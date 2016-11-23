@@ -1,0 +1,15 @@
+<h1> Home of {{ user.first_name }} {{ user.last_name }}</h1>
+
+<div>
+    {% for portfolio in investor.portfolio_set.all %}
+        <div>
+            {{ portfolio.name }}
+        </div>
+        <div>
+            {{ portfolio.current_diversity }}
+        </div>
+        <div>
+            {{ portfolio.total_invested }}
+        </div>
+    {% endfor %}
+</div>

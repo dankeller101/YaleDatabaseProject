@@ -2,16 +2,35 @@ from __future__ import unicode_literals
 
 from django.db import models
 from django.utils import timezone
+from django.contrib.auth.models import User
 
 # Create your models here.
 
-class User(models.Model):
-    name = models.CharField(max_length=100, default="")
-    total_invested = models.IntegerField(default=0)
-    liquid_assets = models.IntegerField(default=0)
+
+class Investor(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
+
+class Portfolio(models.Model):
+    investor = models.ForeignKey(Investor, on_delete=models.CASCADE, null=True)
+    portfolio_name = models.CharField(max_length=255)
+    current_diversity = models.FloatField(default=0)
+    total_invested = models.IntegerField(default=0)
+
+    def __str__(self):
+        return self.portfolio_name
+
+
+class Portfolio_Day(models.Model):
+    portfolio = models.ForeignKey(Portfolio, on_delete=models.CASCADE)
+    day = models.DateField('Current Day')
+    value = models.IntegerField(default=0)
+    diversity = models.FloatField(default=0.0)
+
+    def __str__(self):
+        return self.day
 
 class Stock(models.Model):
     stock_name = models.CharField(max_length=10)
@@ -31,7 +50,7 @@ class Stock(models.Model):
         return timezone.now() - self.end_date
 
 class Stock_Owned(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    portfolio = models.ForeignKey(Portfolio, on_delete=models.CASCADE, null=True)
     stock = models.ForeignKey(Stock, on_delete=models.CASCADE)
     bought_at = models.IntegerField(default=0)
     bought_on = models.DateTimeField('date bought')
@@ -41,7 +60,6 @@ class Stock_Owned(models.Model):
         return self.user + ' ' + self.stock
 
 class Stock_Day(models.Model):
-    stock = models.ForeignKey(Stock, on_delete=models.CASCADE)
     stock = models.ForeignKey(Stock, on_delete=models.CASCADE)
     high = models.IntegerField(default=0)
     low = models.IntegerField(default=0)

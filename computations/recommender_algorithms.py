@@ -13,23 +13,36 @@
 
 import numpy as np
 import random
-import statsmodels as sm
-import gurobipy as gurobi
+from statsmodels.tsa.arima_model import ARIMA
 
-def recommend_random_portfolio(budget, max_per_stock, stock_ids, stock_prices):
+def recommend_random_portfolio(stock_ids, stock_prices, budget, max_investment=None):
 
     """
-
-    :param budget:
-        a float that is the maxmimum amount to be invested in the portfolio
-    :param max_per_stock:
-        a float that is the maximum amount to invest in any one stock
+    Recommends a portfolio by randomly selecting stocks, and then number of shares.
     :param stock_ids:
         a list of stock names
     :param stock_prices:
         a 1D numpy array of stock prices to be considered
-    :return:
+    :param budget:
+        a float that is the maxmimum amount to be invested in the portfolio
+    :param max_investment:
+        a float that is the maximum amount to invest in any one stock. Default is no limit
+    :return: portfolio
+        a dictionary where keys are stock ids and values are the number of shares
+
     """
+
+    # check for bad inputs
+    if np.any(stock_prices < 0):
+        raise ValueError('Stock prices must be nonnegative')
+    if budget < 0:
+        raise ValueError('Budget must be nonnegative')
+    if max_investment < 0:
+        raise ValueError('Max investment must be nonnegative')
+
+    # if max_investment is none, place it as infinity
+    if not max_investment:
+        max_investment = np.inf
 
     n = stock_prices.size
 
@@ -44,7 +57,7 @@ def recommend_random_portfolio(budget, max_per_stock, stock_ids, stock_prices):
         # randomly sample a stock, get price, maximum number of shares we can purchase
         i = random.choice(tuple(potential_stocks))
         price = stock_prices[i]
-        max_shares = int(np.floor(min(current_budget, max_per_stock) / price))
+        max_shares = int(np.floor(min(current_budget, max_investment) / price))
 
         # break if we reach a stock that we cannot afford a single share
         if max_shares == 0:
@@ -56,15 +69,95 @@ def recommend_random_portfolio(budget, max_per_stock, stock_ids, stock_prices):
                 portfolio[stock_ids[i]] = max_shares
                 break
             else:
-                # select random number of shares
+                # select random number of shares, remove stock from potential stocks
                 num_shares = random.choice(1, range(max_shares) + 1)
                 portfolio[stock_ids[i]] = num_shares
+                potential_stocks.remove(i)
 
     return portfolio
 
-def recommend_high_return_portfolio():
+def forecast_stock_price(stock_prices, time_horizon):
 
-    return
+    # HARD CODED PARAMETERS - not the statistically best thing, but it's a good start
+    order_p = 7  # hard coded to choose a week for lag terms
+    order_d = 3  # hard coded to choose the third derivative
+    order_q = 1  # hard coded to choose one smoothing term
+
+    # fit model
+    arima_mod = ARIMA(stock_prices, order=(order_p, order_d, order_q))
+    results = arima_mod.fit()
+
+    # predict price from the last data point to the time horizon
+    forecasted_price = results.predict(start=p, end=p + time_horizon, dynamic=True)
+
+    return forecasted_price
+
+def recommend_high_return_portfolio(stock_ids, stock_prices, budget, time_horizon=14, max_investment=None):
+
+    """
+    Recommends a portfolio by randomly selecting stocks, and then number of shares.
+    :param stock_ids:
+        a list of stock names
+    :param stock_prices:
+        a 2D numpy array where rows are stocks and columns are prices
+    :param budget:
+        a float that is the maxmimum amount to be invested in the portfolio
+    :param time_horizon:
+        a int that is the number of days to predict out to. Default is 14 days.
+    :param max_investment:
+        a float that is the maximum amount to invest in any one stock. Default is no limit.
+    :return: portfolio
+        a dictionary where keys are stock ids and values are the number of shares
+
+    """
+
+    # check for bad inputs
+    if np.any(stock_prices < 0):
+        raise ValueError('Stock prices must be nonnegative')
+    if budget < 0:
+        raise ValueError('Budget must be nonnegative')
+    if (max_investment is not None) and (max_investment < 0):
+        raise ValueError('Max investment must be nonnegative')
+
+    n,p = stock_prices.shape
+
+    # build the model
+    forecasted_prices = forecast_stock_price(stock_prices, time_horizon)
+
+    # compute the TSR (excluding dividends)
+    first_price = stock_prices[:,0]
+    single_share_tsr = (forecasted_prices - first_price) / first_price
+
+    # initialize portfolio and initial budget
+    portfolio = {}
+    potential_stocks = set(range(n))
+    current_budget = budget
+    scratch_tsr = single_share_tsr
+
+    # continually add random choices until we run out of budget or options
+    while True:
+
+        # select the highest predicted TSR, get price, maximum number of shares we can purchase
+        i = np.argmax(scratch_tsr)
+        price = stock_prices[i]
+        max_shares = int(np.floor(min(current_budget, max_investment) / price))
+
+        # break if we reach a stock that we cannot afford a single share
+        if max_shares == 0:
+            break
+        else:
+
+            # if this is the last stock, add all of it
+            if len(potential_stocks) == 1:
+                portfolio[stock_ids[i]] = max_shares
+                break
+            else:
+                # select shares, remove from potential stocks, set tsr to negative
+                portfolio[stock_ids[i]] = max_shares
+                potential_stocks.remove(i)
+                scratch_tsr[i] = -np.inf
+
+    return portfolio
 
 def recommend_diverse_portfolio():
 

@@ -46,7 +46,7 @@ Our project is to develop an paper-trading app called ``Portfolio Playground". \
 
 \subsection{Portfolio Analysis}
 We consider two metrics for evaluating stock portfolios. The first is \emph{total stock return} (TSR), a commonly-used performance metric. For a portfolio $A$ consisting of stocks $A = \{s_1\dots s_N\}$, the total stock return for the period $t_0$ to $t_f$ is defined as
-$$ TSR_{t_0}^{t_f} = \sum_{i=1}^N x_i \frac{(P^{t_0}_{i} - P^{t_f}_{i}) + D_i}{P^{t_0}_{i}} $$
+$$ TSR_{t_0}^{t_f} = \sum_{i=1}^N x_i \frac{(P^{t_f}_{i} - P^{t_0}_{i}) + D_i}{P^{t_0}_{i}} $$
 where $x_i$ is the number of shares of stock $s_i$, $D_i$ is the dividends for stock $s_i$, $P^{t_0}_{i}$ is the price of a single share of stock $s_i$ at time $t_0$ and $P^{t_f}_{i}$ is the price of a single share of stock $s_i$ at time $t_f$. The total stock return is the percentage of return for a given portfolio. In some sense, total stock return measures the success of a portfolio from time $t_0$ to $t_f$. The next performance metric is \emph{stock diversity} (SD). This is not a commonly used metric, but rather one that we define. We claim it captures the diversity of a stock, which is important for novice traders. For a portfolio $A$ consisting of stocks $A = \{s_1\dots s_N\}$, the stock diversity for the period $t_0$ to $t_f$ is defined as 
 $$ SD_{t_0}^{t_f} = \frac{1}{N}\sum_{i<j} Cov(P^i, P^j) $$
 We would like to analyze stock portfolios using these metrics.
@@ -59,7 +59,7 @@ Our app will also support several portfolio recommendation algorithms. The first
 
 \begin{equation*}
 \begin{array}{ll@{}lr}
-\text{maximize}  & \displaystyle\sum\limits_{i=1}^{K} x_i \frac{(P^{t_0}_{i} - P^{t_f}_{i}) + D_i}{P^{t_0}_{i}}&&\\
+\text{maximize}  & \displaystyle\sum\limits_{i=1}^{K} x_i \frac{(P^{t_f}_{i} - P^{t_0}_{i}) + D_i}{P^{t_0}_{i}}&&\\
 \text{subject to}& x_i \geq 0 & i =1 \cdots K & \text{(only nonnegative number of shares)} \\
                 & \displaystyle\sum\limits_{i=1}^{K} x_{j} P^{t_0}_{i}  \leq B &&\text{(total budget)}\\
                  &   P^{t_0}_i x_i \leq M &i =1 \cdots K & \text{(max investment per stock)} \\

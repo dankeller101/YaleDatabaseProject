@@ -1,7 +1,9 @@
 from django.shortcuts import render
 from django.template import loader
-from .models import User, Investor
+from .models import User, Investor, Stock, Stock_Day
 from django.urls import reverse
+from predict_my_money.utils import stockAPI
+import datetime
 
 # Create your views here.
 
@@ -18,6 +20,33 @@ def user_registration(request):
 
 def error(request):
 	return HttpResponse("An Error occured.")
+
+def stock_detail(request, stock_ticker):
+	if request.method == "POST":
+		ticker = request.POST['ticker']
+	else:
+		ticker = stock_ticker
+	try:
+		#see if stock exists in database
+		stock = Stock.objects.get(stock_name=ticker)
+	except Stock.DoesNotExist:
+		#if stock does not exist
+		API = stockAPI()
+		stock = API.createNewStock(ticker)
+	else:
+		current_date = datetime.date.today()
+		if stock.end_date < current_date:
+			API = stockAPI()
+			stock = API.updateStockWithDays(stock)
+	template = loader.get_template('predictor/stock_detail.html')
+	context = {
+		'stock' : stock,
+	}
+	return HttpResponse(template.render(context, request))
+
+
+
+
 
 def create_user(request):
 	if request.method == "POST":

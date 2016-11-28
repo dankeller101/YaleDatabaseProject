@@ -41,7 +41,7 @@ class Stock(models.Model):
     end_date = models.DateField('Latest Record')
 
     def __str__(self):
-        return self.stock_name
+        return 'Stock Name: ' + self.stock_name
 
     def needs_update(self):
         return self.end_date < timezone.now()
@@ -69,7 +69,7 @@ class Stock_Day(models.Model):
     day = models.DateField('Day of Data')
 
     def __str__(self):
-        return self.stock + ' ' + self.day
+        return self.stock.__str__() + ' ' + self.day.__str__()
 
 
 

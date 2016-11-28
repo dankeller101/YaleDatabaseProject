@@ -1,1 +1,8 @@
+# ignore pycharm output
 .idea/
+*.pyc
+
+# ignore tex output
+*.aux
+*.log
+*.synctex.gz

@@ -177,7 +177,7 @@ def recommend_diverse_portfolio(stock_ids, stock_prices, budget, time_horizon=14
         :param max_investment:
             a float that is the maximum amount to invest in any one stock. Default is no limit.
         :param diverse_thresh:
-            a float that is the maximum amount of correlation allowed between pairs in the portfolio
+            a float that is the maximum amount of correlation allowed between pairs in the portfolio. Default is 0.2
         :return: portfolio
             a dictionary where keys are stock ids and values are the number of shares
 
@@ -222,7 +222,7 @@ def recommend_diverse_portfolio(stock_ids, stock_prices, budget, time_horizon=14
 
         # break if there are no more diverse options
         if not diverse_options:
-            print 'Warning: Only %d diverse options were found with a threshold of %.3f' %(len(portfolio), diverse_thresh)
+            print 'Warning: Only %d diverse options were found with a threshold of %.3f' % (len(portfolio), diverse_thresh)
             break
 
         # else, choose the diverse option with the highest forecasted TSR

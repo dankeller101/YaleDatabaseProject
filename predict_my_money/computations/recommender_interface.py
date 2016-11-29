@@ -8,12 +8,12 @@
 
 #computation imports
 import numpy as np
-from computations/recommender_algorithms import recommend_random_portfolio, recommend_high_return_portfolio, recommend_diverse_portfolio
+from predict_my_money.computations.recommender_algorithms import recommend_random_portfolio, recommend_high_return_portfolio, recommend_diverse_portfolio
 
 #backend imports
 import datetime
-from predict_my_money/utils.py import stockDayDatabaseInterface
-from predict_my_money/models import Portfolio
+from predict_my_money.utils import stockDayDatabaseInterface
+from predict_my_money.models import Portfolio
 
 def create_portfolio(user_id, portfolio_id, recommend_type='random', potential_stocks=None, num_observed_days=730, **kwargs):
 
@@ -86,5 +86,7 @@ def create_portfolio(user_id, portfolio_id, recommend_type='random', potential_s
 
     # TODO: update the database with the portfolio for the user
     #Thoughts:  Is this necessary? Maybe we just want to return the array and have the stocks show up.
+
+    
 
     return

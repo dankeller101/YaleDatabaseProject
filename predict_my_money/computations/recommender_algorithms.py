@@ -222,7 +222,7 @@ def recommend_diverse_portfolio(stock_ids, stock_prices, budget, time_horizon=14
 
         # break if there are no more diverse options
         if not diverse_options:
-            print 'Warning: Only %d diverse options were found with a threshold of %.3f' % (len(portfolio), diverse_thresh)
+            print('Warning: Only %d diverse options were found with a threshold of %.3f' % (len(portfolio), diverse_thresh))
             break
 
         # else, choose the diverse option with the highest forecasted TSR

@@ -6,9 +6,14 @@
 # database queries and recommendation algorithms algorithm calls.
 #
 
+#computation imports
 import numpy as np
-from recommender_algorithms import recommend_random_portfolio, recommend_high_return_portfolio, recommend_diverse_portfolio
+from computations/recommender_algorithms import recommend_random_portfolio, recommend_high_return_portfolio, recommend_diverse_portfolio
 
+#backend imports
+import datetime
+from predict_my_money/utils.py import stockDayDatabaseInterface
+from predict_my_money/models import Portfolio
 
 def create_portfolio(user_id, portfolio_id, recommend_type='random', potential_stocks=None, num_observed_days=730, **kwargs):
 
@@ -48,9 +53,15 @@ def create_portfolio(user_id, portfolio_id, recommend_type='random', potential_s
         # potential_stocks = [] # hard-coded list
         pass
 
-    # TODO: query the database for the adjusted stock prices
     # from current time to number of observed days ago
-
+    interfaceObject = stockDayDatabaseInterface()
+    today = datetime.date.today()
+    stockAndPrices = {}
+    for stock in potential_stocks:
+        # TODO: days for stock will be in order of first date.  I don't know how you want to store this data
+        #currently storing it in the dict stockAndPrices, but this can be changed if you want
+        days = interfaceObject.getRangeDaysOrdered(stock, today - num_observed_days, today)
+        stockAndPrices[stock] = [stock, days]
 
     # TODO: clean the data -- remove NaN
 
@@ -74,6 +85,6 @@ def create_portfolio(user_id, portfolio_id, recommend_type='random', potential_s
         portfolio = recommend_diverse_portfolio(stock_ids=stock_ids, stock_prices=stock_prices, **kwargs)
 
     # TODO: update the database with the portfolio for the user
-    # this part uses the user_id and portfolio_id arguments
+    #Thoughts:  Is this necessary? Maybe we just want to return the array and have the stocks show up.
 
     return

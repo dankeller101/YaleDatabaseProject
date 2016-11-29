@@ -36,7 +36,7 @@ class Stock(models.Model):
     stock_name = models.CharField(max_length=10)
     current_high = models.IntegerField(default=0)
     current_low = models.IntegerField(default=0)
-    general_trend = models.IntegerField(default=0)
+    current_adjusted_close = models.IntegerField(default=0)
     start_date = models.DateField('Earliest Record')
     end_date = models.DateField('Latest Record')
 
@@ -66,6 +66,7 @@ class Stock_Day(models.Model):
     close = models.IntegerField(default=0)
     open = models.IntegerField(default=0)
     volume = models.IntegerField(default=0)
+    adjustedClose = models.IntegerField(default=0)
     day = models.DateField('Day of Data')
 
     def __str__(self):

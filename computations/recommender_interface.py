@@ -48,8 +48,9 @@ def create_portfolio(user_id, portfolio_id, recommend_type='random', potential_s
         # potential_stocks = [] # hard-coded list
         pass
 
-    # TODO: query the database for the stock prices and dividends of potential stocks
+    # TODO: query the database for the adjusted stock prices
     # from current time to number of observed days ago
+
 
     # TODO: clean the data -- remove NaN
 

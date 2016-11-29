@@ -3,8 +3,20 @@
 import requests
 import datetime
 from .models import Stock, Stock_Day
-import re
 
+
+class stockDayDatabaseInterface():
+    def getAllDaysOrdered(self, stock):
+        days = Stock_Day.objects.order_by('day').get(stock=stock)
+        return days
+
+    def getSpecificDay(self, stock, dayRequested):
+        day = Stock_Day.get(stock=stock, day=dayRequested)
+        return day
+
+    def getRangeDaysOrdered(self, stock, earliestDate, LatestDate):
+        days = Stock_Day.objects.order_by('day').filter(day__lte=LatestDate).filter(day__gte=earliestDate).get(stock=stock)
+        return days
 
 class stockAPI():
 #returns a new stock with dates from oldest point to current day
@@ -63,6 +75,7 @@ class stockAPI():
         stock.end_date = self.parseDate(mostRecentDay['date'])
         stock.current_low = mostRecentDay['low']
         stock.current_high = mostRecentDay['high']
+        stock.current_adjusted_close = mostRecentDay['adjustedClose'] if mostRecentDay['adjustedClose'] else mostRecentDay['close']
         stock.save()
         return stock
 
@@ -81,6 +94,7 @@ class stockAPI():
             newDay.open = day['open']
             newDay.close = day['close']
             newDay.volume = day['volume']
+            newDay.adjustedClose = day['adjustedClose'] if day['adjustedClosed'] else day['close']
             newDay.save()
             mostRecentDay = day
         return mostRecentDay

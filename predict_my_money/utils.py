@@ -75,7 +75,7 @@ class stockAPI():
         stock.end_date = self.parseDate(mostRecentDay['date'])
         stock.current_low = mostRecentDay['low']
         stock.current_high = mostRecentDay['high']
-        stock.current_adjusted_close = mostRecentDay['adjustedClose'] if mostRecentDay['adjustedClose'] else mostRecentDay['close']
+        stock.current_adjusted_close = mostRecentDay['adjClose'] if mostRecentDay['adjClose'] else mostRecentDay['close']
         stock.save()
         return stock
 
@@ -94,7 +94,7 @@ class stockAPI():
             newDay.open = day['open']
             newDay.close = day['close']
             newDay.volume = day['volume']
-            newDay.adjustedClose = day['adjustedClose'] if day['adjustedClosed'] else day['close']
+            newDay.adjustedClose = day['adjClose'] if day['adjClose'] else day['close']
             newDay.save()
             mostRecentDay = day
         return mostRecentDay

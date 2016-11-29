@@ -1,11 +1,59 @@
 <h1> Create a Portfolio </h1>
 
+<h2>Recommendations</h2>
+<h3>Total spend</h3>
+<input type="text" id="total_spend"/>
+<button id="control">
+    Create A Control
+</button>
+<button id="tsr">
+    Best Expected Return
+</button>
+<button id="diversity">
+    Best Expected Return with Best Diversity
+</button>
+
+
 <form action="{% url 'predictor:make_portfolio' %}" method="post">
     {% csrf_token %}
     <h4>name</h4>
     <input type="text" name="name" />
     <h4>stock tickers and number</h4>
-    <input type="text" name="stock-tickers" />
+    <div id="stocks">
+        <table id="stock-table">
+            <thead>
+                <tr>
+                    <td>
+                        Ticker
+                    </td>
+                    <td>
+                        Amount
+                    </td>
+                    <td>
+                       Delete
+                    </td>
+                </tr>
+            </thead>
+            <tbody id="stock-table-body">
+
+            </tbody>
+        </table>
+        <div id="add-stocks">
+            <h5>stock ticker</h5>
+            <input type="text" id="add-stock-ticker"/>
+            <h5>amount of stock</h5>
+            <input type="text" id="add-stock-amount"/>
+            <button id="add-stock">Add Stock</button>
+        </div>
+        <input type="hidden" name="stock-tickers" id="stock-tickers"/>
+    </div>
+
+
     <input type="submit" value="create_portfolio" />
 
 </form>
+
+
+{% load static %}
+<script src="{% static "predictor/jquery-3.1.1.js" %}"></script>
+<script src="{% static "predictor/portfolio.js" %}"></script>

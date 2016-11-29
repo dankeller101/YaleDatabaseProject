@@ -141,4 +141,7 @@ def home(request, user_id):
 		return render(request, 'predictor/home.html', {'investor': investor, 'user': user})
 
 
+#JSON Response Areas for AJax Calls
+
+
 

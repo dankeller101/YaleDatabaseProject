@@ -8,14 +8,12 @@
 
 import numpy as np
 
-def compute_tsr(stock_prices, dividends, num_shares):
+def compute_tsr(stock_prices, num_shares):
 
     """
     Computes the Total Stock Return (TSR) for a given portfolio
     :param stock_prices
-        a 2D numpy array where rows are stocks and columns are prices
-    :param dividends
-        a 2D numpy array where rows are stocks and columns are dividends paid since purchase (cummulative)
+        a 2D numpy array where rows are stocks and columns are adjusted prices
     :param num_shares
         a 1D numpy array that is the number of shares in each stock
     :return: tsr
@@ -27,10 +25,6 @@ def compute_tsr(stock_prices, dividends, num_shares):
         raise ValueError('Number of shares must be nonnegative')
     if np.any(stock_prices < 0):
         raise ValueError('Stock prices must be nonnegative')
-    if np.any(dividends < 0):
-        raise ValueError('Dividends must be nonnegative')
-    if np.any(np.diff(dividends) < 0):
-        raise ValueError('Dividends must be monotonically increasing')
 
     # get first day prices
     n, p = stock_prices.shape
@@ -38,7 +32,7 @@ def compute_tsr(stock_prices, dividends, num_shares):
 
     # compute individual stock TSR
     num_shares = num_shares.reshape(num_shares.size, 1)
-    individual_tsr = num_shares * ((stock_prices - first_day_price + dividends) / first_day_price)
+    individual_tsr = num_shares * ((stock_prices - first_day_price) / first_day_price)
 
     # sum for portfolio TSR
     tsr = np.sum(individual_tsr, axis=1)

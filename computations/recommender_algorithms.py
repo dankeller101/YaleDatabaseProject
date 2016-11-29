@@ -22,7 +22,7 @@ def recommend_random_portfolio(stock_ids, stock_prices, budget, max_investment=N
     :param stock_ids:
         a list of stock names
     :param stock_prices:
-        a 1D numpy array of stock prices to be considered
+        a 1D numpy array of adjusted stock prices to be considered
     :param budget:
         a float that is the maxmimum amount to be invested in the portfolio
     :param max_investment:
@@ -103,7 +103,7 @@ def recommend_high_return_portfolio(stock_ids, stock_prices, budget, time_horizo
     :param stock_ids:
         a list of stock names
     :param stock_prices:
-        a 2D numpy array where rows are stocks and columns are prices
+        a 2D numpy array where rows are stocks and columns are adjusted stock prices
     :param budget:
         a float that is the maxmimum amount to be invested in the portfolio
     :param time_horizon:
@@ -169,7 +169,7 @@ def recommend_diverse_portfolio(stock_ids, stock_prices, budget, time_horizon=14
         :param stock_ids:
             a list of stock names
         :param stock_prices:
-            a 2D numpy array where rows are stocks and columns are prices
+            a 2D numpy array where rows are stocks and columns are adjusted stock prices
         :param budget:
             a float that is the maxmimum amount to be invested in the portfolio
         :param time_horizon:

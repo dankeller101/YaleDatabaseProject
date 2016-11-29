@@ -3,7 +3,9 @@
 <div>
     {% for portfolio in investor.portfolio_set.all %}
         <div>
-            {{ portfolio.name }}
+        <a href="{% url 'predictor:portfolio_detail'  portfolio_id=portfolio.pk  %}">
+            {{ portfolio.portfolio_name }}
+            </a>
         </div>
         <div>
             {{ portfolio.current_diversity }}
@@ -11,5 +13,6 @@
         <div>
             {{ portfolio.total_invested }}
         </div>
+
     {% endfor %}
 </div>

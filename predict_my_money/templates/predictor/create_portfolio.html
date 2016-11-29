@@ -1,0 +1,11 @@
+<h1> Create a Portfolio </h1>
+
+<form action="{% url 'predictor:make_portfolio' %}" method="post">
+    {% csrf_token %}
+    <h4>name</h4>
+    <input type="text" name="name" />
+    <h4>stock tickers and number</h4>
+    <input type="text" name="stock-tickers" />
+    <input type="submit" value="create_portfolio" />
+
+</form>

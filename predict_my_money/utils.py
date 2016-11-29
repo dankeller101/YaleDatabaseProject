@@ -43,6 +43,8 @@ class stockAPI():
         meta = self.getNewStockMeta(ticker)
         if not meta:
             return None
+        elif not 'startDate' in meta:
+            return None
         stock = Stock()
         stock.stock_name = ticker
         stock.start_date = self.parseMetaDate(meta['startDate'])
@@ -89,3 +91,17 @@ class stockAPI():
 
     def parseMetaDate(self, date):
         return datetime.datetime.strptime(date, '%Y-%m-%d')
+
+    def getStock(self, ticker):
+        ticker = ticker.lower()
+        try:
+            # see if stock exists in database
+            stock = Stock.objects.get(stock_name=ticker)
+        except Stock.DoesNotExist:
+            # if stock does not exist
+            stock = self.createNewStock(ticker)
+        else:
+            current_date = datetime.date.today()
+            if stock.end_date < current_date:
+                stock = self.updateStockWithDays(stock)
+        return stock

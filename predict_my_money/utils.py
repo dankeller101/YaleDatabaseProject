@@ -2,7 +2,8 @@
 
 import requests
 import datetime
-from .models import Stock, Stock_Day
+import numpy
+from .models import Stock, Stock_Day, Portfolio, Portfolio_Day, Stock_Owned
 
 
 class stockDayDatabaseInterface():
@@ -17,6 +18,30 @@ class stockDayDatabaseInterface():
     def getRangeDaysOrdered(self, stock, earliestDate, LatestDate):
         days = Stock_Day.objects.order_by('day').filter(day__lte=LatestDate).filter(day__gte=earliestDate).get(stock=stock)
         return days
+
+class portfolioAPI():
+#controls portfolio maintenance
+    def fixPortfolioDays(self, portfolio_id, earliest_day=None):
+        if not earliest_day:
+            earliest_day = datetime.datetime.strptime('01-01-2012', '%m-%d-%Y')
+        today = datetime.date.today()
+        portfolio = Portfolio.objects.get(pk=portfolio_id)
+        stockInterface = stockDayDatabaseInterface()
+        stocksDict = {}
+        stocksFrameOfReference = {}
+        stocks = Stock_Owned.objects.get(portfolio=portfolio_id)
+        for stock in stocks:
+            owned = stock.amount_owned
+            stock_object = stock.stock
+            stockDays = stockInterface.getRangeDaysOrdered(stock_object, earliest_day, today)
+            stocksDict[stock_object.stock_name] = [owned, stockDays]
+            stocksFrameOfReference[stock_object.stock_name] = []
+
+
+
+
+
+
 
 class stockAPI():
 #returns a new stock with dates from oldest point to current day

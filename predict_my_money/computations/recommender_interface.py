@@ -9,8 +9,6 @@
 #computation imports
 import numpy as np
 from predict_my_money.computations.recommender_algorithms import recommend_random_portfolio, recommend_high_return_portfolio, recommend_diverse_portfolio
-import scipy
-import pandas
 
 #backend imports
 import datetime

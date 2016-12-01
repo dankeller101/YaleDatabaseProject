@@ -104,29 +104,43 @@ def create_portfolio(recommend_type='random', potential_stocks=None, num_observe
         clean_data = False
 
         # add data until it is clean - should only take a couple tries
-        while not clean_data:
+        days_back_to_try = 100
+        for i in range(days_back_to_try):
+
             clean_data = True
             for i, stock in enumerate(potential_stocks):
-                price = interfaceObject.getSpecificDay(stock, try_date).adjustedClose
-                stock_prices[i] = price
-
-                # if the data isn't clean, try the day before that
-                if not np.isreal(price):
+                day = interfaceObject.getSpecificDay(stock, try_date)
+                if (day is not None):
+                    price = day.adjustedClose
+                    if np.isreal(price):
+                        stock_prices[i] = price
+                    else:
+                        clean_data = False
+                        break
+                else:
                     clean_data = False
-                    try_date -= datetime.timedelta(days=1)
                     break
+
+            # if we got clean data, break
+            if clean_data:
+                break
 
     else:
         # get all historical stock data into a 2D numpy array
         stock_prices = np.empty((len(potential_stocks), num_observed_days))
         for i, stock in enumerate(potential_stocks):
             days = interfaceObject.getRangeDaysOrdered(stock, today - datetime.timedelta(days=num_observed_days), today)
-            stock_prices[i, :] = np.array([day.adjustedClose for day in days])
+
+            # note that the following list comprehension gives np.nan if days is None
+            stock_prices[i, :] = np.array([day.adjustedClose if day else np.nan for day in days])
 
         # clean data - remove things like NaN or inf
         stock_prices = np.ma.compress_cols(np.ma.masked_invalid(stock_prices))
 
-        # raise error if stock_prices is empty??
+        # raise error if stock_prices is empty or sufficiently small??
+        lower_threshold_on_days = 1 # this is hard coded to empty right now
+        if stock_prices.shape[1] <= lower_threshold_on_days:
+            raise RuntimeError('There is not enough clean data for the days and stocks requested')
 
     # run desired recommender algorithm
     if recommend_type is 'random':

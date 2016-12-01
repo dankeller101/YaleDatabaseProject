@@ -13,7 +13,7 @@ def compute_tsr(stock_prices, num_shares):
     """
     Computes the Total Stock Return (TSR) for a given portfolio
     :param stock_prices
-        a 2D numpy array where rows are stocks and columns are adjusted prices
+        a 2D numpy array where rows are stocks and columns are adjusted prices -- cannot contain np.nan
     :param num_shares
         a 1D numpy array that is the number of shares in each stock
     :return: tsr
@@ -21,8 +21,12 @@ def compute_tsr(stock_prices, num_shares):
     """
 
     # check for errors
+    if np.any(np.isnan(stock_prices)):
+        raise ValueError('Stock prices cannot contain NaN')
+    if np.any(np.isnan(num_shares)):
+        raise ValueError('Number of shares cannot contain NaN')
     if np.any(num_shares < 0):
-        raise ValueError('Number of shares must be nonnegative')
+        raise ValueError('Number of shares must be positive')
     if np.any(stock_prices < 0):
         raise ValueError('Stock prices must be nonnegative')
 
@@ -44,15 +48,19 @@ def compute_diversity(stock_prices, num_shares):
     """
     Computes the diversity for a given portfolio
     :param stock_prices
-        a 2D numpy array where rows are stocks and columns are prices
+        a 2D numpy array where rows are stocks and columns are prices -- cannot contain np.nan
     :param num_shares
         a 1D numpy array that is the number of shares in each stock
     :return: diversity
         a float that is the weighted average of correlation coefficients
     """
 
-    if np.any(num_shares < 0):
-        raise ValueError('Number of shares must be nonnegative')
+    if np.any(np.isnan(stock_prices)):
+        raise ValueError('Stock prices cannot contain NaN')
+    if np.any(np.isnan(num_shares)):
+        raise ValueError('Number of shares cannot contain NaN')
+    if np.any(num_shares <= 0):
+        raise ValueError('Number of shares must be positive')
     if np.any(stock_prices < 0):
         raise ValueError('Stock prices must be nonnegative')
 

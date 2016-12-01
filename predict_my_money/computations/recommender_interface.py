@@ -13,7 +13,7 @@ from predict_my_money.computations.recommender_algorithms import recommend_rando
 #backend imports
 import datetime
 import json
-from predict_my_money.utils import stockDayDatabaseInterface
+from predict_my_money.utils import stockDayDatabaseInterface, stockAPI
 from django.http import HttpResponse
 
 class SandP():
@@ -90,6 +90,13 @@ def create_portfolio(recommend_type='random', potential_stocks=None, num_observe
     if potential_stocks is None:
         SandPObject = SandP()
         potential_stocks = SandPObject.stocks ## check - is this a list?
+
+    # put stock objects
+    stock_objects = []
+    stockGetter = stockAPI()
+    for stock in potential_stocks:
+        stock_objects.append(stockGetter.getStock(stock))
+    potential_stocks = stock_objects
 
     # get stock price data
     interfaceObject = stockDayDatabaseInterface()

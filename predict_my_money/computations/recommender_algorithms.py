@@ -71,7 +71,7 @@ def recommend_random_portfolio(stock_ids, stock_prices, budget, max_investment=N
             else:
                 # select random number of shares, remove stock from potential stocks
                 num_shares = random.choice(1, range(max_shares) + 1)
-                portfolio[stock_ids[i]] = num_shares
+                portfolio[stock_ids[i].stock_name] = num_shares
                 potential_stocks.remove(i)
 
     return portfolio
@@ -156,7 +156,7 @@ def recommend_high_return_portfolio(stock_ids, stock_prices, budget, time_horizo
                 break
             else:
                 # select shares, remove from potential stocks, set tsr to negative
-                portfolio[stock_ids[i]] = max_shares
+                portfolio[stock_ids[i].stock_name] = max_shares
                 scratch_tsr[i] = -np.inf
 
     return portfolio
@@ -241,7 +241,7 @@ def recommend_diverse_portfolio(stock_ids, stock_prices, budget, time_horizon=14
                 break
             else:
                 # select shares, remove from diverse options, add to portfolio indices
-                portfolio[stock_ids[i]] = max_shares
+                portfolio[stock_ids[i].stock_name] = max_shares
                 diverse_options.remove(i)
                 port_ind.append(i)
 

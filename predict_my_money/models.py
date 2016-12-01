@@ -17,8 +17,9 @@ class Portfolio(models.Model):
     investor = models.ForeignKey(Investor, on_delete=models.CASCADE, null=True)
     portfolio_name = models.CharField(max_length=255)
     current_diversity = models.FloatField(default=0)
+    current_value = models.FloatField(default=0)
     total_invested = models.IntegerField(default=0)
-    end_date = models.DateField('Latest Record')
+    end_date = models.DateField('Latest Record', null=True)
 
     def __str__(self):
         return self.portfolio_name

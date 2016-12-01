@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.template import loader
 from .models import User, Investor, Stock, Portfolio, Stock_Owned
 from django.urls import reverse
-from predict_my_money.utils import stockAPI
+from predict_my_money.utils import stockAPI, portfolioAPI
 import datetime
 from django.contrib.auth import authenticate, login, logout
 from predict_my_money.computations.recommender_interface import recommend_diverse_portfolio, recommend_high_return_portfolio, recommend_random_portfolio
@@ -21,18 +21,18 @@ def user_registration(request):
 	return HttpResponse(template.render(context, request))
 
 def portfolio_detail(request, portfolio_id):
-	try:
-		portfolio = Portfolio.objects.get(pk=portfolio_id)
-	except Portfolio.DoesNotExist:
-		return render(request, 'predictor/error', {
-			'error_message': "Portfolio does not exist",
-		})
-	else:
+	portAPI = portfolioAPI()
+	portfolio = portAPI.getPortfolio(portfolio_id)
+	if portfolio:
 		template = loader.get_template('predictor/portfolio_detail.html')
 		context = {
 			'portfolio' : portfolio
 		}
 		return HttpResponse(template.render(context, request))
+	else:
+		return render(request, 'predictor/error', {
+			'error_message': "Portfolio doesn't exist.",
+		})
 
 def error(request):
 	return HttpResponse("An Error occured.")

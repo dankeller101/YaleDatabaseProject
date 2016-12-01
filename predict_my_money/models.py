@@ -18,6 +18,7 @@ class Portfolio(models.Model):
     portfolio_name = models.CharField(max_length=255)
     current_diversity = models.FloatField(default=0)
     total_invested = models.IntegerField(default=0)
+    end_date = models.DateField('Latest Record')
 
     def __str__(self):
         return self.portfolio_name

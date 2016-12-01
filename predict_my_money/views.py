@@ -5,7 +5,8 @@ from django.urls import reverse
 from predict_my_money.utils import stockAPI, portfolioAPI
 import datetime
 from django.contrib.auth import authenticate, login, logout
-from predict_my_money.computations.recommender_interface import recommend_diverse_portfolio, recommend_high_return_portfolio, recommend_random_portfolio
+from predict_my_money.computations.recommender_interface import recommend_diverse_portfolio, recommend_high_return_portfolio, recommend_random_portfolio, \
+	recommend_interfacer
 
 # Create your views here.
 
@@ -149,13 +150,13 @@ def recommend_portfolio(request):
 	if request.method == "POST":
 		type = request.POST['type']
 		totalspend = request.POST['total_spend']
-		return []
-		# if type == "control":
-		# 	return create_portfolio('random');
-		# elif type == "tsr":
-		# 	return create_portfolio('high_return');
-		# else:
-		# 	return create_portfolio('diverse');
+		kwargs = {'budget':totalspend}
+		if type == "control":
+			return recommend_interfacer('random', budget=totalspend)
+		elif type == "tsr":
+			return recommend_interfacer('high_return', budget=totalspend)
+		else:
+			return recommend_interfacer('diverse', budget=totalspend)
 
 
 

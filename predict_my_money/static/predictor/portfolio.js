@@ -18,6 +18,7 @@ $(document).ready(function(){
         });
     }
 
+
     function addStockDOM(ticker, amount)
     {
         //Add new table row to table for stock
@@ -31,7 +32,7 @@ $(document).ready(function(){
         tablerow.append(deletebuttonfortable);
         tableBody.append(tablerow);
         //activate new delete button
-        $('#' + ticker + '').click(deleteStock);
+        $('.' + ticker + '-row').click(deleteStock);
     }
 
 
@@ -42,7 +43,7 @@ $(document).ready(function(){
         var amount = $('#add-stock-amount').val();
         var hidden = $('#stock-tickers');
 
-        addStockDom(ticker, amount);
+        addStockDOM(ticker, amount);
 
         //update current value in hidden
         var currentvalue = hidden.val();
@@ -70,3 +71,4 @@ $(document).ready(function(){
         hidden.val(value);
     }
 });
+

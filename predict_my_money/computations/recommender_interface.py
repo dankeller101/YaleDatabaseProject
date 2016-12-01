@@ -55,7 +55,7 @@ class SandP():
             "XEL", "XRX", "XLNX", "XL", "XYL", "YHOO", "YUM", "ZBH", "ZION", "ZTS"
         ]
 
-def create_portfolio(recommend_type='random', potential_stocks=None, num_observed_days=730, **kwargs):
+def recommend_interfacer(recommend_type='random', potential_stocks=None, num_observed_days=730, kwargs=None):
 
     """
     This function takes the user's information and recommender parameters as input,

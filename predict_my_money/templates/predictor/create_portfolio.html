@@ -2,7 +2,8 @@
 
 <h2>Recommendations</h2>
 <h3>Total spend</h3>
-    <form action="{% url 'predictor:get_recommendation' %}" method="post" id="recommend-form">
+    <form action="{% url 'predictor:recommend_portfolio' %}" method="post" id="recommend-form">
+        {% csrf_token %}
     <input type="text" name="total_spend" id="total_spend"/>
         <input type="hidden" name='type' id="type-recommend"/>
     <button id="control" value="control" class="recommend">

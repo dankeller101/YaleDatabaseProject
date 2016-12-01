@@ -2,17 +2,19 @@
 
 <h2>Recommendations</h2>
 <h3>Total spend</h3>
-<input type="text" id="total_spend"/>
-<button id="control">
-    Create A Control
-</button>
-<button id="tsr">
-    Best Expected Return
-</button>
-<button id="diversity">
-    Best Expected Return with Best Diversity
-</button>
-
+    <form action="{% url 'predictor:get_recommendation' %}" method="post" id="recommend-form">
+    <input type="text" name="total_spend" id="total_spend"/>
+        <input type="hidden" name='type' id="type-recommend"/>
+    <button id="control" value="control" class="recommend">
+        Create A Control
+    </button>
+    <button id="tsr" value="tsr" class="recommend">
+        Best Expected Return
+    </button>
+    <button id="diversity" value="diversity" class="recommend">
+        Best Expected Return with Best Diversity
+    </button>
+    </form>
 
 <form action="{% url 'predictor:make_portfolio' %}" method="post">
     {% csrf_token %}

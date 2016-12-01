@@ -5,6 +5,7 @@ from django.urls import reverse
 from predict_my_money.utils import stockAPI
 import datetime
 from django.contrib.auth import authenticate, login, logout
+from predict_my_money.computations.recommender_interface import recommend_diverse_portfolio, recommend_high_return_portfolio, recommend_random_portfolio
 
 # Create your views here.
 
@@ -142,6 +143,18 @@ def home(request, user_id):
 
 
 #JSON Response Areas for AJax Calls
+def recommend_portfolio(request):
+	if request.method == "POST":
+		type = request.POST['type']
+		totalspend = request.POST['total_spend']
+		return []
+		# if type == "control":
+		# 	return create_portfolio('random');
+		# elif type == "tsr":
+		# 	return create_portfolio('high_return');
+		# else:
+		# 	return create_portfolio('diverse');
+
 
 
 

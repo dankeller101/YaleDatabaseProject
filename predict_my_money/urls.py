@@ -22,9 +22,11 @@ urlpatterns = [
     #example /log_in
     url(r'^log_in', views.log_in, name='log_in'),
     #example /authenticate_user
-    url(r'authenicate_user', views.authenticate_user, name='authenticate_user'),
+    url(r'^authenicate_user', views.authenticate_user, name='authenticate_user'),
     #example /log_out
-    url(r'log_out', views.sign_out, name='sign_out'),
+    url(r'^log_out', views.sign_out, name='sign_out'),
     #example /portfolio/view/1
-    url(r'portfolio/view/(?P<portfolio_id>[0-9]+)', views.portfolio_detail, name='portfolio_detail'),
+    url(r'^portfolio/view/(?P<portfolio_id>[0-9]+)', views.portfolio_detail, name='portfolio_detail'),
+    #example /portfolio/recommend
+    url(r'^portfolio/recommend', views.recommend_portfolio, name='recommend_portfolio'),
 ]

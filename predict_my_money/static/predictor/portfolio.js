@@ -1,6 +1,39 @@
 $(document).ready(function(){
     $("#add-stock").click(addStock);
 
+    $('.recommend').click(getRecommendation);
+
+    function getRecommendation(e)
+    {
+        e.preventDefault();
+        var button = $(e.currentTarget);
+        var type = $('#type-recommend');
+        type.val(button.val());
+        var form = $('#recommend-form');
+        $.post(form.attr('action'), form.serialize(), function(json){
+            var result = $.parseJSON(json);
+            $.each(result, function(stock, amount) {
+                addStockDOM(stock, amount);
+            });
+        });
+    }
+
+    function addStockDOM(ticker, amount)
+    {
+        //Add new table row to table for stock
+        var tableBody = $('#stock-table-body');
+        var tablerow = $("<tr class='" + ticker + "-row'></tr>");
+        var tickerfortable = $("<td>" + ticker + "</td>");
+        var amountfortable = $("<td>" + amount + "</td>");
+        var deletebuttonfortable = $("<td><button data-amount='" + amount + "' class='" + ticker + "'>Delete</button></td>");
+        tablerow.append(tickerfortable);
+        tablerow.append(amountfortable);
+        tablerow.append(deletebuttonfortable);
+        tableBody.append(tablerow);
+        //activate new delete button
+        $('#' + ticker + '').click(deleteStock);
+    }
+
 
     function addStock(e)
     {
@@ -9,18 +42,7 @@ $(document).ready(function(){
         var amount = $('#add-stock-amount').val();
         var hidden = $('#stock-tickers');
 
-        //Add new table row to table for stock
-        var tableBody = $('#stock-table-body');
-        var tablerow = $("<tr id='" + ticker + "-row'></tr>");
-        var tickerfortable = $("<td>" + ticker + "</td>");
-        var amountfortable = $("<td>" + amount + "</td>");
-        var deletebuttonfortable = $("<td><button class='delete-stock' data-amount='" + amount + "' id='" + ticker + "'>Delete</button></td>");
-        tablerow.append(tickerfortable);
-        tablerow.append(amountfortable);
-        tablerow.append(deletebuttonfortable);
-        tableBody.append(tablerow);
-        //activate new delete button
-        $('#' + ticker + '').click(deleteStock);
+        addStockDom(ticker, amount);
 
         //update current value in hidden
         var currentvalue = hidden.val();
@@ -35,10 +57,10 @@ $(document).ready(function(){
         //get info
         var target = $(e.currentTarget);
         var amount = target.attr('data-amount');
-        var ticker = target.attr('id');
+        var ticker = target.attr('class');
 
         //remove table row
-        var row = $('#' + ticker + '-row');
+        var row = $('.' + ticker + '-row');
         row.remove();
 
         //remove from hidden

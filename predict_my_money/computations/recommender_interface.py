@@ -84,8 +84,6 @@ def create_portfolio(recommend_type='random', potential_stocks=None, num_observe
     :return: a JSON Response of a dictionary with stockname -> amount to buy
     """
 
-    # TODO: consider pulling data inside the recommender algorithm to avoid work for random recommender
-
     # raise error if recommend_type is not supported
     if recommend_type not in ['random', 'diverse', 'high_return']:
         raise ValueError('recommend_type not recognized')
@@ -93,41 +91,54 @@ def create_portfolio(recommend_type='random', potential_stocks=None, num_observe
     # if potential stocks does not have anything, then choose from the S&P500
     if potential_stocks is None:
         SandPObject = SandP()
-        potential_stocks = SandPObject.stocks
+        potential_stocks = SandPObject.stocks ## check - is this a list?
 
-    # from current time to number of observed days ago
+    # get stock price data
     interfaceObject = stockDayDatabaseInterface()
     today = datetime.date.today()
-    stockAndPrices = {}
-    for stock in potential_stocks:
-        # TODO: days for stock will be in order of first date.  I don't know how you want to store this data
-        #currently storing it in the dict stockAndPrices, but this can be changed if you want
-        days = interfaceObject.getRangeDaysOrdered(stock, today - num_observed_days, today)
-        stockAndPrices[stock] = [stock, days]
-
-    # TODO: clean the data -- remove NaN
-
-    # TODO: put into format for recommender algorithms
-    stock_ids = None # list of stock names
-    stock_prices = None # 2D numpy array of stock prices
-
-
-    # run desired recommender algorithm
-    #note:  Portfolio is returned as a dictionary of stock name -> amount
     if recommend_type is 'random':
 
-        current_stock_prices = stock_prices[:,0]
-        portfolio = recommend_random_portfolio(stock_ids=stock_ids, stock_prices=current_stock_prices, **kwargs)
+        # initialize stock prices
+        stock_prices = np.empty(len(potential_stocks))
+        try_date = today
+        clean_data = False
+
+        # add data until it is clean - should only take a couple tries
+        while not clean_data:
+            clean_data = True
+            for i, stock in enumerate(potential_stocks):
+                price = interfaceObject.getSpecificDay(stock, try_date).adjustedClose
+                stock_prices[i] = price
+
+                # if the data isn't clean, try the day before that
+                if not np.isreal(price):
+                    clean_data = False
+                    try_date -= datetime.timedelta(days=1)
+                    break
+
+    else:
+        # get all historical stock data into a 2D numpy array
+        stock_prices = np.empty((len(potential_stocks), num_observed_days))
+        for i, stock in enumerate(potential_stocks):
+            days = interfaceObject.getRangeDaysOrdered(stock, today - datetime.timedelta(days=num_observed_days), today)
+            stock_prices[i, :] = np.array([day.adjustedClose for day in days])
+
+        # clean data - remove things like NaN or inf
+        stock_prices = np.ma.compress_cols(np.ma.masked_invalid(stock_prices))
+
+        # raise error if stock_prices is empty??
+
+    # run desired recommender algorithm
+    if recommend_type is 'random':
+        portfolio = recommend_random_portfolio(stock_ids=potential_stocks, stock_prices=stock_prices, **kwargs)
 
     elif recommend_type is 'high_return':
-
-        portfolio = recommend_high_return_portfolio(stock_ids=stock_ids, stock_prices=stock_prices, **kwargs)
+        portfolio = recommend_high_return_portfolio(stock_ids=potential_stocks, stock_prices=stock_prices, **kwargs)
 
     elif recommend_type is 'diverse':
+        portfolio = recommend_diverse_portfolio(stock_ids=potential_stocks, stock_prices=stock_prices, **kwargs)
 
-        portfolio = recommend_diverse_portfolio(stock_ids=stock_ids, stock_prices=stock_prices, **kwargs)
-
-
+    # dummy portfolio here
     portfolio = {}
     portfolio['googl'] = 40
 

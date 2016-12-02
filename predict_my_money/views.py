@@ -18,10 +18,20 @@ from predict_my_money.computations.recommender_interface import recommend_divers
 
 def index(request):
 	if request.user:
-		return HttpResponseRedirect(reverse('predictor:home0'))
+		return HttpResponseRedirect(reverse('predictor:home'))
 	else:
-		return HttpResponseRedirect(reverse('predictor:log_in', args=(current_user.id,)))
-		return HttpResponse("Hello, world.  You're at the polls index.")
+		return HttpResponseRedirect(reverse('predictor:login'))
+
+
+def home(request):
+	print request.user
+	try:
+		user = User.objects.get(pk=request.user.id)
+	except User.DoesNotExist:
+		raise Http404("User does not exist")
+	else:
+		investor = Investor.objects.get(user=request.user.id)
+		return render(request, 'predictor/home.html', {'investor': investor, 'user': user})
 
 
 def portfolio_detail(request, portfolio_id):
@@ -37,6 +47,7 @@ def portfolio_detail(request, portfolio_id):
 		return render(request, 'predictor/error.html', {
 			'error_message': "Portfolio doesn't exist.",
 		})
+
 
 def error(request):
 	return HttpResponse("An Error occured.")
@@ -100,7 +111,6 @@ def make_portfolio(request):
 		})
 
 
-
 #JSON Response Areas for AJax Calls
 def recommend_portfolio(request):
 	if request.method == "POST":
@@ -134,32 +144,3 @@ def portfolio_detail_json(request, portfolio_id):
 	storage['days'] = daysDict
 	return HttpResponse(json.dumps(storage), content_type="application/json")
 
-def account_portfolios_json(request):
-	user = request.user
-	investor = Investor.objects.get(user=user)
-	portfolios = Portfolio.objects.filter(investor=investor)
-	storage = {}
-	for portfolio in portfolios:
-		storage[portfolio.portfolio_name] = [portfolio.current_value, portfolio.current_diversity]
-	return HttpResponse(json.dumps(storage), content_type="application/json")
-
-
-
-def home0(request):
-	print request.user
-	try:
-		user = User.objects.get(pk=request.user.id)
-	except User.DoesNotExist:
-		raise Http404("User does not exist")
-	else:
-		investor = Investor.objects.get(user=request.user.id)
-		return render(request, 'predictor/home.html', {'investor': investor, 'user': user})
-
-def home(request, user_id):
-	try:
-		user = User.objects.get(pk=user_id)
-	except User.DoesNotExist:
-		raise Http404("User does not exist")
-	else:
-		investor = Investor.objects.get(user=user_id)
-		return render(request, 'predictor/home.html', {'investor': investor, 'user': user})

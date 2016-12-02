@@ -1,30 +1,21 @@
 from django.conf.urls import url
 
-from . import views, access_views
+from . import views, access_views, api_views
 
 urlpatterns = [
     # example /
     url(r'^$', views.index, name='index'),
     #example /registeruser
     url(r'^register', access_views.register, name='register'),
-    # #example /create_user
-    # url(r'^create_user', access_views.create_user, name='create_user'),
-    #example /log_in
-    url(r'^log_in', access_views.login, name='login'),
-    #example /authenticate_user
-    # url(r'^authenticate_user', access_views.authenticate_user, name='authenticate_user'),
-    #example /log_out
-    url(r'^log_out', access_views.sign_out, name='logout'),
-
-    #example /login/json
-    url(r'^login/json', access_views.log_in_json, name="log_in_json"),
-    #example /logout/json
-    url(r'^logout/json', access_views.log_out_json, name="log_out_json"),
+    # #example /login
+    url(r'^login', access_views.login, name='login'),
+    #example /logout
+    url(r'^logout', access_views.logout, name='logout'),
 
     #example /error
     url(r'^error', views.error, name='error'),
     #example /1/home
-    url(r'^home', views.home0, name='home0'),
+    url(r'^home', views.home, name='home'),
     #example /1/home
     url(r'^(?P<user_id>[0-9]+)/home', views.home, name='home'),
     #example /stock/view/GOOGL
@@ -37,8 +28,12 @@ urlpatterns = [
     url(r'^portfolio/view/(?P<portfolio_id>[0-9]+)', views.portfolio_detail, name='portfolio_detail'),
     #example /portfolio/recommend
     url(r'^portfolio/recommend', views.recommend_portfolio, name='recommend_portfolio'),
-    #example /portfolio/1
-    url(r'^portfolio/(?P<portfolio_id>[0-9]+)', views.portfolio_detail_json, name='portfolio_detail_json'),
+    # #example /portfolio/1
+    # url(r'^portfolio/(?P<portfolio_id>[0-9]+)', views.portfolio_detail_json, name='portfolio_detail_json'),
     #example /portfolios
-    url(r'^portfolios', views.account_portfolios_json, name='account_portfolios_json'),
+    # url(r'^portfolios', views.account_portfolios_json, name='account_portfolios_json'),
+
+    # JSON API below
+    url(r'^api/portfolios/(?P<id>[0-9]+)', api_views.portfolio, name='api_portfolio'),
+    url(r'^api/portfolios', api_views.portfolios, name='api_portfolios'),
 ]

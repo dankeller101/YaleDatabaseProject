@@ -8,7 +8,7 @@ from django.template import loader
 from django.urls import reverse
 from predict_my_money.utils import stockAPI, portfolioAPI, stockDayDatabaseInterface
 from django.contrib.auth import authenticate, login as djangoLogin, logout as djangoLogout
-from django.http import HttpResponseRedirect, HttpResponse, Http404
+from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseBadRequest
 
 from .models import User, Investor
 
@@ -24,7 +24,7 @@ def register(request):
 		password = request.POST['password']
 		email = request.POST['email']
 		name = request.POST['name']
-		
+
 		user = User.objects.create_user(username, email, password)
 		# user.first_name, user.last_name = name.split()
 		user.save()
@@ -32,13 +32,9 @@ def register(request):
 		investor.user = user
 		investor.save()
 		djangoLogin(request, user)
-		return HttpResponseRedirect(reverse('predictor:home', args=(user.id,)))
+		return HttpResponseRedirect(reverse('predictor:home'))
 	else:
-		return "Invalid method."
-
-def sign_out(request):
-	logout(request)
-	return HttpResponse('You have successfully signed out.')
+		return HttpResponseBadRequest("Invalid method.")
 
 
 def login(request):
@@ -50,36 +46,20 @@ def login(request):
 		username = request.POST['username']
 		password = request.POST['password']
 		user = authenticate(username=username, password=password)
-		if user is not None:
-			login(request, user)
-			return HttpResponseRedirect(reverse('predictor:home', args=(user.id,)))
-		else:
+		
+		if user:
 			return render(request, 'predictor/error.html', {
 				'error_message': "Invalid Login.",
 			})
+
+		login(request, user)
+		return HttpResponseRedirect(reverse('predictor'))
 	else:
-		return "Invalid method."
+		return HttpResponseBadRequest("Invalid method.")
 
 
-## JSON below
-
-def log_in_json(request):
-	if request.method == "POST":
-		username = request.POST['username']
-		password = request.POST['password']
-		user = authenticate(username=username, password=password)
-		if user is not None:
-			login(request, user)
-			json = {}
-			json['success'] = True
-			return HttpResponse(json.dumps(json), content_type="application/json")
-		else:
-			json = {}
-			json['success'] = False
-			return HttpResponse(json.dumps(json), content_type="application/json")
-
-def log_out_json(request):
+def logout(request):
 	djangoLogout(request)
-	json = {}
-	json['success'] = True
-	return HttpResponse(json.dumps(json), content_type="application/json")
+	return HttpResponse('You have successfully signed out.')
+
+	

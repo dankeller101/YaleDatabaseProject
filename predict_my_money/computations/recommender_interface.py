@@ -89,7 +89,7 @@ def recommend_interfacer(recommend_type='random', potential_stocks=None, num_obs
     # if potential stocks does not have anything, then choose from the S&P500
     if potential_stocks is None:
         SandPObject = SandP()
-        potential_stocks = SandPObject.stocks ## check - is this a list?
+        potential_stocks = SandPObject.stocks
 
     # put stock objects
     stock_objects = []

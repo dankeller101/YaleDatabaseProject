@@ -14,11 +14,17 @@ class stockDayDatabaseInterface():
 
     def getSpecificDay(self, stock, dayRequested):
         try:
-            day = Stock_Day.objects.get(stock=stock, day=dayRequested)
+            day = Stock_Day.objects.filter(stock=stock, day=dayRequested)
         except Stock_Day.DoesNotExist:
             return None
         else:
-            return day
+            if len(day) > 1:
+                toBeDestroyed = None
+                for time in day:
+                    if toBeDestroyed:
+                        toBeDestroyed.delete()
+                    toBeDestroyed = time
+            return toBeDestroyed
 
     def getRangeDaysOrdered(self, stock, earliestDate, LatestDate):
         days = Stock_Day.objects.order_by('day').filter(day__lte=LatestDate).filter(day__gte=earliestDate).filter(stock=stock)
@@ -88,7 +94,8 @@ class stockAPI():
             'Content-Type': 'application/json',
             'Authorization': 'Token 2348473cfae1ffc4a9a473c3b575f750e32328ba'
         }
-        endDate = datetime.date.today().__str__()
+        endDate = datetime.date.today() - datetime.timedelta(days=1)
+        endDate = endDate.__str__()
         requestResponse = requests.get("https://api.tiingo.com/tiingo/daily/" + ticker + "/prices?startDate=2012-1-1&endDate=" + endDate,
                                        headers=headers)
         return requestResponse.json()
@@ -107,8 +114,10 @@ class stockAPI():
             'Content-Type': 'application/json',
             'Authorization': 'Token 2348473cfae1ffc4a9a473c3b575f750e32328ba'
         }
+        lastDate = lastDate + datetime.timedelta(days=1)
         lastDate = lastDate.__str__()
-        endDate = datetime.date.today().__str__()
+        endDate = datetime.date.today() - datetime.timedelta(days=1)
+        endDate = endDate.__str__()
         requestResponse = requests.get("https://api.tiingo.com/tiingo/daily/" + ticker + "/prices?startDate=" + lastDate + "&endDate=" + endDate,
                                        headers=headers)
         return requestResponse.json()

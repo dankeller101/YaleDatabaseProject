@@ -1,10 +1,10 @@
+{% load static %}
+<link rel="StyleSheet" href="{% static "predictor/line_graph.css" %}" type="text/css">
 
 <div id="data-dump" data-prices="{{ data }}"></div>
 
-<svg width="960" height="500"></svg>
 
 
-{% load static %}
 <script src="{% static "predictor/jquery-3.1.1.js" %}"></script>
 <script src="{% static "predictor/d3.min.js" %}"></script>
 <script src="{% static "predictor/line_graph.js" %}"></script>

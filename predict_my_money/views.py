@@ -56,7 +56,7 @@ def stock_detail(request, stock_ticker):
 		days = interface.getAllDaysOrdered(stock)
 		array = []
 		for day in days:
-			array.append([day.day.strftime("%d-%b-%y"), day.adjustedClose])
+			array.append({'date' : day.day.strftime("%d-%b-%y"), 'close' : day.adjustedClose})
 		days = json.dumps(array)
 	template = loader.get_template('predictor/stock_detail.html')
 	context = {

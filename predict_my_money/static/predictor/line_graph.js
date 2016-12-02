@@ -1,11 +1,12 @@
 $(document).ready(function(){
-    var data = $('#data-dump').attr('data-prices')
+    var data = $('#data-dump').attr('data-prices');
+    data = $.parseJSON(data);
 
     var margin = {top: 20, right: 50, bottom: 30, left: 50},
         width = 960 - margin.left - margin.right,
         height = 500 - margin.top - margin.bottom;
 
-    var parseDate = d3.timeFormat("%d-%b-%y").parse,
+    var parseDate = d3.timeParse("%d-%b-%y"),
         bisectDate = d3.bisector(function(d) { return d.date; }).left,
         formatValue = d3.format(",.2f"),
         formatCurrency = function(d) { return "$" + formatValue(d); };
@@ -16,15 +17,13 @@ $(document).ready(function(){
     var y = d3.scaleLinear()
         .range([height, 0]);
 
-    var xAxis = d3.svg.axis()
-        .scale(x)
-        .orient("bottom");
+    var xAxis = d3.axisBottom()
+        .scale(x);
 
-    var yAxis = d3.svg.axis()
-        .scale(y)
-        .orient("left");
+    var yAxis = d3.axisLeft()
+        .scale(y);
 
-    var line = d3.svg.line()
+    var line = d3.line()
         .x(function(d) { return x(d.date); })
         .y(function(d) { return y(d.close); });
 

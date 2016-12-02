@@ -88,8 +88,7 @@ class stockAPI():
             'Content-Type': 'application/json',
             'Authorization': 'Token 2348473cfae1ffc4a9a473c3b575f750e32328ba'
         }
-        endDate = datetime.date.today() + datetime.timedelta(days=1)
-        endDate = endDate.__str__()
+        endDate = datetime.date.today().__str__()
         requestResponse = requests.get("https://api.tiingo.com/tiingo/daily/" + ticker + "/prices?startDate=2012-1-1&endDate=" + endDate,
                                        headers=headers)
         return requestResponse.json()
@@ -108,7 +107,6 @@ class stockAPI():
             'Content-Type': 'application/json',
             'Authorization': 'Token 2348473cfae1ffc4a9a473c3b575f750e32328ba'
         }
-        lastDate = lastDate - datetime.timedelta(days=1)
         lastDate = lastDate.__str__()
         endDate = datetime.date.today().__str__()
         requestResponse = requests.get("https://api.tiingo.com/tiingo/daily/" + ticker + "/prices?startDate=" + lastDate + "&endDate=" + endDate,

@@ -98,9 +98,8 @@ def recommend_interfacer(recommend_type='random', potential_stocks=None, num_obs
         stock_objects.append(stockGetter.getStock(stock))
     potential_stocks = stock_objects
 
-
-
-
+    # number of potential stocks
+    num_stocks = len(potential_stocks)
 
     # get stock price data
     interfaceObject = stockDayDatabaseInterface()
@@ -108,7 +107,7 @@ def recommend_interfacer(recommend_type='random', potential_stocks=None, num_obs
     if recommend_type is 'random':
 
         # initialize stock prices
-        stock_prices = np.empty(len(potential_stocks))
+        stock_prices = np.empty(num_stocks)
         try_date = today
         clean_data = False
 
@@ -134,40 +133,109 @@ def recommend_interfacer(recommend_type='random', potential_stocks=None, num_obs
             if clean_data:
                 break
 
+        if not clean_data:
+            raise RuntimeError('There is not enough clean data for the days and stocks requested')
+
     else:
         # get all historical stock data into a 2D numpy array
 
-        # hacky work-around to get the days without weekend
-        days = interfaceObject.getRangeDaysOrdered(potential_stocks[0], today - datetime.timedelta(days=num_observed_days), today)
-        num_weekdays = len(days)
+        # # hacky work-around to get the days without weekend
+        # days = interfaceObject.getRangeDaysOrdered(potential_stocks[0], today - datetime.timedelta(days=num_observed_days), today)
+        # num_weekdays = len(days)
+        #
+        # # DEBUG
+        # common_days = set([day.day for day in days])
 
-        # DEBUG
-        common_days = set([day.day for day in days])
+        # get stock prices ready
+        stock_price_dict = {}
 
-        stock_prices = np.empty((len(potential_stocks), num_weekdays))
+        # stock_prices = np.empty((len(potential_stocks), num_weekdays))
 
         for i, stock in enumerate(potential_stocks):
+
+            # get all days in the range that we have in the database
             days = interfaceObject.getRangeDaysOrdered(stock, today - datetime.timedelta(days=num_observed_days), today)
 
-            # DEBUG
-            these_days = set([day.day for day in days])
-            days_missing = common_days.difference(these_days)
-            days_extra = these_days.difference(common_days)
-            print('For stock %d, %s, we have %d days -- %d missing, %d extra' %(i, stock, len(days), len(days_missing), len(days_extra)))
-            print('\tMissing: %s' % str(days_missing))
-            print('\tExtra: %s' % str(days_extra))
+            # add days to stock price
+            for day in days:
+                # only do anything if that day is not None
+                if day:
+                    # if this day already exists, update the numpy array
+                    if day.day in stock_price_dict.keys():
+                        stock_price_dict[day.day][i] = day.adjustedClose
+                    # else if this day does not exist, then create a numpy array initialized to all entries nan
+                    else:
+                        stock_price_dict[day.day] = np.empty(num_stocks).fill(np.nan)
+                        stock_price_dict[day.day][i] = day.adjustedClose
 
+            # # DEBUG
+            # these_days = set([day.day for day in days])
+            # days_missing = common_days.difference(these_days)
+            # days_extra = these_days.difference(common_days)
+            # print('For stock %d, %s, we have %d days -- %d missing, %d extra' %(i, stock, len(days), len(days_missing), len(days_extra)))
+            # print('\tMissing: %s' % str(days_missing))
+            # print('\tExtra: %s' % str(days_extra))
 
+        # turn the dictionary into a 2D numpy array using column stack
+        stock_prices = np.column_stack(tuple(sorted(stock_price_dict)))
 
-            # note that the following list comprehension gives np.nan if days is None
-            #stock_prices[i, :] = np.array([day.adjustedClose if day else np.nan for day in days])
+        # Clean the data
+        # 1. Remove any stock that is missing more than 75% of the data
+        percent_missing_threshold = 0.75
+        n, p = stock_prices.shape
+        keep_rows = np.sum(np.isnan(stock_prices), axis=1) < p * percent_missing_threshold
+        stock_prices = stock_prices[keep_rows, :]
 
-        # clean data - remove things like NaN or inf
-        stock_prices = np.ma.compress_cols(np.ma.masked_invalid(stock_prices))
+        # 2. For each day we have,
+        #       If there is less than 75% of the data, remove it
+        #       Otherwise, interpolate data from 5 days before or 5 days after
+        #           if 10 consecutive days are missing, remove the stock
 
-        # raise error if stock_prices is empty or sufficiently small??
-        lower_threshold_on_days = 1 # this is hard coded to empty right now
-        if stock_prices.shape[1] <= lower_threshold_on_days:
+        # remove days with few data points
+        keep_columns = np.sum(np.isnan(stock_prices), axis=0) < p * percent_missing_threshold
+        stock_prices = stock_prices[:, keep_columns]
+
+        # interpolate those where they are missing
+        rows_to_remove = []
+        for ind in np.argwhere(np.isnan(stock_prices)):
+
+            # try going backward 5 days
+            interpolated = False
+            for i in np.arange(1,6):
+                try:
+                    interp = stock_prices[ind[0],ind[1]-i]
+                    if np.isreal(interp):
+                        stock_prices[ind[0],ind[1]] = interp
+                        interpolated = True
+                        break
+                except IndexError:
+                    break
+
+            # try going forward 5 days
+            if not interpolated:
+                for i in np.arange(1, 6):
+                    try:
+                        interp = stock_prices[ind[0], ind[1] + i]
+                        if np.isreal(interp):
+                            stock_prices[ind[0], ind[1]] = interp
+                            interpolated = True
+                            break
+                    except IndexError:
+                        break
+
+            # if not interpolated, remove that stock
+            if not interpolated:
+                rows_to_remove.append(ind[0])
+
+        # remove the finals rows that had 10 consecutive days missing
+        stock_prices = np.delete(stock_prices, rows_to_remove, axis=0)
+
+        # TODO: add a front end part that checks that there are less days requested than stocks...maybe we should also check it here
+
+        # raise an error if we have too few days to run our model on
+        lower_threshold_on_days = stock_prices.shape[0]  # howl if we have more stocks than days
+        lower_threshold_on_stocks = num_stocks * 0.75
+        if stock_prices.shape[1] <= lower_threshold_on_days or stock_prices.shape[0] <= lower_threshold_on_stocks:
             raise RuntimeError('There is not enough clean data for the days and stocks requested')
 
     # run desired recommender algorithm

@@ -12,6 +12,7 @@
 # popular stocks.
 
 import numpy as np
+import pandas as pd
 import random
 from statsmodels.tsa.arima_model import ARIMA
 
@@ -82,10 +83,11 @@ def forecast_stock_price(stock_prices, time_horizon):
 
     # HARD CODED PARAMETERS - not the statistically best thing, but it's a good start
     order_p = 7  # hard coded to choose a week for lag terms
-    order_d = 3  # hard coded to choose the third derivative
+    order_d = 2  # hard coded to choose the third derivative
     order_q = 1  # hard coded to choose one smoothing term
 
     # fit model
+    # df = pd.DataFrame(stock_prices)
     arima_mod = ARIMA(stock_prices, order=(order_p, order_d, order_q))
     results = arima_mod.fit()
 

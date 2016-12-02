@@ -165,7 +165,7 @@ def recommend_interfacer(recommend_type='random', potential_stocks=None, num_obs
                         stock_price_dict[day.day][i] = day.adjustedClose
                     # else if this day does not exist, then create a numpy array initialized to all entries nan
                     else:
-                        stock_price_dict[day.day] = np.empty(num_stocks).fill(np.nan)
+                        stock_price_dict[day.day] = np.empty(num_stocks) * np.nan
                         stock_price_dict[day.day][i] = day.adjustedClose
 
             # # DEBUG
@@ -177,7 +177,7 @@ def recommend_interfacer(recommend_type='random', potential_stocks=None, num_obs
             # print('\tExtra: %s' % str(days_extra))
 
         # turn the dictionary into a 2D numpy array using column stack
-        stock_prices = np.column_stack(tuple(sorted(stock_price_dict)))
+        stock_prices = np.column_stack(tuple([stock_price_dict[k] for k in sorted(stock_price_dict.keys())]))
 
         # Clean the data
         # 1. Remove any stock that is missing more than 75% of the data

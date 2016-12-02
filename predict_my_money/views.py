@@ -1,18 +1,20 @@
-from django.shortcuts import render
-from django.template import loader
-from .models import User, Investor, Stock, Portfolio, Stock_Owned, Portfolio_Day
-from django.urls import reverse
-from predict_my_money.utils import stockAPI, portfolioAPI, stockDayDatabaseInterface
+"""views.py"""
+
 import datetime
 import json
+
+from django.shortcuts import render
+from django.template import loader
+from django.urls import reverse
+from predict_my_money.utils import stockAPI, portfolioAPI, stockDayDatabaseInterface
 from django.contrib.auth import authenticate, login, logout
+from django.http import HttpResponseRedirect, HttpResponse, Http404
+
+from .models import User, Investor, Stock, Portfolio, Stock_Owned, Portfolio_Day
 from predict_my_money.computations.recommender_interface import recommend_diverse_portfolio, recommend_high_return_portfolio, recommend_random_portfolio, \
 	recommend_interfacer
 
 # Create your views here.
-
-
-from django.http import HttpResponseRedirect, HttpResponse, Http404
 
 def index(request):
 	if request.user:
@@ -142,56 +144,6 @@ def account_portfolios_json(request):
 	return HttpResponse(json.dumps(storage), content_type="application/json")
 
 
-### REGISTRATION
-
-def register(request):
-	template = loader.get_template('predictor/register.html')
-	context = {}
-	return HttpResponse(template.render(context, request))
-
-def sign_out(request):
-	logout(request)
-	return HttpResponse('You have successfully signed out.')
-
-
-def create_user(request):
-	if request.method == "POST":
-		username = request.POST['username']
-		password = request.POST['password']
-		email = request.POST['email']
-		name = request.POST['name']
-		name = name.split()
-		user = User.objects.create_user(username, email, password)
-		user.first_name = name[0]
-		user.last_name = name[1]
-		user.save()
-		investor = Investor()
-		investor.user = user
-		investor.save()
-		login(request, user)
-		return HttpResponseRedirect(reverse('predictor:home', args=(user.id,)))
-	else:
-		return render(request, 'predictor/error.html', {
-			'error_message': "You didn't select a choice.",
-		})
-
-def log_in(request):
-	template = loader.get_template('predictor/log_in.html')
-	context = {}
-	return HttpResponse(template.render(context, request));
-
-def authenticate_user(request):
-	if request.method == "POST":
-		username = request.POST['username']
-		password = request.POST['password']
-		user = authenticate(username=username, password=password)
-		if user is not None:
-			login(request, user)
-			return HttpResponseRedirect(reverse('predictor:home', args=(user.id,)))
-		else:
-			return render(request, 'predictor/error.html', {
-				'error_message': "Invalid Login.",
-			})
 
 def home0(request):
 	print request.user
@@ -211,28 +163,3 @@ def home(request, user_id):
 	else:
 		investor = Investor.objects.get(user=user_id)
 		return render(request, 'predictor/home.html', {'investor': investor, 'user': user})
-
-def log_in_json(request):
-	if request.method == "POST":
-		username = request.POST['username']
-		password = request.POST['password']
-		user = authenticate(username=username, password=password)
-		if user is not None:
-			login(request, user)
-			json = {}
-			json['success'] = True
-			return HttpResponse(json.dumps(json), content_type="application/json")
-		else:
-			json = {}
-			json['success'] = False
-			return HttpResponse(json.dumps(json), content_type="application/json")
-
-def log_out_json(request):
-	logout(request)
-	json = {}
-	json['success'] = True
-	return HttpResponse(json.dumps(json), content_type="application/json")
-
-
-
-

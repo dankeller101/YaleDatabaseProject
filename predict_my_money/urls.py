@@ -1,25 +1,25 @@
 from django.conf.urls import url
 
-from . import views
+from . import views, access_views
 
 urlpatterns = [
     # example /
     url(r'^$', views.index, name='index'),
     #example /registeruser
-    url(r'^register', views.register, name='register'),
-    #example /create_user
-    url(r'^create_user', views.create_user, name='create_user'),
+    url(r'^register', access_views.register, name='register'),
+    # #example /create_user
+    # url(r'^create_user', access_views.create_user, name='create_user'),
     #example /log_in
-    url(r'^log_in', views.log_in, name='log_in'),
+    url(r'^log_in', access_views.login, name='login'),
     #example /authenticate_user
-    url(r'^authenticate_user', views.authenticate_user, name='authenticate_user'),
+    # url(r'^authenticate_user', access_views.authenticate_user, name='authenticate_user'),
     #example /log_out
-    url(r'^log_out', views.sign_out, name='sign_out'),
+    url(r'^log_out', access_views.sign_out, name='logout'),
 
     #example /login/json
-    url(r'^login/json', views.log_in_json, name="log_in_json"),
+    url(r'^login/json', access_views.log_in_json, name="log_in_json"),
     #example /logout/json
-    url(r'^logout/json', views.log_out_json, name="log_out_json"),
+    url(r'^logout/json', access_views.log_out_json, name="log_out_json"),
 
     #example /error
     url(r'^error', views.error, name='error'),

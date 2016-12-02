@@ -1,9 +1,9 @@
-{% extends "predictor/accessform.html" %}
+{% extends "access/base.html" %}
 
 {% block content %}
 <h1>Log in!</h1>
 
-<form action="{% url 'predictor:authenticate_user' %}" method="post">
+<form action="{% url 'predictor:login' %}" method="post">
 	{% csrf_token %}
 	<div class="form-group row">
 		<label for="inputText" class="col-sm-2 col-form-label">username</label>

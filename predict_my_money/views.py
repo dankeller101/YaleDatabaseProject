@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.template import loader
-from .models import User, Investor, Stock, Portfolio, Stock_Owned
+from .models import User, Investor, Stock, Portfolio, Stock_Owned, Portfolio_Day
 from django.urls import reverse
 from predict_my_money.utils import stockAPI, portfolioAPI, stockDayDatabaseInterface
 import datetime
@@ -167,6 +167,55 @@ def recommend_portfolio(request):
 			return recommend_interfacer(recommend_type='high_return', budget=totalspend)
 		else:
 			return recommend_interfacer(recommend_type='diverse', budget=totalspend)
+
+def portfolio_detail_json(request, portfolio_id):
+	api = portfolioAPI()
+	portfolio = api.getPortfolio(portfolio_id)
+	storage = {}
+	investor = portfolio.investor.user.first_name + " " + portfolio.investor.user.last_name
+	name = portfolio.portfolio_name
+	diversity = portfolio.current_diversity
+	value = portfolio.current_value
+	days = Portfolio_Day.objects.order_by('day').filter(portfolio=portfolio)
+	daysDict = {}
+	for day in days:
+		daysDict[day.day.__str__()] = {'value':day.value, 'diversity':day.diversity}
+	storage['investor'] = investor
+	storage['name'] = name
+	storage['diversity'] = diversity
+	storage['value'] = value
+	storage['days'] = daysDict
+	return HttpResponse(json.dumps(storage), content_type="application/json")
+
+def account_portfolios_json(request):
+	user = request.user
+	investor = Investor.objects.get(user=user)
+	portfolios = Portfolio.objects.filter(investor=investor)
+	storage = {}
+	for portfolio in portfolios:
+		storage[portfolio.portfolio_name] = [portfolio.current_value, portfolio.current_diversity]
+	return HttpResponse(json.dumps(storage), content_type="application/json")
+
+def log_in_json(request):
+	if request.method == "POST":
+		username = request.POST['username']
+		password = request.POST['password']
+		user = authenticate(username=username, password=password)
+		if user is not None:
+			login(request, user)
+			json = {}
+			json['success'] = True
+			return HttpResponse(json.dumps(json), content_type="application/json")
+		else:
+			json = {}
+			json['success'] = False
+			return HttpResponse(json.dumps(json), content_type="application/json")
+
+def log_out_json(request):
+	logout(request)
+	json = {}
+	json['success'] = True
+	return HttpResponse(json.dumps(json), content_type="application/json")
 
 
 

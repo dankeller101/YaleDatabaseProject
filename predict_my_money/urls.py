@@ -29,4 +29,12 @@ urlpatterns = [
     url(r'^portfolio/view/(?P<portfolio_id>[0-9]+)', views.portfolio_detail, name='portfolio_detail'),
     #example /portfolio/recommend
     url(r'^portfolio/recommend', views.recommend_portfolio, name='recommend_portfolio'),
+    #example /portfolio/1
+    url(r'^portfolio/(?P<portfolio_id>[0-9]+)', views.portfolio_detail_json, name='portfolio_detail_json'),
+    #example /portfolios
+    url(r'^portfolios', views.account_portfolios_json, name='account_portfolios_json'),
+    #example /login/json
+    url(r'^login/json', views.log_in_json, name="log_in_json"),
+    #example /logout/json
+    url(r'^logout/json', views.log_out_json, name="log_out_json"),
 ]

@@ -1,18 +1,22 @@
+{% extends "predictor/base.html" %}
+
+{% block content %}
 <h1> Home of {{ user.first_name }} {{ user.last_name }}</h1>
 
 <div>
-    {% for portfolio in investor.portfolio_set.all %}
-        <div>
-        <a href="{% url 'predictor:portfolio_detail'  portfolio_id=portfolio.pk  %}">
-            {{ portfolio.portfolio_name }}
-            </a>
-        </div>
-        <div>
-            {{ portfolio.current_diversity }}
-        </div>
-        <div>
-            {{ portfolio.total_invested }}
-        </div>
+	{% for portfolio in investor.portfolio_set.all %}
+		<div>
+		<a href="{% url 'predictor:portfolio_detail'  portfolio_id=portfolio.pk  %}">
+			{{ portfolio.portfolio_name }}
+			</a>
+		</div>
+		<div>
+			{{ portfolio.current_diversity }}
+		</div>
+		<div>
+			{{ portfolio.total_invested }}
+		</div>
 
-    {% endfor %}
+	{% endfor %}
 </div>
+{% endblock %}

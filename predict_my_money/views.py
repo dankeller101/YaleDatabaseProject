@@ -17,8 +17,8 @@ from django.http import HttpResponseRedirect, HttpResponse, Http404
 def index(request):
 	return HttpResponse("Hello, world.  You're at the polls index.")
 
-def user_registration(request):
-	template = loader.get_template('predictor/user_registration.html')
+def register(request):
+	template = loader.get_template('predictor/register.html')
 	context = {}
 	return HttpResponse(template.render(context, request))
 
@@ -32,7 +32,7 @@ def portfolio_detail(request, portfolio_id):
 		}
 		return HttpResponse(template.render(context, request))
 	else:
-		return render(request, 'predictor/error', {
+		return render(request, 'predictor/error.html', {
 			'error_message': "Portfolio doesn't exist.",
 		})
 
@@ -48,7 +48,7 @@ def stock_detail(request, stock_ticker):
 	stock = API.getStock(ticker)
 
 	if not stock:
-		return render(request, 'predictor/error', {
+		return render(request, 'predictor/error.html', {
 			'error_message': "Stock does not exist",
 		})
 	else:
@@ -83,7 +83,7 @@ def make_portfolio(request):
 		quantity = stocks[1]
 		stock = API.getStock(stock)
 		if not stock:
-			return render(request, 'predictor/error', {
+			return render(request, 'predictor/error.html', {
 				'error_message': "Stock doesn't exist.",
 			})
 		stock_owned.portfolio = portfolio
@@ -93,7 +93,7 @@ def make_portfolio(request):
 		stock_owned.amount_owned = quantity
 		return HttpResponseRedirect(reverse('predictor:home', args=(current_user.id,)))
 	else:
-		return render(request, 'predictor/error', {
+		return render(request, 'predictor/error.html', {
 			'error_message': "You didn't submit a portfolio.",
 		})
 
@@ -120,7 +120,7 @@ def create_user(request):
 		login(request, user)
 		return HttpResponseRedirect(reverse('predictor:home', args=(user.id,)))
 	else:
-		return render(request, 'predictor/error', {
+		return render(request, 'predictor/error.html', {
 			'error_message': "You didn't select a choice.",
 		})
 
@@ -138,7 +138,7 @@ def authenticate_user(request):
 			login(request, user)
 			return HttpResponseRedirect(reverse('predictor:home', args=(user.id,)))
 		else:
-			return render(request, 'predictor/error', {
+			return render(request, 'predictor/error.html', {
 				'error_message': "Invalid Login.",
 			})
 

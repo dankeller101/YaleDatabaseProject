@@ -6,7 +6,7 @@ urlpatterns = [
     # example /
     url(r'^$', views.index, name='index'),
     #example /registeruser
-    url(r'^registeruser', views.user_registration, name='user_registration'),
+    url(r'^register', views.register, name='register'),
     #example /create_user
     url(r'^create_user', views.create_user, name='create_user'),
     #example /error
@@ -22,7 +22,7 @@ urlpatterns = [
     #example /log_in
     url(r'^log_in', views.log_in, name='log_in'),
     #example /authenticate_user
-    url(r'^authenicate_user', views.authenticate_user, name='authenticate_user'),
+    url(r'^authenticate_user', views.authenticate_user, name='authenticate_user'),
     #example /log_out
     url(r'^log_out', views.sign_out, name='sign_out'),
     #example /portfolio/view/1

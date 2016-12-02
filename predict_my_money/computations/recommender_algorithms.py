@@ -91,7 +91,7 @@ def preprocessing_steps(stock_prices, normalize=True, log=True):
     stock_prices_var[ind_zero_var] = 1.0
 
     # normalization step
-    stock_prices = (stock_prices - np.mean(stock_prices, axis=1)) / stock_prices_var
+    stock_prices = (stock_prices - stock_prices_mean) / stock_prices_var
 
     return stock_prices, stock_prices_mean, stock_prices_var
 
@@ -113,8 +113,8 @@ def forecast_stock_price_arima(stock_prices, time_horizon):
     n, p = stock_prices.shape
 
     # HARD CODED PARAMETERS - not the statistically best thing, but it's a good start
-    order_p = 7  # hard coded to choose a week for lag terms
-    order_d = 2  # hard coded to choose the third derivative
+    order_p = 5  # hard coded to choose a working week for lag terms
+    order_d = 2  # hard coded to choose the second derivative
     order_q = 1  # hard coded to choose one smoothing term
 
     # fit model
@@ -128,7 +128,7 @@ def forecast_stock_price_arima(stock_prices, time_horizon):
 
     return forecasted_price
 
-def forecast_stock_price_var(stock_prices, time_horizon, max_order=20):
+def forecast_stock_price_var(stock_prices, time_horizon, max_order=5):
 
     # transpose this sucker
     stock_prices_t = np.transpose(stock_prices)
@@ -141,8 +141,8 @@ def forecast_stock_price_var(stock_prices, time_horizon, max_order=20):
     # fit data with optimal order
     results = var_mod.fit(maxlags=opt_order)
 
-    # predict price from the last data point to time horizon
-    forecasted_price_t = np.asarray(results.forecast(stock_prices_t[-time_horizon - order:-time_horizon], time_horizon))
+    # predict price to time horizon
+    forecasted_price_t = results.forecast(stock_prices_t, time_horizon)
     forecasted_price = np.transpose(forecasted_price_t)
 
     return forecasted_price
@@ -236,7 +236,7 @@ def recommend_high_return_portfolio(stock_ids, stock_prices, budget, time_horizo
 
     return portfolio
 
-def recommend_diverse_portfolio(stock_ids, stock_prices, budget, time_horizon=14, max_investment=None, diverse_thresh=0.2, model='arima', preprocess=False):
+def recommend_diverse_portfolio(stock_ids, stock_prices, budget, time_horizon=14, max_investment=None, diverse_thresh=0.2, model='var', preprocess=False):
     """
         Recommends a portfolio by fitting an autoregressive integrated moving average (ARIMA) model to stock prices,
         forecasting to a further time horizon. Next, the correlation matrix is chosen. Stocks are greedily chosen such
@@ -301,7 +301,7 @@ def recommend_diverse_portfolio(stock_ids, stock_prices, budget, time_horizon=14
             break
 
         # else, choose the diverse option with the highest forecasted TSR
-        i = diverse_options[np.argmax(forecasted_prices[diverse_options])]
+        i = diverse_options[np.argmax(scratch_tsr[diverse_options])]
         price = stock_prices[i]
         max_shares = int(np.floor(min(current_budget, max_investment) / price))
 
@@ -315,10 +315,11 @@ def recommend_diverse_portfolio(stock_ids, stock_prices, budget, time_horizon=14
                 portfolio[stock_ids[i].stock_name] = int(np.floor(current_budget / price))
                 break
             else:
-                # select shares, remove from diverse options, add to portfolio indices
+                # select shares, remove from diverse options, add to portfolio indices, put tsr as lowest
                 portfolio[stock_ids[i].stock_name] = max_shares
                 diverse_options.remove(i)
                 port_ind.append(i)
+                scratch_tsr[i] = -np.inf
 
     return portfolio
 

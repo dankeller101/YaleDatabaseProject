@@ -2,8 +2,9 @@ from django.shortcuts import render
 from django.template import loader
 from .models import User, Investor, Stock, Portfolio, Stock_Owned
 from django.urls import reverse
-from predict_my_money.utils import stockAPI, portfolioAPI
+from predict_my_money.utils import stockAPI, portfolioAPI, stockDayDatabaseInterface
 import datetime
+import json
 from django.contrib.auth import authenticate, login, logout
 from predict_my_money.computations.recommender_interface import recommend_diverse_portfolio, recommend_high_return_portfolio, recommend_random_portfolio, \
 	recommend_interfacer
@@ -45,13 +46,21 @@ def stock_detail(request, stock_ticker):
 		ticker = stock_ticker
 	API = stockAPI()
 	stock = API.getStock(ticker)
+
 	if not stock:
 		return render(request, 'predictor/error', {
 			'error_message': "Stock does not exist",
 		})
+	else:
+		interface = stockDayDatabaseInterface()
+		days = interface.getAllDaysOrdered(stock)
+		array = []
+		for day in days:
+			array.append([day.day.strftime("%d-%b-%y"), day.adjustedClose])
+		days = json.dumps(array)
 	template = loader.get_template('predictor/stock_detail.html')
 	context = {
-		'stock' : stock,
+		'data' : days,
 	}
 	return HttpResponse(template.render(context, request))
 

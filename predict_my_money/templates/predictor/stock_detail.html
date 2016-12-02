@@ -1,16 +1,7 @@
-<div>
-    {% for day in stock.stock_day_set.all %}
-        <h1>
-            date: {{ day.day }}
-        </h1>
-        <p>
-            high: {{ day.high }}
-            low: {{ day.low }}
-        </p>
-    {% endfor %}
 
-</div>
+<div id="data-dump" data-prices="{{ data }}"></div>
 
+<svg width="960" height="500"></svg>
 
 
 {% load static %}

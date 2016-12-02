@@ -31,7 +31,7 @@ $(document).ready(function(){
         tablerow.append(deletebuttonfortable);
         tableBody.append(tablerow);
         //activate new delete button
-        $('.' + ticker + '-row').click(deleteStock);
+        $('.' + ticker + '').click(deleteStock);
     }
 
 

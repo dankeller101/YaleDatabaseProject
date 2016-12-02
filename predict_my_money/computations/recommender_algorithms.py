@@ -15,6 +15,7 @@ import numpy as np
 import pandas as pd
 import random
 from statsmodels.tsa.arima_model import ARIMA
+from statsmodels.tsa.vector_ar import var_model
 
 def recommend_random_portfolio(stock_ids, stock_prices, budget, max_investment=None):
 
@@ -77,8 +78,9 @@ def recommend_random_portfolio(stock_ids, stock_prices, budget, max_investment=N
 
     return portfolio
 
-def forecast_stock_price(stock_prices, time_horizon):
+def forecast_stock_price_arima(stock_prices, time_horizon):
 
+    # I've transposed some stuff -- check it out
     n, p = stock_prices.shape
 
     # HARD CODED PARAMETERS - not the statistically best thing, but it's a good start
@@ -87,12 +89,35 @@ def forecast_stock_price(stock_prices, time_horizon):
     order_q = 1  # hard coded to choose one smoothing term
 
     # fit model
-    # df = pd.DataFrame(stock_prices)
-    arima_mod = ARIMA(stock_prices, order=(order_p, order_d, order_q))
+    stock_prices_t = np.transpose(stock_prices)
+    arima_mod = ARIMA(stock_prices_t, order=(order_p, order_d, order_q))
     results = arima_mod.fit()
 
     # predict price from the last data point to the time horizon
-    forecasted_price = results.predict(start=p, end=p + time_horizon, dynamic=True)
+    forecasted_price_t = results.predict(start=p, end=p + time_horizon, dynamic=True)
+    forecasted_price = np.transpose(forecasted_price_t)
+
+    return forecasted_price
+
+def forecast_stock_price_var(stock_prices, time_horizon, max_order=20):
+
+    n, p = stock_prices.shape
+
+    # transpose this sucker
+    stock_prices_t = np.transpose(stock_prices)
+
+    # select optimal order
+    model = var_model.VAR(stock_prices)
+    order = model.select_order(max_order)
+    opt_order = order['aic']
+
+    # fit model
+    model_var = var_model.VAR(stock_prices_t)
+    model_results = model_var.fit(maxlags=opt_order)
+
+    # predict price from the last data point to time horizon
+    forecasted_price_t = np.asarray(model_results.forecast(stock_prices_t[-time_horizon - order:-time_horizon], time_horizon))
+    forecasted_price = np.transpose(forecasted_price_t)
 
     return forecasted_price
 
@@ -128,10 +153,11 @@ def recommend_high_return_portfolio(stock_ids, stock_prices, budget, time_horizo
         raise ValueError('Max investment must be nonnegative')
 
     # build the model
-    forecasted_prices = forecast_stock_price(stock_prices, time_horizon)
+    forecasted_prices = forecast_stock_price_arima(stock_prices, time_horizon)  # ARIMA
+    # forecasted_prices = forecast_stock_price_varstock_prices, time_horizon)  # VAR
 
-    # compute the TSR (excluding dividends)
-    first_price = stock_prices[:,0]
+    # compute the TSR
+    first_price = stock_prices[:, 0]
     single_share_tsr = (forecasted_prices - first_price) / first_price
 
     # initialize portfolio and initial budget

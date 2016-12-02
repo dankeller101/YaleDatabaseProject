@@ -6,43 +6,19 @@ import json
 from django.shortcuts import render
 from django.template import loader
 from django.urls import reverse
-from predict_my_money.utils import stockAPI, portfolioAPI, stockDayDatabaseInterface
+from predict_my_money.utils import stockAPI, portfolioAPI, \
+	stockDayDatabaseInterface
 from django.contrib.auth import authenticate, login, logout
-from django.http import HttpResponseRedirect, HttpResponse, Http404, HttpResponseBadRequest
+from django.http import HttpResponseRedirect, HttpResponse, Http404, \
+	HttpResponseBadRequest, JsonResponse
 from django.views.decorators.http import require_http_methods, require_GET
 
-
 from .models import User, Investor, Stock, Portfolio, Stock_Owned, Portfolio_Day
-from predict_my_money.computations.recommender_interface import recommend_diverse_portfolio, recommend_high_return_portfolio, recommend_random_portfolio, \
-	recommend_interfacer
+from predict_my_money.computations.recommender_interface import \
+	recommend_diverse_portfolio, recommend_high_return_portfolio, \
+	recommend_random_portfolio, recommend_interfacer
 
 # Create your views here.
-
-def stock_detail(request, stock_ticker):
-	if request.method == "POST":
-		ticker = request.POST['ticker']
-	else:
-		ticker = stock_ticker
-	API = stockAPI()
-	stock = API.getStock(ticker)
-
-	if not stock:
-		return render(request, 'predictor/error.html', {
-			'error_message': "Stock does not exist",
-		})
-	else:
-		interface = stockDayDatabaseInterface()
-		days = interface.getAllDaysOrdered(stock)
-		array = []
-		for day in days:
-			array.append({'date' : day.day.strftime("%d-%b-%y"), 'close' : day.adjustedClose})
-		days = json.dumps(array)
-	template = loader.get_template('predictor/stock_detail.html')
-	context = {
-		'data' : days,
-	}
-	return HttpResponse(template.render(context, request))
-
 
 def make_portfolio(request):
 	if request.method == "POST":
@@ -93,17 +69,37 @@ def portfolio_detail(request, portfolio_id):
 
 #
 
+@require_GET
+def get_stock_plot(request):
+	ticker = request.GET["stock"]
+	API = stockAPI()
+	stock = API.getStock(ticker)
+
+	if not stock:
+		return JsonResponse({ "data": null }, status=404)
+
+	interface = stockDayDatabaseInterface()
+	days = interface.getAllDaysOrdered(stock)
+	array = []
+	for day in days:
+		array.append({'date' : day.day.strftime("%d-%b-%y"), 'close' : day.adjustedClose})
+
+	return JsonResponse({ "data": array })
+
 
 @require_GET
 def get_recommendation(request):
 	totalspend = float(request.GET['total_spend'])
 	kwargs = { 'budget': totalspend }
-	if type == "control":
-		return json.dumps(recommend_interfacer(recommend_type='random', budget=totalspend))
-	elif type == "tsr":
-		return json.dumps(recommend_interfacer(recommend_type='high_return', budget=totalspend))
+
+	if "type" in request.GET and request.GET["type"] in ["control", "tsr"]:
+		rtype = request.GET["type"]
 	else:
-		return json.dumps(recommend_interfacer(recommend_type='diverse', budget=totalspend))
+		rtype = "diverse"
+
+	a = recommend_interfacer(recommend_type=rtype, budget=totalspend)
+	print a
+	return json.dumps(a)
 
 def portfolio(request, id):
 	if request.method == "GET":

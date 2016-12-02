@@ -5,19 +5,17 @@ from . import views, access_views, api_views
 urlpatterns = [
     # example /
     url(r'^$', views.index, name='index'),
-    #example /registeruser
+    
+    # User access functions (login, register etc)
     url(r'^register', access_views.register, name='register'),
-    # #example /login
     url(r'^login', access_views.login, name='login'),
-    #example /logout
     url(r'^logout', access_views.logout, name='logout'),
 
     #example /error
     url(r'^error', views.error, name='error'),
     #example /1/home
     url(r'^home', views.home, name='home'),
-    #example /1/home
-    url(r'^(?P<user_id>[0-9]+)/home', views.home, name='home'),
+    
     #example /stock/view/GOOGL
     url(r'^stock/view/(?P<stock_ticker>[a-z]+)', views.stock_detail, name='stock_detail'),
     #example /portfolio/create
@@ -37,4 +35,6 @@ urlpatterns = [
     url(r'^api/get_recommendation', api_views.get_recommendation, name='get_recommendation'),
     url(r'^api/portfolios/(?P<id>[0-9]+)', api_views.portfolio, name='api_portfolio'),
     url(r'^api/portfolios', api_views.portfolios, name='api_portfolios'),
+
+    url(r'^api/get_stock_plot', api_views.get_stock_plot, name='get_stock_plot'),
 ]

@@ -133,6 +133,9 @@ def recommend_interfacer(recommend_type='random', potential_stocks=None, num_obs
             if clean_data:
                 break
 
+        if not clean_data:
+            raise RuntimeError('There is not enough clean data for the days and stocks requested')
+
     else:
         # get all historical stock data into a 2D numpy array
 

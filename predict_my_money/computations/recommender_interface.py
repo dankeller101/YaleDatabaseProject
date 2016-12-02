@@ -116,12 +116,12 @@ def recommend_interfacer(recommend_type='random', potential_stocks=None, num_obs
         for i in range(days_back_to_try):
 
             clean_data = True
-            for i, stock in enumerate(potential_stocks):
+            for j, stock in enumerate(potential_stocks):
                 day = interfaceObject.getSpecificDay(stock, try_date)
                 if (day is not None):
                     price = day.adjustedClose
                     if np.isreal(price):
-                        stock_prices[i] = price
+                        stock_prices[j] = price
                     else:
                         clean_data = False
                         break
@@ -132,21 +132,14 @@ def recommend_interfacer(recommend_type='random', potential_stocks=None, num_obs
             # if we got clean data, break
             if clean_data:
                 break
+            else:
+                try_date -= datetime.timedelta(days=1)
 
         if not clean_data:
             raise RuntimeError('There is not enough clean data for the days and stocks requested')
 
     else:
-        # get all historical stock data into a 2D numpy array
-
-        # # hacky work-around to get the days without weekend
-        # days = interfaceObject.getRangeDaysOrdered(potential_stocks[0], today - datetime.timedelta(days=num_observed_days), today)
-        # num_weekdays = len(days)
-        #
-        # # DEBUG
-        # common_days = set([day.day for day in days])
-
-        # get stock prices ready
+        # get all historical stock data into a 2D numpy array -- start with dict, put into numpy array later
         stock_price_dict = {}
 
         # stock_prices = np.empty((len(potential_stocks), num_weekdays))
@@ -167,14 +160,6 @@ def recommend_interfacer(recommend_type='random', potential_stocks=None, num_obs
                     else:
                         stock_price_dict[day.day] = np.empty(num_stocks) * np.nan
                         stock_price_dict[day.day][i] = day.adjustedClose
-
-            # # DEBUG
-            # these_days = set([day.day for day in days])
-            # days_missing = common_days.difference(these_days)
-            # days_extra = these_days.difference(common_days)
-            # print('For stock %d, %s, we have %d days -- %d missing, %d extra' %(i, stock, len(days), len(days_missing), len(days_extra)))
-            # print('\tMissing: %s' % str(days_missing))
-            # print('\tExtra: %s' % str(days_extra))
 
         # turn the dictionary into a 2D numpy array using column stack
         stock_prices = np.column_stack(tuple([stock_price_dict[k] for k in sorted(stock_price_dict.keys())]))

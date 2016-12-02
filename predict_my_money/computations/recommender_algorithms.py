@@ -12,7 +12,6 @@
 # popular stocks.
 
 import numpy as np
-import pandas as pd
 import random
 from statsmodels.tsa.arima_model import ARIMA
 from statsmodels.tsa.vector_ar import var_model

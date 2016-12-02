@@ -188,10 +188,14 @@ def recommend_interfacer(recommend_type='random', potential_stocks=None, num_obs
 
         # 2. For each day we have,
         #       If there is less than 75% of the data, remove it
+        #       Otherwise, interpolate data from 5 days before or 5 days after
+        #           if 10 consecutive days are missing, remove the stock
+
+        # remove days with few data points
         keep_columns = np.sum(np.isnan(stock_prices), axis=0) < p * percent_missing_threshold
         stock_prices = stock_prices[:, keep_columns]
-        #       Otherwise, interpolate data from 5 days before or 5 days after
-        #       if 10 consecutive days are missing, remove the stock
+
+        # interpolate those where they are missing
         rows_to_remove = []
         for ind in np.argwhere(np.isnan(stock_prices)):
 
@@ -226,9 +230,12 @@ def recommend_interfacer(recommend_type='random', potential_stocks=None, num_obs
         # remove the finals rows that had 10 consecutive days missing
         stock_prices = np.delete(stock_prices, rows_to_remove, axis=0)
 
+        # TODO: add a front end part that checks that there are less days requested than stocks...maybe we should also check it here
+
         # raise an error if we have too few days to run our model on
-        lower_threshold_on_days = 10 # this is hard coded to empty right now
-        if stock_prices.shape[1] <= lower_threshold_on_days:
+        lower_threshold_on_days = stock_prices.shape[0]  # howl if we have more stocks than days
+        lower_threshold_on_stocks = num_stocks * 0.75
+        if stock_prices.shape[1] <= lower_threshold_on_days or stock_prices.shape[0] <= lower_threshold_on_stocks:
             raise RuntimeError('There is not enough clean data for the days and stocks requested')
 
     # run desired recommender algorithm

@@ -27,13 +27,14 @@ urlpatterns = [
     #example /portfolio/view/1
     url(r'^portfolio/view/(?P<portfolio_id>[0-9]+)', views.portfolio_detail, name='portfolio_detail'),
     #example /portfolio/recommend
-    url(r'^portfolio/recommend', views.recommend_portfolio, name='recommend_portfolio'),
+    # url(r'^api/get_recommendation', api_views.get_recommendation, name='get_recommendation'),
     # #example /portfolio/1
     # url(r'^portfolio/(?P<portfolio_id>[0-9]+)', views.portfolio_detail_json, name='portfolio_detail_json'),
     #example /portfolios
     # url(r'^portfolios', views.account_portfolios_json, name='account_portfolios_json'),
 
     # JSON API below
+    url(r'^api/get_recommendation', api_views.get_recommendation, name='get_recommendation'),
     url(r'^api/portfolios/(?P<id>[0-9]+)', api_views.portfolio, name='api_portfolio'),
     url(r'^api/portfolios', api_views.portfolios, name='api_portfolios'),
 ]

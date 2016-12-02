@@ -1,9 +1,11 @@
+{% load static %}
 {% extends "predictor/base.html" %}
 
-{% load static %}
+{% block content %}
 <link rel="StyleSheet" href="{% static "predictor/line_graph.css" %}" type="text/css">
 
 <div id="data-dump" data-prices="{{ data }}"></div>
 
 <script src="{% static "predictor/d3.min.js" %}"></script>
 <script src="{% static "predictor/line_graph.js" %}"></script>
+{% endblock %}

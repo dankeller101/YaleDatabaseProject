@@ -14,6 +14,11 @@ from .models import User, Investor, Stock, Portfolio, Stock_Owned, Portfolio_Day
 from predict_my_money.computations.recommender_interface import recommend_diverse_portfolio, recommend_high_return_portfolio, recommend_random_portfolio, \
 	recommend_interfacer
 
+
+
+def error(request):
+	return HttpResponse("An Error occured.")
+
 # Create your views here.
 
 def index(request):
@@ -48,9 +53,6 @@ def portfolio_detail(request, portfolio_id):
 			'error_message': "Portfolio doesn't exist.",
 		})
 
-
-def error(request):
-	return HttpResponse("An Error occured.")
 
 def stock_detail(request, stock_ticker):
 	if request.method == "POST":
@@ -110,20 +112,6 @@ def make_portfolio(request):
 			'error_message': "You didn't submit a portfolio.",
 		})
 
-
-#JSON Response Areas for AJax Calls
-def recommend_portfolio(request):
-	if request.method == "POST":
-		type = request.POST['type']
-		totalspend = request.POST['total_spend']
-		totalspend = float(totalspend)
-		kwargs = {'budget':totalspend}
-		if type == "control":
-			return recommend_interfacer(recommend_type='random', budget=totalspend)
-		elif type == "tsr":
-			return recommend_interfacer(recommend_type='high_return', budget=totalspend)
-		else:
-			return recommend_interfacer(recommend_type='diverse', budget=totalspend)
 
 def portfolio_detail_json(request, portfolio_id):
 	api = portfolioAPI()

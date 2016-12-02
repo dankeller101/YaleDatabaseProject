@@ -9,19 +9,19 @@ from .models import Stock, Stock_Day, Portfolio, Portfolio_Day, Stock_Owned
 
 class stockDayDatabaseInterface():
     def getAllDaysOrdered(self, stock):
-        days = Stock_Day.objects.order_by('day').get(stock=stock)
+        days = Stock_Day.objects.order_by('day').filter(stock=stock)
         return days
 
     def getSpecificDay(self, stock, dayRequested):
         try:
-            day = Stock_Day.get(stock=stock, day=dayRequested)
+            day = Stock_Day.objects.get(stock=stock, day=dayRequested)
         except Stock_Day.DoesNotExist:
             return None
         else:
             return day
 
     def getRangeDaysOrdered(self, stock, earliestDate, LatestDate):
-        days = Stock_Day.objects.order_by('day').filter(day__lte=LatestDate).filter(day__gte=earliestDate).get(stock=stock)
+        days = Stock_Day.objects.order_by('day').filter(day__lte=LatestDate).filter(day__gte=earliestDate).filter(stock=stock)
         return days
 
 class portfolioAPI():

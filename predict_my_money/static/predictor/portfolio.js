@@ -11,8 +11,7 @@ $(document).ready(function(){
         type.val(button.val());
         var form = $('#recommend-form');
         $.post(form.attr('action'), form.serialize(), function(json){
-            var result = $.parseJSON(json);
-            $.each(result, function(stock, amount) {
+            $.each(json, function(stock, amount) {
                 addStockDOM(stock, amount);
             });
         });

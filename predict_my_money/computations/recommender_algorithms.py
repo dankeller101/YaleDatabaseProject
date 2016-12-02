@@ -37,7 +37,7 @@ def recommend_random_portfolio(stock_ids, stock_prices, budget, max_investment=N
         raise ValueError('Stock prices must be nonnegative')
     if budget < 0:
         raise ValueError('Budget must be nonnegative')
-    if max_investment < 0:
+    if max_investment and max_investment < 0:
         raise ValueError('Max investment must be nonnegative')
 
     # if max_investment is none, place it as infinity
@@ -66,11 +66,11 @@ def recommend_random_portfolio(stock_ids, stock_prices, budget, max_investment=N
 
             # if this is the last stock, add all of it
             if len(potential_stocks) == 1:
-                portfolio[stock_ids[i]] = max_shares
+                portfolio[stock_ids[i].stock_name] = max_shares
                 break
             else:
                 # select random number of shares, remove stock from potential stocks
-                num_shares = random.choice(1, range(max_shares) + 1)
+                num_shares = np.random.randint(1, max_shares+1)
                 portfolio[stock_ids[i].stock_name] = num_shares
                 potential_stocks.remove(i)
 
@@ -152,7 +152,7 @@ def recommend_high_return_portfolio(stock_ids, stock_prices, budget, time_horizo
 
             # if this is the last stock, add all of it
             if np.sum(scratch_tsr == -np.inf) == 1:
-                portfolio[stock_ids[i]] = int(np.floor(current_budget / price))
+                portfolio[stock_ids[i].stock_name] = int(np.floor(current_budget / price))
                 break
             else:
                 # select shares, remove from potential stocks, set tsr to negative
@@ -237,7 +237,7 @@ def recommend_diverse_portfolio(stock_ids, stock_prices, budget, time_horizon=14
 
             # if this is the last stock, add all of it
             if len(diverse_options) == 1:
-                portfolio[stock_ids[i]] = int(np.floor(current_budget / price))
+                portfolio[stock_ids[i].stock_name] = int(np.floor(current_budget / price))
                 break
             else:
                 # select shares, remove from diverse options, add to portfolio indices

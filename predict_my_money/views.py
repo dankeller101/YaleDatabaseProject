@@ -150,13 +150,14 @@ def recommend_portfolio(request):
 	if request.method == "POST":
 		type = request.POST['type']
 		totalspend = request.POST['total_spend']
+		totalspend = float(totalspend)
 		kwargs = {'budget':totalspend}
 		if type == "control":
-			return recommend_interfacer('random', budget=totalspend)
+			return recommend_interfacer(recommend_type='random', budget=totalspend)
 		elif type == "tsr":
-			return recommend_interfacer('high_return', budget=totalspend)
+			return recommend_interfacer(recommend_type='high_return', budget=totalspend)
 		else:
-			return recommend_interfacer('diverse', budget=totalspend)
+			return recommend_interfacer(recommend_type='diverse', budget=totalspend)
 
 
 

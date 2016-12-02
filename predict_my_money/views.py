@@ -15,12 +15,12 @@ from predict_my_money.computations.recommender_interface import recommend_divers
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 
 def index(request):
-	return HttpResponse("Hello, world.  You're at the polls index.")
+	if request.user:
+		return HttpResponseRedirect(reverse('predictor:home0'))
+	else:
+		return HttpResponseRedirect(reverse('predictor:log_in', args=(current_user.id,)))
+		return HttpResponse("Hello, world.  You're at the polls index.")
 
-def register(request):
-	template = loader.get_template('predictor/register.html')
-	context = {}
-	return HttpResponse(template.render(context, request))
 
 def portfolio_detail(request, portfolio_id):
 	portAPI = portfolioAPI()
@@ -97,61 +97,6 @@ def make_portfolio(request):
 			'error_message': "You didn't submit a portfolio.",
 		})
 
-def sign_out(request):
-	logout(request)
-	return HttpResponse('You have successfully signed out.')
-
-
-
-def create_user(request):
-	if request.method == "POST":
-		username = request.POST['username']
-		password = request.POST['password']
-		email = request.POST['email']
-		name = request.POST['name']
-		name = name.split()
-		user = User.objects.create_user(username, email, password)
-		user.first_name = name[0]
-		user.last_name = name[1]
-		user.save()
-		investor = Investor()
-		investor.user = user
-		investor.save()
-		login(request, user)
-		return HttpResponseRedirect(reverse('predictor:home', args=(user.id,)))
-	else:
-		return render(request, 'predictor/error.html', {
-			'error_message': "You didn't select a choice.",
-		})
-
-def log_in(request):
-	template = loader.get_template('predictor/log_in.html')
-	context = {}
-	return HttpResponse(template.render(context, request));
-
-def authenticate_user(request):
-	if request.method == "POST":
-		username = request.POST['username']
-		password = request.POST['password']
-		user = authenticate(username=username, password=password)
-		if user is not None:
-			login(request, user)
-			return HttpResponseRedirect(reverse('predictor:home', args=(user.id,)))
-		else:
-			return render(request, 'predictor/error.html', {
-				'error_message': "Invalid Login.",
-			})
-
-def home(request, user_id):
-	try:
-		user = User.objects.get(pk=user_id)
-	except User.DoesNotExist:
-		raise Http404("User does not exist")
-	else:
-		investor = Investor.objects.get(user=user_id)
-		return render(request, 'predictor/home.html', {'investor': investor, 'user': user})
-
-
 
 
 #JSON Response Areas for AJax Calls
@@ -195,6 +140,77 @@ def account_portfolios_json(request):
 	for portfolio in portfolios:
 		storage[portfolio.portfolio_name] = [portfolio.current_value, portfolio.current_diversity]
 	return HttpResponse(json.dumps(storage), content_type="application/json")
+
+
+### REGISTRATION
+
+def register(request):
+	template = loader.get_template('predictor/register.html')
+	context = {}
+	return HttpResponse(template.render(context, request))
+
+def sign_out(request):
+	logout(request)
+	return HttpResponse('You have successfully signed out.')
+
+
+def create_user(request):
+	if request.method == "POST":
+		username = request.POST['username']
+		password = request.POST['password']
+		email = request.POST['email']
+		name = request.POST['name']
+		name = name.split()
+		user = User.objects.create_user(username, email, password)
+		user.first_name = name[0]
+		user.last_name = name[1]
+		user.save()
+		investor = Investor()
+		investor.user = user
+		investor.save()
+		login(request, user)
+		return HttpResponseRedirect(reverse('predictor:home', args=(user.id,)))
+	else:
+		return render(request, 'predictor/error.html', {
+			'error_message': "You didn't select a choice.",
+		})
+
+def log_in(request):
+	template = loader.get_template('predictor/log_in.html')
+	context = {}
+	return HttpResponse(template.render(context, request));
+
+def authenticate_user(request):
+	if request.method == "POST":
+		username = request.POST['username']
+		password = request.POST['password']
+		user = authenticate(username=username, password=password)
+		if user is not None:
+			login(request, user)
+			return HttpResponseRedirect(reverse('predictor:home', args=(user.id,)))
+		else:
+			return render(request, 'predictor/error.html', {
+				'error_message': "Invalid Login.",
+			})
+
+def home0(request):
+	print request.user
+	try:
+		user = User.objects.get(pk=request.user.id)
+	except User.DoesNotExist:
+		raise Http404("User does not exist")
+	else:
+		investor = Investor.objects.get(user=request.user.id)
+		return render(request, 'predictor/home.html', {'investor': investor, 'user': user})
+
+def home(request, user_id):
+	try:
+		user = User.objects.get(pk=user_id)
+	except User.DoesNotExist:
+		raise Http404("User does not exist")
+	else:
+		investor = Investor.objects.get(user=user_id)
+		return render(request, 'predictor/home.html', {'investor': investor, 'user': user})
 
 def log_in_json(request):
 	if request.method == "POST":

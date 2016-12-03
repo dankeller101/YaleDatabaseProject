@@ -98,7 +98,7 @@ def get_recommendation(request):
 		rtype = "diverse"
 
 	a = recommend_interfacer(recommend_type=rtype, budget=totalspend)
-	print a
+	print(a)
 	return json.dumps(a)
 
 def portfolio(request, id):

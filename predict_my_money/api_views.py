@@ -119,12 +119,12 @@ def get_recommendation(request):
 		rtype = "high_return"
 
 	a = recommend_interfacer(recommend_type=rtype, budget=totalspend)
-	print a
+	print(a)
 	ret = []
 	for m in a:
-		print m, a[m]
+		print(m, a[m])
 		ret.append([m, a[m][0], a[m][1]])
-	print ret
+	print(ret)
 	return JsonResponse({ "data": ret })
 
 def portfolio(request, id):
@@ -158,6 +158,7 @@ def portfolios(request):
 		portfolio = Portfolio()
 		portfolio.portfolio_name = request.POST['name']
 		portfolio.investor = Investor.objects.get(user=request.user)
+		portfolio.save()
 
 		stocks = json.loads(request.POST["_stocks"])
 

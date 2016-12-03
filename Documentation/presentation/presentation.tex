@@ -129,12 +129,15 @@ Portfolio Playground is a paper trading web-application with three main function
 \end{frame}
 
 \begin{frame}{Main Functionality - Creation and Analysis}
-FRONT END PICTURE GOES HERE
+
+\begin{center}
+\includegraphics[width=0.7\textwidth]{analysis}
+\end{center}
 
 Our portfolio creation supports a variety of features including
 	\begin{itemize}
 		\item Stocks pulled from over 37,000 US equities and mutual funds
-		\item Large amounts of historical stock price data (19XX-2016)
+		\item Large amounts of historical stock price data (1970s-2016)
 		\item User inputs include number of shares purchased, portfolio creation date
 	\end{itemize}
 \end{frame}
@@ -154,7 +157,10 @@ $$Div = 1 - \frac{1}{Z} \sum_{i<j}^N x_i x_j Cor(P_i,P_j) \in \left[ 0,1 \right]
 \end{frame}
 
 \begin{frame}{Main Functionality - Comparison}
-FRONT END PICTURE GOES HERE
+
+\begin{center}
+\includegraphics[width=0.7\textwidth]{comparison}
+\end{center}
 
 Our portfolio comparison supports a variety of features including
 	\begin{itemize}
@@ -165,7 +171,10 @@ Our portfolio comparison supports a variety of features including
 \end{frame}
 
 \begin{frame}{Main Functionality - Recommendation}
-The most unique feature of Portfolio Playground is its state-of-the-art recommendation algorithms. This helps shape trading intuition for novice traders. The algorithms used are
+\begin{center}
+\includegraphics[width=0.6\textwidth]{creation}
+\end{center}
+The most unique feature of Portfolio Playground is its state-of-the-art recommendation algorithms. The algorithms used are
 
 \begin{itemize}
 \item Random
@@ -230,9 +239,14 @@ The Diverse Options algorithm recommends an optimal portfolio under budget const
 
 \begin{frame}{Database Design}
 
-What do we need to store?
+What need to store
+\begin{itemize}
+	\item user information
+	\item portfolio information
+	\item historical stock information
+\end{itemize}
 
-Where are we getting it from?
+We are using Django DB and calling Tiingo API.
 
 \end{frame}
 
@@ -254,7 +268,13 @@ What are the design decisions?
 
 \begin{frame}{Front End Design}
 
-What tools did we use to achieve this?
+The front end tools we used were
+\begin{itemize}
+	\item \texttt{react.js}
+	\item \texttt{D3.js}
+	\item \texttt{guilp.js}
+	\item \texttt{bootstrap}
+\end{itemize}
 
 \end{frame}
 

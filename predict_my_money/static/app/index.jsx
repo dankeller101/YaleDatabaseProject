@@ -14,83 +14,146 @@ function CsrfToken() {
   return <input type='hidden' name='csrfmiddlewaretoken' value={token} />
 }
 
-// using jQuery
-function getCookie(name) {
-  var cookieValue = null;
-  if (document.cookie && document.cookie != '') {
-    var cookies = document.cookie.split(';');
-    for (var i = 0; i < cookies.length; i++) {
-      var cookie = jQuery.trim(cookies[i]);
-      // Does this cookie string begin with the name we want?
-      if (cookie.substring(0, name.length + 1) == (name + '=')) {
-        cookieValue = decodeURIComponent(
-          cookie.substring(name.length + 1)
-          );
-        break;
-      }
-    }
-  }
-  return cookieValue;
-}
 
 class NewPortfolioView extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {}
+    this.state.stocks = [
+      { name: "AAPL", amount: "300", price_now: "120", price: "96" },
+      { name: "YAHO", amount: "200", price_now: "40", price: "33" },
+      { name: "MSFT", amount: "100", price_now: "60", price: "71" },
+    ]
+  }
+
+  componentDidMount() {
+    $.getJSON("/predictor/api/get_portfolio_plot?stock=aapl", (data) => {
+      var points = [];
+      var lastprice = 36000;
+      for (var i=800; i<data.data.length; ++i) {
+        if (i%5 == 0) {
+          lastprice += (Math.random()-0.5)*100;
+          data.data[i].close = lastprice;
+          points.push(data.data[i])
+        }
+      }
+      plotData(points, findDOMNode(this.refs.plot))
+    })
+  }
+
   render() {
+
+    var stockList = this.state.stocks.map((e, i) => {
+      return (
+        <tr>
+          <td>{ i+1 }</td>
+          <td>{ e.name }</td>
+          <td>{ e.amount }</td>
+          <td>${ e.price }</td>
+          <td><button className="btn btn-danger">Remove</button></td>
+        </tr>
+      )
+    })
+
     return (
-      <div>
-        <h1>Create a Portfolio</h1>
-
-        <h2>Recommendations</h2>
-        <h3>Total spend</h3>
-        <form action="recommend" method="post" id="recommend-form">
+      <div className="container">
+        <br />
+        <h1>New Portfolio</h1>
+        <form>
           <CsrfToken />
-          <input type="text" name="total_spend" id="total_spend"/>
-              <input type="hidden" name='type' id="type-recommend"/>
-          <button id="control" value="control" class="recommend">
-              Create A Control
-          </button>
-          <button id="tsr" value="tsr" class="recommend">
-              Best Expected Return
-          </button>
-          <button id="diversity" value="diversity" class="recommend">
-              Best Expected Return with Best Diversity
-          </button>
-        </form>
 
-        <form action="{% url 'predictor:make_portfolio' %}" method="post">
-            <CsrfToken />
-            <h4>name</h4>
-            <input type="text" name="name" />
-            <h4>stock tickers and number</h4>
-            <div id="stocks">
-                <table id="stock-table">
-                    <thead>
-                        <tr><td>Ticker</td><td>Amount</td><td>Delete</td></tr>
-                    </thead>
-                    <tbody id="stock-table-body"></tbody>
-                </table>
-                <div id="add-stocks">
-                    <h5>stock ticker</h5>
-                    <input type="text" id="add-stock-ticker"/>
-                    <h5>amount of stock</h5>
-                    <input type="text" id="add-stock-amount"/>
-                    <button id="add-stock">Add Stock</button>
+          <div className="row">
+            <div className="col-sm-6">
+              <div className="form-group">
+                <label for="inputName">Name</label>
+                <input type="email" className="form-control" id="inputName" aria-describedby="nameHelp" placeholder="Identify your portfolio" />
+                <small id="nameHelp" className="form-text text-muted">Identify your portfolio.</small>
+              </div>
+
+              <hr />
+
+              <form className="form-inline">
+                <div className="form-group">
+                  <label for="exampleInputName2">Get Recommendation for&nbsp;</label>
+                  <input type="text" className="form-control" id="exampleInputName2" placeholder="how many dollars" />
                 </div>
-                <input type="hidden" name="stock-tickers" id="stock-tickers"/>
+
+                <div className="form-group">
+                  <label for="exampleInputName2">of type&nbsp;</label>
+
+                  <select className="form-control" id="exampleSelect1">
+                    <option>Control</option>
+                    <option>Best Expected Return</option>
+                    <option>Best Expected Return + Diversity</option>
+                  </select>
+                </div>
+                &nbsp;
+
+                <div className="form-group">
+                  <button className="btn btn-info">Suggest</button>
+                </div>
+              </form>
+
+              <hr />
+
+              <button className="btn btn-primary btn-lg">
+                Create Portfolio
+              </button>
             </div>
 
-            <input type="submit" value="create_portfolio" />
+            <div className="col-sm-6">
+              <p>Predicted fluctuation</p>
+              <div ref="plot" id="data-dump" data-prices="{{ data }}"></div>
+            </div>
+
+          </div>
+
+          <br />
+
+          <h3>Stocks currently in portolio</h3>
+
+          <form id="add-stock" className="FormAddStock form-inline">
+            <div className="form-group">
+              <label for="exampleInputName2">Add to portfolio stock&nbsp;</label>
+              <input type="text" className="form-control" id="exampleInputName2" placeholder="stock name" />
+            </div>
+
+            <div className="form-group">
+              <label for="exampleInputName2">with amount&nbsp;</label>
+              <input type="number" className="form-control" id="exampleInputName2" placeholder="amount of stock" />
+            </div>
+
+            <div className="form-group">
+              <button className="btn btn-info">Add</button>
+            </div>
+          </form>
+
+          <table className="table table-striped">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Amount</th>
+                <th>Price</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+            {stockList}
+            </tbody>
+          </table>
         </form>
       </div>
     )
   }
 }
 
-function doit(data, el) {
-	console.log(data)
+function plotData(data, el) {
 
   var margin = {top: 20, right: 50, bottom: 30, left: 50},
-    width = 960 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
+    width = $(el).width() - margin.left - margin.right,
+    height = $(el).width()/2 - margin.top - margin.bottom;
 
   var parseDate = d3.timeParse("%d-%b-%y"),
     bisectDate = d3.bisector(function(d) { return d.date; }).left,
@@ -105,7 +168,8 @@ function doit(data, el) {
 
   var line = d3.line()
     .x(function(d) { return x(d.date); })
-    .y(function(d) { return y(d.close); });
+    .y(function(d) { return y(d.close); })
+    .curve(d3.curveBasis);
 
   var svg = d3.select(el).append("svg")
     .attr("width", width + margin.left + margin.right)
@@ -114,10 +178,9 @@ function doit(data, el) {
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
   data.forEach(function(d) {
-    d.date = parseDate(d.date);
-    d.close = +d.close;
-  }
-  );
+      d.date = parseDate(d.date);
+      d.close = +d.close;
+    });
 
   data.sort(function(a, b) {
     return a.date - b.date;
@@ -136,34 +199,34 @@ function doit(data, el) {
     .call(yAxis)
     .append("text")
     .attr("transform", "rotate(-90)")
-    .attr("y", 6)
+    .attr("y", 4)
     .attr("dy", ".71em")
     .style("text-anchor", "end")
     .text("Price ($)");
 
-  svg.append("path")
+  var path = svg.append("path")
     .datum(data)
     .attr("class", "line")
     .attr("d", line);
 
-  // var focus = svg.append("g")
-  //   .attr("class", "focus")
-  //   .style("display", "none");
+  var focus = svg.append("g")
+    .attr("class", "focus")
+    .style("display", "none");
 
-  // focus.append("circle")
-  //   .attr("r", 4.5);
+  focus.append("circle")
+    .attr("r", 4.5);
 
-  // focus.append("text")
-  //   .attr("x", 9)
-  //   .attr("dy", ".35em");
+  focus.append("text")
+    .attr("x", 9)
+    .attr("dy", ".35em");
 
-  // svg.append("rect")
-  //   .attr("class", "overlay")
-  //   .attr("width", width)
-  //   .attr("height", height)
-  //   .on("mouseover", function() { focus.style("display", null); })
-  //   .on("mouseout", function() { focus.style("display", "none"); })
-  //   .on("mousemove", mousemove);
+  svg.append("rect")
+    .attr("class", "overlay")
+    .attr("width", width)
+    .attr("height", height)
+    .on("mouseover", function() { focus.style("display", null); })
+    .on("mouseout", function() { focus.style("display", "none"); })
+    .on("mousemove", mousemove);
 
   function mousemove() {
     var x0 = x.invert(d3.mouse(this)[0]),
@@ -186,7 +249,13 @@ class StockView extends React.Component {
 
 	componentDidMount() {
 		$.getJSON("/predictor/api/get_stock_plot?stock=aapl", (data) => {
-      doit(data.data, findDOMNode(this))
+      var points = [];
+      for (var i=0; i<data.data.length; ++i) {
+        if (i%100) {
+          points.push(data.data[i])
+        }
+      }
+      plotData(points, findDOMNode(this))
     })
 	}
 
@@ -202,6 +271,97 @@ class StockView extends React.Component {
 	}
 }
 
+class PortfolioView extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {};
+  }
+
+  componentDidMount() {
+    $.getJSON("/predictor/api/get_portfolio_plot?stock=aapl", (data) => {
+      var points = [];
+      var lastprice = 36000;
+      for (var i=800; i<data.data.length; ++i) {
+        if (i%5 == 0) {
+          lastprice += (Math.random()-0.5)*100;
+          data.data[i].close = lastprice;
+          points.push(data.data[i])
+        }
+      }
+      plotData(points, findDOMNode(this.refs.plot))
+    })
+  }
+
+  render() {
+    var _stockList = [
+      { name: "AAPL", amount: "300", price_now: "120", price: "96" },
+      { name: "YAHO", amount: "200", price_now: "40", price: "33" },
+      { name: "MSFT", amount: "100", price_now: "60", price: "71" },
+    ]
+
+    var stockList = _stockList.map((el, i) => {
+      return <tr>
+        <td>{ i+1 }</td>
+        <td>{ el.name }</td>
+        <td>{ el.amount }</td>
+        <td>${ el.price_now }</td>
+        <td>${ el.price }</td>
+      </tr>
+    })
+
+    return (
+      <div className="StockView">
+        <h1>Portfolio #4</h1>
+        <h6>Created 3 days ago by Daniel Keller.</h6>
+
+        <div className="row">
+          <div className="col-sm-4">
+            <hr />
+            <pre>
+            <code>
+              Diversity: .49
+              <br />
+              Current Value: $66,321
+              <br />
+              Original Value: $60,783
+            </code>
+            </pre>
+            <hr />
+          </div>
+          <div className="col-sm-8">
+            <div ref="plot" id="data-dump" data-prices="{{ data }}"></div>
+          </div>
+        </div>
+
+        <hr />
+        <div>
+          <h2>Stocks in this portfolio</h2>
+          <p>Here are the stocks that belong to this portfolio.</p>
+          <table className="table table-striped">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Amount</th>
+                <th>Price</th>
+                <th>Bought Price</th>
+              </tr>
+            </thead>
+            <tbody>
+            {stockList}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )
+  }
+}
+
+
+window.startPortfolioView = function() {
+  render(<PortfolioView stock={window.data.stock} />, document.getElementById('app'));
+}
 
 window.startNewPortfolioView = function() {
   render(<NewPortfolioView stock={window.data.stock} />, document.getElementById('app'));

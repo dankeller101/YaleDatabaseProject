@@ -93,145 +93,264 @@
 	  return _react2.default.createElement('input', { type: 'hidden', name: 'csrfmiddlewaretoken', value: token });
 	}
 	
-	// using jQuery
-	function getCookie(name) {
-	  var cookieValue = null;
-	  if (document.cookie && document.cookie != '') {
-	    var cookies = document.cookie.split(';');
-	    for (var i = 0; i < cookies.length; i++) {
-	      var cookie = jQuery.trim(cookies[i]);
-	      // Does this cookie string begin with the name we want?
-	      if (cookie.substring(0, name.length + 1) == name + '=') {
-	        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-	        break;
-	      }
-	    }
-	  }
-	  return cookieValue;
-	}
-	
 	var NewPortfolioView = function (_React$Component2) {
 	  _inherits(NewPortfolioView, _React$Component2);
 	
-	  function NewPortfolioView() {
+	  function NewPortfolioView(props) {
 	    _classCallCheck(this, NewPortfolioView);
 	
-	    return _possibleConstructorReturn(this, (NewPortfolioView.__proto__ || Object.getPrototypeOf(NewPortfolioView)).apply(this, arguments));
+	    var _this2 = _possibleConstructorReturn(this, (NewPortfolioView.__proto__ || Object.getPrototypeOf(NewPortfolioView)).call(this, props));
+	
+	    _this2.state = {};
+	    _this2.state.stocks = [{ name: "AAPL", amount: "300", price_now: "120", price: "96" }, { name: "YAHO", amount: "200", price_now: "40", price: "33" }, { name: "MSFT", amount: "100", price_now: "60", price: "71" }];
+	    return _this2;
 	  }
 	
 	  _createClass(NewPortfolioView, [{
+	    key: 'componentDidMount',
+	    value: function componentDidMount() {
+	      var _this3 = this;
+	
+	      $.getJSON("/predictor/api/get_portfolio_plot?stock=aapl", function (data) {
+	        var points = [];
+	        var lastprice = 36000;
+	        for (var i = 800; i < data.data.length; ++i) {
+	          if (i % 5 == 0) {
+	            lastprice += (Math.random() - 0.5) * 100;
+	            data.data[i].close = lastprice;
+	            points.push(data.data[i]);
+	          }
+	        }
+	        plotData(points, (0, _reactDom.findDOMNode)(_this3.refs.plot));
+	      });
+	    }
+	  }, {
 	    key: 'render',
 	    value: function render() {
+	
+	      var stockList = this.state.stocks.map(function (e, i) {
+	        return _react2.default.createElement(
+	          'tr',
+	          null,
+	          _react2.default.createElement(
+	            'td',
+	            null,
+	            i + 1
+	          ),
+	          _react2.default.createElement(
+	            'td',
+	            null,
+	            e.name
+	          ),
+	          _react2.default.createElement(
+	            'td',
+	            null,
+	            e.amount
+	          ),
+	          _react2.default.createElement(
+	            'td',
+	            null,
+	            '$',
+	            e.price
+	          ),
+	          _react2.default.createElement(
+	            'td',
+	            null,
+	            _react2.default.createElement(
+	              'button',
+	              { className: 'btn btn-danger' },
+	              'Remove'
+	            )
+	          )
+	        );
+	      });
+	
 	      return _react2.default.createElement(
 	        'div',
-	        null,
+	        { className: 'container' },
+	        _react2.default.createElement('br', null),
 	        _react2.default.createElement(
 	          'h1',
 	          null,
-	          'Create a Portfolio'
-	        ),
-	        _react2.default.createElement(
-	          'h2',
-	          null,
-	          'Recommendations'
-	        ),
-	        _react2.default.createElement(
-	          'h3',
-	          null,
-	          'Total spend'
+	          'New Portfolio'
 	        ),
 	        _react2.default.createElement(
 	          'form',
-	          { action: 'recommend', method: 'post', id: 'recommend-form' },
+	          null,
 	          _react2.default.createElement(CsrfToken, null),
-	          _react2.default.createElement('input', { type: 'text', name: 'total_spend', id: 'total_spend' }),
-	          _react2.default.createElement('input', { type: 'hidden', name: 'type', id: 'type-recommend' }),
-	          _react2.default.createElement(
-	            'button',
-	            { id: 'control', value: 'control', 'class': 'recommend' },
-	            'Create A Control'
-	          ),
-	          _react2.default.createElement(
-	            'button',
-	            { id: 'tsr', value: 'tsr', 'class': 'recommend' },
-	            'Best Expected Return'
-	          ),
-	          _react2.default.createElement(
-	            'button',
-	            { id: 'diversity', value: 'diversity', 'class': 'recommend' },
-	            'Best Expected Return with Best Diversity'
-	          )
-	        ),
-	        _react2.default.createElement(
-	          'form',
-	          { action: '{% url \'predictor:make_portfolio\' %}', method: 'post' },
-	          _react2.default.createElement(CsrfToken, null),
-	          _react2.default.createElement(
-	            'h4',
-	            null,
-	            'name'
-	          ),
-	          _react2.default.createElement('input', { type: 'text', name: 'name' }),
-	          _react2.default.createElement(
-	            'h4',
-	            null,
-	            'stock tickers and number'
-	          ),
 	          _react2.default.createElement(
 	            'div',
-	            { id: 'stocks' },
+	            { className: 'row' },
 	            _react2.default.createElement(
-	              'table',
-	              { id: 'stock-table' },
+	              'div',
+	              { className: 'col-sm-6' },
 	              _react2.default.createElement(
-	                'thead',
-	                null,
+	                'div',
+	                { className: 'form-group' },
 	                _react2.default.createElement(
-	                  'tr',
-	                  null,
+	                  'label',
+	                  { 'for': 'inputName' },
+	                  'Name'
+	                ),
+	                _react2.default.createElement('input', { type: 'email', className: 'form-control', id: 'inputName', 'aria-describedby': 'nameHelp', placeholder: 'Identify your portfolio' }),
+	                _react2.default.createElement(
+	                  'small',
+	                  { id: 'nameHelp', className: 'form-text text-muted' },
+	                  'Identify your portfolio.'
+	                )
+	              ),
+	              _react2.default.createElement('hr', null),
+	              _react2.default.createElement(
+	                'form',
+	                { className: 'form-inline' },
+	                _react2.default.createElement(
+	                  'div',
+	                  { className: 'form-group' },
 	                  _react2.default.createElement(
-	                    'td',
-	                    null,
-	                    'Ticker'
+	                    'label',
+	                    { 'for': 'exampleInputName2' },
+	                    'Get Recommendation for\xA0'
+	                  ),
+	                  _react2.default.createElement('input', { type: 'text', className: 'form-control', id: 'exampleInputName2', placeholder: 'how many dollars' })
+	                ),
+	                _react2.default.createElement(
+	                  'div',
+	                  { className: 'form-group' },
+	                  _react2.default.createElement(
+	                    'label',
+	                    { 'for': 'exampleInputName2' },
+	                    'of type\xA0'
 	                  ),
 	                  _react2.default.createElement(
-	                    'td',
-	                    null,
-	                    'Amount'
-	                  ),
+	                    'select',
+	                    { className: 'form-control', id: 'exampleSelect1' },
+	                    _react2.default.createElement(
+	                      'option',
+	                      null,
+	                      'Control'
+	                    ),
+	                    _react2.default.createElement(
+	                      'option',
+	                      null,
+	                      'Best Expected Return'
+	                    ),
+	                    _react2.default.createElement(
+	                      'option',
+	                      null,
+	                      'Best Expected Return + Diversity'
+	                    )
+	                  )
+	                ),
+	                '\xA0',
+	                _react2.default.createElement(
+	                  'div',
+	                  { className: 'form-group' },
 	                  _react2.default.createElement(
-	                    'td',
-	                    null,
-	                    'Delete'
+	                    'button',
+	                    { className: 'btn btn-info' },
+	                    'Suggest'
 	                  )
 	                )
 	              ),
-	              _react2.default.createElement('tbody', { id: 'stock-table-body' })
+	              _react2.default.createElement('hr', null),
+	              _react2.default.createElement(
+	                'button',
+	                { className: 'btn btn-primary btn-lg' },
+	                'Create Portfolio'
+	              )
 	            ),
 	            _react2.default.createElement(
 	              'div',
-	              { id: 'add-stocks' },
+	              { className: 'col-sm-6' },
 	              _react2.default.createElement(
-	                'h5',
+	                'p',
 	                null,
-	                'stock ticker'
+	                'Predicted fluctuation'
 	              ),
-	              _react2.default.createElement('input', { type: 'text', id: 'add-stock-ticker' }),
+	              _react2.default.createElement('div', { ref: 'plot', id: 'data-dump', 'data-prices': '{{ data }}' })
+	            )
+	          ),
+	          _react2.default.createElement('br', null),
+	          _react2.default.createElement(
+	            'h3',
+	            null,
+	            'Stocks currently in portolio'
+	          ),
+	          _react2.default.createElement(
+	            'form',
+	            { id: 'add-stock', className: 'FormAddStock form-inline' },
+	            _react2.default.createElement(
+	              'div',
+	              { className: 'form-group' },
 	              _react2.default.createElement(
-	                'h5',
-	                null,
-	                'amount of stock'
+	                'label',
+	                { 'for': 'exampleInputName2' },
+	                'Add to portfolio stock\xA0'
 	              ),
-	              _react2.default.createElement('input', { type: 'text', id: 'add-stock-amount' }),
+	              _react2.default.createElement('input', { type: 'text', className: 'form-control', id: 'exampleInputName2', placeholder: 'stock name' })
+	            ),
+	            _react2.default.createElement(
+	              'div',
+	              { className: 'form-group' },
+	              _react2.default.createElement(
+	                'label',
+	                { 'for': 'exampleInputName2' },
+	                'with amount\xA0'
+	              ),
+	              _react2.default.createElement('input', { type: 'number', className: 'form-control', id: 'exampleInputName2', placeholder: 'amount of stock' })
+	            ),
+	            _react2.default.createElement(
+	              'div',
+	              { className: 'form-group' },
 	              _react2.default.createElement(
 	                'button',
-	                { id: 'add-stock' },
-	                'Add Stock'
+	                { className: 'btn btn-info' },
+	                'Add'
+	              )
+	            )
+	          ),
+	          _react2.default.createElement(
+	            'table',
+	            { className: 'table table-striped' },
+	            _react2.default.createElement(
+	              'thead',
+	              null,
+	              _react2.default.createElement(
+	                'tr',
+	                null,
+	                _react2.default.createElement(
+	                  'th',
+	                  null,
+	                  '#'
+	                ),
+	                _react2.default.createElement(
+	                  'th',
+	                  null,
+	                  'Name'
+	                ),
+	                _react2.default.createElement(
+	                  'th',
+	                  null,
+	                  'Amount'
+	                ),
+	                _react2.default.createElement(
+	                  'th',
+	                  null,
+	                  'Price'
+	                ),
+	                _react2.default.createElement(
+	                  'th',
+	                  null,
+	                  'Action'
+	                )
 	              )
 	            ),
-	            _react2.default.createElement('input', { type: 'hidden', name: 'stock-tickers', id: 'stock-tickers' })
-	          ),
-	          _react2.default.createElement('input', { type: 'submit', value: 'create_portfolio' })
+	            _react2.default.createElement(
+	              'tbody',
+	              null,
+	              stockList
+	            )
+	          )
 	        )
 	      );
 	    }
@@ -240,12 +359,11 @@
 	  return NewPortfolioView;
 	}(_react2.default.Component);
 	
-	function doit(data, el) {
-	  console.log(data);
+	function plotData(data, el) {
 	
 	  var margin = { top: 20, right: 50, bottom: 30, left: 50 },
-	      width = 960 - margin.left - margin.right,
-	      height = 500 - margin.top - margin.bottom;
+	      width = $(el).width() - margin.left - margin.right,
+	      height = $(el).width() / 2 - margin.top - margin.bottom;
 	
 	  var parseDate = d3.timeParse("%d-%b-%y"),
 	      bisectDate = d3.bisector(function (d) {
@@ -266,7 +384,7 @@
 	    return x(d.date);
 	  }).y(function (d) {
 	    return y(d.close);
-	  });
+	  }).curve(d3.curveBasis);
 	
 	  var svg = d3.select(el).append("svg").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 	
@@ -286,28 +404,21 @@
 	
 	  svg.append("g").attr("class", "x axis").attr("transform", "translate(0," + height + ")").call(xAxis);
 	
-	  svg.append("g").attr("class", "y axis").call(yAxis).append("text").attr("transform", "rotate(-90)").attr("y", 6).attr("dy", ".71em").style("text-anchor", "end").text("Price ($)");
+	  svg.append("g").attr("class", "y axis").call(yAxis).append("text").attr("transform", "rotate(-90)").attr("y", 4).attr("dy", ".71em").style("text-anchor", "end").text("Price ($)");
 	
-	  svg.append("path").datum(data).attr("class", "line").attr("d", line);
+	  var path = svg.append("path").datum(data).attr("class", "line").attr("d", line);
 	
-	  // var focus = svg.append("g")
-	  //   .attr("class", "focus")
-	  //   .style("display", "none");
+	  var focus = svg.append("g").attr("class", "focus").style("display", "none");
 	
-	  // focus.append("circle")
-	  //   .attr("r", 4.5);
+	  focus.append("circle").attr("r", 4.5);
 	
-	  // focus.append("text")
-	  //   .attr("x", 9)
-	  //   .attr("dy", ".35em");
+	  focus.append("text").attr("x", 9).attr("dy", ".35em");
 	
-	  // svg.append("rect")
-	  //   .attr("class", "overlay")
-	  //   .attr("width", width)
-	  //   .attr("height", height)
-	  //   .on("mouseover", function() { focus.style("display", null); })
-	  //   .on("mouseout", function() { focus.style("display", "none"); })
-	  //   .on("mousemove", mousemove);
+	  svg.append("rect").attr("class", "overlay").attr("width", width).attr("height", height).on("mouseover", function () {
+	    focus.style("display", null);
+	  }).on("mouseout", function () {
+	    focus.style("display", "none");
+	  }).on("mousemove", mousemove);
 	
 	  function mousemove() {
 	    var x0 = x.invert(d3.mouse(this)[0]),
@@ -326,20 +437,26 @@
 	  function StockView(props) {
 	    _classCallCheck(this, StockView);
 	
-	    var _this3 = _possibleConstructorReturn(this, (StockView.__proto__ || Object.getPrototypeOf(StockView)).call(this, props));
+	    var _this4 = _possibleConstructorReturn(this, (StockView.__proto__ || Object.getPrototypeOf(StockView)).call(this, props));
 	
-	    _this3.state = {};
+	    _this4.state = {};
 	    // this.state.
-	    return _this3;
+	    return _this4;
 	  }
 	
 	  _createClass(StockView, [{
 	    key: 'componentDidMount',
 	    value: function componentDidMount() {
-	      var _this4 = this;
+	      var _this5 = this;
 	
 	      $.getJSON("/predictor/api/get_stock_plot?stock=aapl", function (data) {
-	        doit(data.data, (0, _reactDom.findDOMNode)(_this4));
+	        var points = [];
+	        for (var i = 0; i < data.data.length; ++i) {
+	          if (i % 100) {
+	            points.push(data.data[i]);
+	          }
+	        }
+	        plotData(points, (0, _reactDom.findDOMNode)(_this5));
 	      });
 	    }
 	  }, {
@@ -360,6 +477,184 @@
 	
 	  return StockView;
 	}(_react2.default.Component);
+	
+	var PortfolioView = function (_React$Component4) {
+	  _inherits(PortfolioView, _React$Component4);
+	
+	  function PortfolioView(props) {
+	    _classCallCheck(this, PortfolioView);
+	
+	    var _this6 = _possibleConstructorReturn(this, (PortfolioView.__proto__ || Object.getPrototypeOf(PortfolioView)).call(this, props));
+	
+	    _this6.state = {};
+	    return _this6;
+	  }
+	
+	  _createClass(PortfolioView, [{
+	    key: 'componentDidMount',
+	    value: function componentDidMount() {
+	      var _this7 = this;
+	
+	      $.getJSON("/predictor/api/get_portfolio_plot?stock=aapl", function (data) {
+	        var points = [];
+	        var lastprice = 36000;
+	        for (var i = 800; i < data.data.length; ++i) {
+	          if (i % 5 == 0) {
+	            lastprice += (Math.random() - 0.5) * 100;
+	            data.data[i].close = lastprice;
+	            points.push(data.data[i]);
+	          }
+	        }
+	        plotData(points, (0, _reactDom.findDOMNode)(_this7.refs.plot));
+	      });
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	      var _stockList = [{ name: "AAPL", amount: "300", price_now: "120", price: "96" }, { name: "YAHO", amount: "200", price_now: "40", price: "33" }, { name: "MSFT", amount: "100", price_now: "60", price: "71" }];
+	
+	      var stockList = _stockList.map(function (el, i) {
+	        return _react2.default.createElement(
+	          'tr',
+	          null,
+	          _react2.default.createElement(
+	            'td',
+	            null,
+	            i + 1
+	          ),
+	          _react2.default.createElement(
+	            'td',
+	            null,
+	            el.name
+	          ),
+	          _react2.default.createElement(
+	            'td',
+	            null,
+	            el.amount
+	          ),
+	          _react2.default.createElement(
+	            'td',
+	            null,
+	            '$',
+	            el.price_now
+	          ),
+	          _react2.default.createElement(
+	            'td',
+	            null,
+	            '$',
+	            el.price
+	          )
+	        );
+	      });
+	
+	      return _react2.default.createElement(
+	        'div',
+	        { className: 'StockView' },
+	        _react2.default.createElement(
+	          'h1',
+	          null,
+	          'Portfolio #4'
+	        ),
+	        _react2.default.createElement(
+	          'h6',
+	          null,
+	          'Created 3 days ago by Daniel Keller.'
+	        ),
+	        _react2.default.createElement(
+	          'div',
+	          { className: 'row' },
+	          _react2.default.createElement(
+	            'div',
+	            { className: 'col-sm-4' },
+	            _react2.default.createElement('hr', null),
+	            _react2.default.createElement(
+	              'pre',
+	              null,
+	              _react2.default.createElement(
+	                'code',
+	                null,
+	                'Diversity: .49',
+	                _react2.default.createElement('br', null),
+	                'Current Value: $66,321',
+	                _react2.default.createElement('br', null),
+	                'Original Value: $60,783'
+	              )
+	            ),
+	            _react2.default.createElement('hr', null)
+	          ),
+	          _react2.default.createElement(
+	            'div',
+	            { className: 'col-sm-8' },
+	            _react2.default.createElement('div', { ref: 'plot', id: 'data-dump', 'data-prices': '{{ data }}' })
+	          )
+	        ),
+	        _react2.default.createElement('hr', null),
+	        _react2.default.createElement(
+	          'div',
+	          null,
+	          _react2.default.createElement(
+	            'h2',
+	            null,
+	            'Stocks in this portfolio'
+	          ),
+	          _react2.default.createElement(
+	            'p',
+	            null,
+	            'Here are the stocks that belong to this portfolio.'
+	          ),
+	          _react2.default.createElement(
+	            'table',
+	            { className: 'table table-striped' },
+	            _react2.default.createElement(
+	              'thead',
+	              null,
+	              _react2.default.createElement(
+	                'tr',
+	                null,
+	                _react2.default.createElement(
+	                  'th',
+	                  null,
+	                  '#'
+	                ),
+	                _react2.default.createElement(
+	                  'th',
+	                  null,
+	                  'Name'
+	                ),
+	                _react2.default.createElement(
+	                  'th',
+	                  null,
+	                  'Amount'
+	                ),
+	                _react2.default.createElement(
+	                  'th',
+	                  null,
+	                  'Price'
+	                ),
+	                _react2.default.createElement(
+	                  'th',
+	                  null,
+	                  'Bought Price'
+	                )
+	              )
+	            ),
+	            _react2.default.createElement(
+	              'tbody',
+	              null,
+	              stockList
+	            )
+	          )
+	        )
+	      );
+	    }
+	  }]);
+	
+	  return PortfolioView;
+	}(_react2.default.Component);
+	
+	window.startPortfolioView = function () {
+	  (0, _reactDom.render)(_react2.default.createElement(PortfolioView, { stock: window.data.stock }), document.getElementById('app'));
+	};
 	
 	window.startNewPortfolioView = function () {
 	  (0, _reactDom.render)(_react2.default.createElement(NewPortfolioView, { stock: window.data.stock }), document.getElementById('app'));

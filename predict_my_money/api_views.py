@@ -69,6 +69,24 @@ def portfolio_detail(request, portfolio_id):
 
 #
 
+
+@require_GET
+def get_portfolio_plot(request):
+	ticker = request.GET["stock"]
+	API = stockAPI()
+	stock = API.getStock(ticker)
+
+	if not stock:
+		return JsonResponse({ "data": null }, status=404)
+
+	interface = stockDayDatabaseInterface()
+	days = interface.getAllDaysOrdered(stock)
+	array = []
+	for day in days:
+		array.append({'date' : day.day.strftime("%d-%b-%y"), 'close' : day.adjustedClose})
+
+	return JsonResponse({ "data": array })
+
 @require_GET
 def get_stock_plot(request):
 	ticker = request.GET["stock"]
@@ -92,10 +110,10 @@ def get_recommendation(request):
 	totalspend = float(request.GET['total_spend'])
 	kwargs = { 'budget': totalspend }
 
-	if "type" in request.GET and request.GET["type"] in ["control", "tsr"]:
+	if "type" in request.GET and request.GET["type"] in ["random", "diverse"]:
 		rtype = request.GET["type"]
 	else:
-		rtype = "diverse"
+		rtype = "high_return"
 
 	a = recommend_interfacer(recommend_type=rtype, budget=totalspend)
 	print(a)

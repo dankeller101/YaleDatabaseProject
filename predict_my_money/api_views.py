@@ -157,6 +157,8 @@ def portfolios(request):
 	elif request.method == "POST":
 		portfolio = Portfolio()
 		portfolio.portfolio_name = request.POST['name']
+		portfolio.start_date = datetime.datetime.today()
+		portfolio.end_date = datetime.datetime.today() - datetime.timedelta(days=10000000000)
 		portfolio.investor = Investor.objects.get(user=request.user)
 		portfolio.save()
 

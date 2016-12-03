@@ -1,0 +1,27 @@
+body {
+  font: 10px sans-serif; }
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges; }
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px; }
+
+.overlay {
+  fill: none;
+  pointer-events: all; }
+
+.focus circle {
+  fill: none;
+  stroke: steelblue; }
+
+.range {
+  fill: #eee;
+  opacity: .4;
+  pointer-events: all;
+  shape-rendering: crispEdges; }

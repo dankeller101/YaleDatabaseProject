@@ -1,0 +1,46 @@
+{% extends "predictor/base.html" %}
+{% load static %}
+
+
+{% block head %}
+<script>
+window.data = { stock: '{{ stock_ticker }}' };
+</script>
+{% endblock %}
+
+{% block js %}
+<script src="{% static 'predictor/d3.min.js' %}"></script>
+<script>startStockView();</script>
+{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-light bg-faded">
+  <a class="navbar-brand" href="#">StockPredictor</a>
+  <ul class="nav navbar-nav">
+    <li class="nav-item">
+      <a class="nav-link" href="#">Portfolios</a>
+    </li>
+    <li class="nav-item active">
+      <a class="nav-link" href="#">Stocks <span class="sr-only">(current)</span></a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#">New</a>
+    </li>
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" href="http://example.com" id="supportedContentDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Dropdown</a>
+      <div class="dropdown-menu" aria-labelledby="supportedContentDropdown">
+        <a class="dropdown-item" href="#">Action</a>
+        <a class="dropdown-item" href="#">Another action</a>
+        <a class="dropdown-item" href="#">Something else here</a>
+      </div>
+    </li>
+  </ul>
+  <form class="form-inline float-xs-right">
+    <input class="form-control" type="text" placeholder="Stock">
+    <button class="btn btn-outline-success" type="submit">Search Stock</button>
+  </form>
+</nav>
+
+<div id="app"></div>
+
+{% endblock %}

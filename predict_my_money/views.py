@@ -1,26 +1,43 @@
-from django.shortcuts import render
-from django.template import loader
-from .models import User, Investor, Stock, Portfolio, Stock_Owned, Portfolio_Day
-from django.urls import reverse
-from predict_my_money.utils import stockAPI, portfolioAPI, stockDayDatabaseInterface
+"""views.py"""
+
 import datetime
 import json
+
+from django.shortcuts import render
+from django.template import loader
+from django.urls import reverse
+from predict_my_money.utils import stockAPI, portfolioAPI, stockDayDatabaseInterface
 from django.contrib.auth import authenticate, login, logout
+from django.http import HttpResponseRedirect, HttpResponse, Http404
+from django.views.decorators.http import require_http_methods, require_GET
+
+from .models import User, Investor, Stock, Portfolio, Stock_Owned, Portfolio_Day
 from predict_my_money.computations.recommender_interface import recommend_diverse_portfolio, recommend_high_return_portfolio, recommend_random_portfolio, \
 	recommend_interfacer
 
+
+def error(request):
+	return HttpResponse("An Error occured.")
+
 # Create your views here.
 
-
-from django.http import HttpResponseRedirect, HttpResponse, Http404
-
 def index(request):
-	return HttpResponse("Hello, world.  You're at the polls index.")
+	if request.user:
+		return HttpResponseRedirect(reverse('predictor:home'))
+	else:
+		return HttpResponseRedirect(reverse('predictor:login'))
 
-def register(request):
-	template = loader.get_template('predictor/register.html')
-	context = {}
-	return HttpResponse(template.render(context, request))
+
+def home(request):
+	print request.user
+	try:
+		user = User.objects.get(pk=request.user.id)
+	except User.DoesNotExist:
+		raise Http404("User does not exist")
+	else:
+		investor = Investor.objects.get(user=request.user.id)
+		return render(request, 'predictor/home.html', {'investor': investor, 'user': user})
+
 
 def portfolio_detail(request, portfolio_id):
 	portAPI = portfolioAPI()
@@ -36,38 +53,15 @@ def portfolio_detail(request, portfolio_id):
 			'error_message': "Portfolio doesn't exist.",
 		})
 
-def error(request):
-	return HttpResponse("An Error occured.")
-
+@require_GET
 def stock_detail(request, stock_ticker):
-	if request.method == "POST":
-		ticker = request.POST['ticker']
-	else:
-		ticker = stock_ticker
-	API = stockAPI()
-	stock = API.getStock(ticker)
+	return render(request, 'predictor/stock.html', {
+		'stock_ticker': stock_ticker,
+	})
 
-	if not stock:
-		return render(request, 'predictor/error.html', {
-			'error_message': "Stock does not exist",
-		})
-	else:
-		interface = stockDayDatabaseInterface()
-		days = interface.getAllDaysOrdered(stock)
-		array = []
-		for day in days:
-			array.append({'date' : day.day.strftime("%d-%b-%y"), 'close' : day.adjustedClose})
-		days = json.dumps(array)
-	template = loader.get_template('predictor/stock_detail.html')
-	context = {
-		'data' : days,
-	}
-	return HttpResponse(template.render(context, request))
-
+@require_GET
 def create_portfolio(request):
-	template = loader.get_template('predictor/create_portfolio.html')
-	context = {}
-	return HttpResponse(template.render(context, request));
+	return render(request, 'predictor/new_portfolio.html')
 
 def make_portfolio(request):
 	if request.method == "POST":
@@ -97,76 +91,6 @@ def make_portfolio(request):
 			'error_message': "You didn't submit a portfolio.",
 		})
 
-def sign_out(request):
-	logout(request)
-	return HttpResponse('You have successfully signed out.')
-
-
-
-def create_user(request):
-	if request.method == "POST":
-		username = request.POST['username']
-		password = request.POST['password']
-		email = request.POST['email']
-		name = request.POST['name']
-		name = name.split()
-		user = User.objects.create_user(username, email, password)
-		user.first_name = name[0]
-		user.last_name = name[1]
-		user.save()
-		investor = Investor()
-		investor.user = user
-		investor.save()
-		login(request, user)
-		return HttpResponseRedirect(reverse('predictor:home', args=(user.id,)))
-	else:
-		return render(request, 'predictor/error.html', {
-			'error_message': "You didn't select a choice.",
-		})
-
-def log_in(request):
-	template = loader.get_template('predictor/log_in.html')
-	context = {}
-	return HttpResponse(template.render(context, request));
-
-def authenticate_user(request):
-	if request.method == "POST":
-		username = request.POST['username']
-		password = request.POST['password']
-		user = authenticate(username=username, password=password)
-		if user is not None:
-			login(request, user)
-			return HttpResponseRedirect(reverse('predictor:home', args=(user.id,)))
-		else:
-			return render(request, 'predictor/error.html', {
-				'error_message': "Invalid Login.",
-			})
-
-def home(request, user_id):
-	try:
-		user = User.objects.get(pk=user_id)
-	except User.DoesNotExist:
-		raise Http404("User does not exist")
-	else:
-		investor = Investor.objects.get(user=user_id)
-		return render(request, 'predictor/home.html', {'investor': investor, 'user': user})
-
-
-
-
-#JSON Response Areas for AJax Calls
-def recommend_portfolio(request):
-	if request.method == "POST":
-		type = request.POST['type']
-		totalspend = request.POST['total_spend']
-		totalspend = float(totalspend)
-		kwargs = {'budget':totalspend}
-		if type == "control":
-			return recommend_interfacer(recommend_type='random', budget=totalspend)
-		elif type == "tsr":
-			return recommend_interfacer(recommend_type='high_return', budget=totalspend)
-		else:
-			return recommend_interfacer(recommend_type='diverse', budget=totalspend)
 
 def portfolio_detail_json(request, portfolio_id):
 	api = portfolioAPI()
@@ -186,37 +110,4 @@ def portfolio_detail_json(request, portfolio_id):
 	storage['value'] = value
 	storage['days'] = daysDict
 	return HttpResponse(json.dumps(storage), content_type="application/json")
-
-def account_portfolios_json(request):
-	user = request.user
-	investor = Investor.objects.get(user=user)
-	portfolios = Portfolio.objects.filter(investor=investor)
-	storage = {}
-	for portfolio in portfolios:
-		storage[portfolio.portfolio_name] = [portfolio.current_value, portfolio.current_diversity]
-	return HttpResponse(json.dumps(storage), content_type="application/json")
-
-def log_in_json(request):
-	if request.method == "POST":
-		username = request.POST['username']
-		password = request.POST['password']
-		user = authenticate(username=username, password=password)
-		if user is not None:
-			login(request, user)
-			json = {}
-			json['success'] = True
-			return HttpResponse(json.dumps(json), content_type="application/json")
-		else:
-			json = {}
-			json['success'] = False
-			return HttpResponse(json.dumps(json), content_type="application/json")
-
-def log_out_json(request):
-	logout(request)
-	json = {}
-	json['success'] = True
-	return HttpResponse(json.dumps(json), content_type="application/json")
-
-
-
 

@@ -67,7 +67,7 @@ def recommend_random_portfolio(stock_ids, stock_prices, budget, max_investment=N
 
             # if this is the last stock, add all of it
             if len(potential_stocks) == 1:
-                portfolio[stock_ids[i].stock_name] = max_shares
+                portfolio[stock_ids[i].stock_name] = (max_shares, price)
                 break
             else:
                 # select random number of shares, remove stock from potential stocks

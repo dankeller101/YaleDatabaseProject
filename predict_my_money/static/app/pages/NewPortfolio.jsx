@@ -12,6 +12,17 @@ class PortfolioEditor extends React.Component {
 		this.state = { stocks: [{ name: 'AAPL', amount: 3 }] }
 	}
 
+	resetStocks(rows) {
+		var stocks = [];
+		for (var i=0; i<rows.legth; ++i) {
+			stocks.push({
+				name: row[i][0].toUpperCase(),
+				amount: row[i][1].toUpperCase(),
+				price: row[i][2].toUpperCase(),
+			})
+		}
+	}
+
 	getStocks() {
 		return this.state.stocks
 	}
@@ -56,10 +67,12 @@ class PortfolioEditor extends React.Component {
 	}
 
 	render() {
-
 		var stockList = this.state.stocks.map((e, i) => {
 			var remove = () => {
+				_.remove(this.state.stocks, { name: e.name })
+				console.log(this.state.stocks)
 				this.setState({ stocks: _.remove(this.state.stocks, { name: e.name })})
+				console.log(this.state.stock)
 			}
 
 			return (
@@ -152,7 +165,28 @@ export default class NewPortfolioView extends React.Component {
 		}
 
 		$.post("/predictor/api/portfolios", data, (data) => {
+			if (data.error) {
+				alert(data.message)
+				return
+			}
 
+			location.href = "/predictor/"
+		})
+	}
+
+	_onClickGetRecom() {
+		let data = {
+			type: findDOMNode(this.refs.ftype).value,
+			bc: parseInt(findDOMNode(this.refs.fbconst).value)
+		}
+
+		$.getJSON("/predictor/api/get_recommendation", (data) => {
+			if (data.error) {
+				alert(data.message)
+				return
+			}
+
+			this.refs.pmanager.resetStocks(data)
 		})
 	}
 
@@ -177,20 +211,19 @@ export default class NewPortfolioView extends React.Component {
 
 						<form className="form-inline">
 							<div className="form-group">
-								<label for="exampleInputName2">Get Recommendation for</label>
-								<input type="text" className="form-control" id="exampleInputName2" placeholder="how many dollars" />
+								<label for="exampleInputName2" onClick="this._onClickGetRecom.bind(this)">Get Recommendation for</label>
+								<input type="text" className="form-control" ref="fbconst" id="exampleInputName2" placeholder="how many dollars" />
 							</div>
 
 							<div className="form-group">
 								<label for="exampleInputName2">of type</label>
 
-								<select className="form-control" id="exampleSelect1">
-									<option>Control</option>
-									<option>Best Expected Return</option>
-									<option>Best Expected Return + Diversity</option>
+								<select className="form-control" ref='ftype' id="exampleSelect1">
+									<option value='control'>Control</option>
+									<option value=''>Best Expected Return</option>
+									<option value=''>Best Expected Return + Diversity</option>
 								</select>
 							</div>
-							&nbsp
 
 							<div className="form-group">
 								<button className="btn btn-info">Suggest</button>

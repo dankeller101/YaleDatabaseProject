@@ -119,8 +119,11 @@ def get_recommendation(request):
 		rtype = "high_return"
 
 	a = recommend_interfacer(recommend_type=rtype, budget=totalspend)
-	print(a)
-	return json.dumps(a)
+	ret = []
+	for m in a:
+		ret.append([m, a[m]])
+	print ret
+	return JsonResponse({ "data": ret })
 
 def portfolio(request, id):
 	if request.method == "GET":
@@ -158,7 +161,7 @@ def portfolios(request):
 
 		for order in stocks:
 			sname, quantity = order
-			stock = sapi.getStock(stock)
+			stock = sapi.getStock(sname)
 			if not stock:
 				return JsonResponse({ "error": True, "message": "Stock not found." })
 

@@ -22666,6 +22666,18 @@
 		}
 	
 		_createClass(PortfolioEditor, [{
+			key: 'resetStocks',
+			value: function resetStocks(rows) {
+				var stocks = [];
+				for (var i = 0; i < rows.legth; ++i) {
+					stocks.push({
+						name: row[i][0].toUpperCase(),
+						amount: row[i][1].toUpperCase(),
+						price: row[i][2].toUpperCase()
+					});
+				}
+			}
+		}, {
 			key: 'getStocks',
 			value: function getStocks() {
 				return this.state.stocks;
@@ -22719,7 +22731,10 @@
 	
 				var stockList = this.state.stocks.map(function (e, i) {
 					var remove = function remove() {
+						_lodash2.default.remove(_this3.state.stocks, { name: e.name });
+						console.log(_this3.state.stocks);
 						_this3.setState({ stocks: _lodash2.default.remove(_this3.state.stocks, { name: e.name }) });
+						console.log(_this3.state.stock);
 					};
 	
 					return _react2.default.createElement(
@@ -22898,7 +22913,33 @@
 					return;
 				}
 	
-				$.post("/predictor/api/portfolios", data, function (data) {});
+				$.post("/predictor/api/portfolios", data, function (data) {
+					if (data.error) {
+						alert(data.message);
+						return;
+					}
+	
+					location.href = "/predictor/";
+				});
+			}
+		}, {
+			key: '_onClickGetRecom',
+			value: function _onClickGetRecom() {
+				var _this6 = this;
+	
+				var data = {
+					type: (0, _reactDom.findDOMNode)(this.refs.ftype).value,
+					bc: parseInt((0, _reactDom.findDOMNode)(this.refs.fbconst).value)
+				};
+	
+				$.getJSON("/predictor/api/get_recommendation", function (data) {
+					if (data.error) {
+						alert(data.message);
+						return;
+					}
+	
+					_this6.refs.pmanager.resetStocks(data);
+				});
 			}
 		}, {
 			key: 'componentDidMount',
@@ -22945,10 +22986,10 @@
 									{ className: 'form-group' },
 									_react2.default.createElement(
 										'label',
-										{ 'for': 'exampleInputName2' },
+										{ 'for': 'exampleInputName2', onClick: 'this._onClickGetRecom.bind(this)' },
 										'Get Recommendation for'
 									),
-									_react2.default.createElement('input', { type: 'text', className: 'form-control', id: 'exampleInputName2', placeholder: 'how many dollars' })
+									_react2.default.createElement('input', { type: 'text', className: 'form-control', ref: 'fbconst', id: 'exampleInputName2', placeholder: 'how many dollars' })
 								),
 								_react2.default.createElement(
 									'div',
@@ -22960,25 +23001,24 @@
 									),
 									_react2.default.createElement(
 										'select',
-										{ className: 'form-control', id: 'exampleSelect1' },
+										{ className: 'form-control', ref: 'ftype', id: 'exampleSelect1' },
 										_react2.default.createElement(
 											'option',
-											null,
+											{ value: 'control' },
 											'Control'
 										),
 										_react2.default.createElement(
 											'option',
-											null,
+											{ value: '' },
 											'Best Expected Return'
 										),
 										_react2.default.createElement(
 											'option',
-											null,
+											{ value: '' },
 											'Best Expected Return + Diversity'
 										)
 									)
 								),
-								'&nbsp',
 								_react2.default.createElement(
 									'div',
 									{ className: 'form-group' },
@@ -40394,10 +40434,18 @@
 			key: 'render',
 			value: function render() {
 				var _list = this.props.items.map(function (el, i) {
+					var access = function access() {
+						location.href = "/predictor/portfolios/" + el.id;
+					};
 					return _react2.default.createElement(
 						'div',
 						{ className: 'PortfolioListItem' },
-						el.portfolio_name
+						el.portfolio_name,
+						_react2.default.createElement(
+							'button',
+							{ onClick: access },
+							'See portfolio'
+						)
 					);
 				});
 				return _react2.default.createElement(

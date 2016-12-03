@@ -61,18 +61,37 @@ class portfolioAPI():
 
         today = datetime.date.today()
         portfolio = Portfolio.objects.get(pk=portfolio_id)
+
+        #instantiate interfaces
         stockInterface = stockDayDatabaseInterface()
+        stockapi = stockAPI()
+
+        #all stock_owned objects connected to this portfolio
         stocks = Stock_Owned.objects.get(portfolio=portfolio)
+
+        #fill stocksObjects array with stock objects
+        stocksObjects = []
+        for stock in stocks:
+            #get stock objects
+            stock = Stock.objects.get(pk=stock.stock)
+            #update stock with newest days
+            stock = stockapi.getStock(stock.stock_name)
+            stocksObjects.append(stock)
+
+        creationDateWithBuffer = portfolio.start_date - datetime.timedelta(days=70)
+
+        cleanedArray = dummyFunction(stocksObjects, creationDateWithBuffer, today)
+
+        stock_prices = cleanedArray[0]
+        stocks_in = cleanedArray[1]
+        days_in = cleanedArray[2]
+
         num_observed_days = today.date - earliest_day.date
         num_observed_days = num_observed_days.days
 
-        #build 2d numpy array where each row = a stock, each column = a day
-        stock_prices = np.empty((len(stocks), num_observed_days))
+        #build 1d numpy array for amoutns
         stock_amounts = np.empty(len(stocks))
-        lookup_date = earliest_day - datetime.timedelta(days=60)
         for i, stock in enumerate(stocks):
-            days = stockInterface.getRangeDaysOrdered(stock.stock, lookup_date, today)
-            stock_prices[i, :] = np.array([day.adjustedClose if day else np.nan for day in days])
             stock_amounts[i] = stock.amount_owned
 
 

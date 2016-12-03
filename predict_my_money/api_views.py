@@ -18,39 +18,12 @@ from predict_my_money.computations.recommender_interface import \
 	recommend_diverse_portfolio, recommend_high_return_portfolio, \
 	recommend_random_portfolio, recommend_interfacer
 
+sapi = stockAPI()
+papi = portfolioAPI()
+
 # Create your views here.
-
-def make_portfolio(request):
-	if request.method == "POST":
-		current_user = request.user
-		API = stockAPI()
-		portfolio = Portfolio()
-		portfolio.portfolio_name = request.POST['name']
-		portfolio.investor = Investor.objects.get(user=current_user)
-		portfolio.save()
-		stocks = request.POST['stock-tickers'].split()
-		stock_owned = Stock_Owned()
-		stock = stocks[0]
-		quantity = stocks[1]
-		stock = API.getStock(stock)
-		if not stock:
-			return render(request, 'predictor/error.html', {
-				'error_message': "Stock doesn't exist.",
-			})
-		stock_owned.portfolio = portfolio
-		stock_owned.stock = stock
-		stock_owned.bought_on = datetime.date.today()
-		stock_owned.bought_at = stock.current_high
-		stock_owned.amount_owned = quantity
-		return HttpResponseRedirect(reverse('predictor:home', args=(current_user.id,)))
-	else:
-		return render(request, 'predictor/error.html', {
-			'error_message': "You didn't submit a portfolio.",
-		})
-
 def portfolio_detail(request, portfolio_id):
-	api = portfolioAPI()
-	portfolio = api.getPortfolio(portfolio_id)
+	portfolio = papi.getPortfolio(portfolio_id)
 	storage = {}
 	investor = portfolio.investor.user.first_name + " " + portfolio.investor.user.last_name
 	name = portfolio.portfolio_name
@@ -73,8 +46,7 @@ def portfolio_detail(request, portfolio_id):
 @require_GET
 def get_portfolio_plot(request):
 	ticker = request.GET["stock"]
-	API = stockAPI()
-	stock = API.getStock(ticker)
+	stock = sapi.getStock(ticker)
 
 	if not stock:
 		return JsonResponse({ "data": null }, status=404)
@@ -91,8 +63,7 @@ def get_portfolio_plot(request):
 @require_GET
 def get_stock(request):
 	ticker = request.GET["name"]
-	API = stockAPI()
-	stock = API.getStock(ticker)
+	stock = sapi.getStock(ticker)
 
 	if not stock:
 		return JsonResponse({ "data": null }, status=404)
@@ -123,8 +94,7 @@ def get_stock(request):
 @require_GET
 def get_stock_plot(request):
 	ticker = request.GET["stock"]
-	API = stockAPI()
-	stock = API.getStock(ticker)
+	stock = sapi.getStock(ticker)
 
 	if not stock:
 		return JsonResponse({ "data": null }, status=404)
@@ -154,8 +124,7 @@ def get_recommendation(request):
 
 def portfolio(request, id):
 	if request.method == "GET":
-		portAPI = portfolioAPI()
-		portfolio = portAPI.getPortfolio(id)
+		portfolio = papi.getPortfolio(id)
 		if portfolio:
 			template = loader.get_template('predictor/portfolio_detail.html')
 			context = {
@@ -179,7 +148,31 @@ def portfolios(request):
 		for portfolio in portfolios:
 			storage[portfolio.portfolio_name] = [portfolio.current_value, portfolio.current_diversity]
 		return HttpResponse(json.dumps(storage), content_type="application/json")
-	elif request.method == "PUT":
-		return HttpResponseBadRequest("Not implemented.")
+	
+	elif request.method == "POST":
+		portfolio = Portfolio()
+		portfolio.portfolio_name = request.POST['name']
+		portfolio.investor = Investor.objects.get(user=request.user)
+
+		stocks = json.loads(request.POST["_stocks"])
+
+		for order in stocks:
+			sname, quantity = order
+			stock = sapi.getStock(stock)
+			if not stock:
+				return JsonResponse({ "error": True, "message": "Stock not found." })
+
+			owned = Stock_Owned()
+			owned.portfolio = portfolio
+			owned.stock = stock
+			owned.bought_on = datetime.date.today()
+			owned.bought_at = stock.current_high
+			owned.amount_owned = quantity
+			owned.save()
+
+		portfolio.save()
+
+		return JsonResponse({ "error": False })
+		# return HttpResponseRedirect(reverse('predictor:home', args=(current_user.id,)))
 	else:
 		return HttpResponseBadRequest("Invalid method.")

@@ -61,6 +61,10 @@
 	
 	var _NewPortfolio2 = _interopRequireDefault(_NewPortfolio);
 	
+	var _Home = __webpack_require__(/*! ./pages/Home.jsx */ 185);
+	
+	var _Home2 = _interopRequireDefault(_Home);
+	
 	var _csrf = __webpack_require__(/*! ./lib/csrf.jsx */ 180);
 	
 	var _csrf2 = _interopRequireDefault(_csrf);
@@ -564,6 +568,10 @@
 	
 	window.startPortfolioView = function () {
 	  (0, _reactDom.render)(_react2.default.createElement(PortfolioView, { stock: window.data.stock }), document.getElementById('app'));
+	};
+	
+	window.startHomeView = function () {
+	  (0, _reactDom.render)(_react2.default.createElement(_Home2.default, null), document.getElementById('app'));
 	};
 	
 	window.startNewPortfolioView = function () {
@@ -22618,7 +22626,7 @@
 	'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
-	  value: true
+		value: true
 	});
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -22646,343 +22654,365 @@
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } // pages/NewPortfolio.jsx
 	
 	var PortfolioEditor = function (_React$Component) {
-	  _inherits(PortfolioEditor, _React$Component);
+		_inherits(PortfolioEditor, _React$Component);
 	
-	  function PortfolioEditor(props) {
-	    _classCallCheck(this, PortfolioEditor);
+		function PortfolioEditor(props) {
+			_classCallCheck(this, PortfolioEditor);
 	
-	    var _this = _possibleConstructorReturn(this, (PortfolioEditor.__proto__ || Object.getPrototypeOf(PortfolioEditor)).call(this, props));
+			var _this = _possibleConstructorReturn(this, (PortfolioEditor.__proto__ || Object.getPrototypeOf(PortfolioEditor)).call(this, props));
 	
-	    _this.state = { stocks: [{ name: 'AAPL', amount: 3 }] };
-	    return _this;
-	  }
+			_this.state = { stocks: [{ name: 'AAPL', amount: 3 }] };
+			return _this;
+		}
 	
-	  _createClass(PortfolioEditor, [{
-	    key: 'getStocks',
-	    value: function getStocks() {
-	      return this.state.stocks;
-	    }
-	  }, {
-	    key: '_onClickAdd',
-	    value: function _onClickAdd() {
-	      var _this2 = this;
+		_createClass(PortfolioEditor, [{
+			key: 'getStocks',
+			value: function getStocks() {
+				return this.state.stocks;
+			}
+		}, {
+			key: '_onClickAdd',
+			value: function _onClickAdd() {
+				var _this2 = this;
 	
-	      var name = (0, _reactDom.findDOMNode)(this.refs.name).value.toUpperCase();
-	      var amount = parseInt((0, _reactDom.findDOMNode)(this.refs.amount).value);
+				var name = (0, _reactDom.findDOMNode)(this.refs.name).value.toUpperCase();
+				var amount = parseInt((0, _reactDom.findDOMNode)(this.refs.amount).value);
 	
-	      if (name.length < 3) {
-	        alert('Invalid stock name.');
-	        return;
-	      }
+				if (name.length < 3) {
+					alert('Invalid stock name.');
+					return;
+				}
 	
-	      if (amount < 0) {
-	        alert('Invalid amount.');
-	        return;
-	      }
+				if (amount < 0) {
+					alert('Invalid amount.');
+					return;
+				}
 	
-	      (0, _reactDom.findDOMNode)(this.refs.name).value = (0, _reactDom.findDOMNode)(this.refs.amount).value = '';
+				(0, _reactDom.findDOMNode)(this.refs.name).value = (0, _reactDom.findDOMNode)(this.refs.amount).value = '';
 	
-	      var found = _lodash2.default.find(this.state.stocks, { name: name });
-	      if (found) {
-	        found.amount += amount;
-	        this.setState({ stocks: this.state.stocks });
-	        return;
-	      }
+				var found = _lodash2.default.find(this.state.stocks, { name: name });
+				if (found) {
+					found.amount += amount;
+					this.setState({ stocks: this.state.stocks });
+					return;
+				}
 	
-	      $.getJSON("/predictor/api/get_stock?stock=" + name, function (data) {
-	        if (data.error) {
-	          alert('Stock not found.');
-	          return;
-	        }
+				$.getJSON("/predictor/api/get_stock?name=" + name, function (data) {
+					if (data.error) {
+						alert('Stock not found.');
+						return;
+					}
 	
-	        _this2.state.stocks.push({
-	          name: name,
-	          amount: amount,
-	          price: data.current_adjusted_close
-	        });
+					_this2.state.stocks.push({
+						name: name,
+						amount: amount,
+						price: data.current_adjusted_close
+					});
 	
-	        _this2.props.onUpdate(_this2.state.stocks);
-	      });
-	    }
-	  }, {
-	    key: 'render',
-	    value: function render() {
+					_this2.props.onUpdate(_this2.state.stocks);
+				});
+			}
+		}, {
+			key: 'render',
+			value: function render() {
+				var _this3 = this;
 	
-	      var stockList = this.state.stocks.map(function (e, i) {
-	        return _react2.default.createElement(
-	          'tr',
-	          { key: e.name },
-	          _react2.default.createElement(
-	            'td',
-	            null,
-	            i + 1
-	          ),
-	          _react2.default.createElement(
-	            'td',
-	            null,
-	            e.name
-	          ),
-	          _react2.default.createElement(
-	            'td',
-	            null,
-	            e.amount
-	          ),
-	          _react2.default.createElement(
-	            'td',
-	            null,
-	            '$',
-	            e.price
-	          ),
-	          _react2.default.createElement(
-	            'td',
-	            null,
-	            _react2.default.createElement(
-	              'button',
-	              { className: 'btn btn-danger' },
-	              'Remove'
-	            )
-	          )
-	        );
-	      });
+				var stockList = this.state.stocks.map(function (e, i) {
+					var remove = function remove() {
+						_this3.setState({ stocks: _lodash2.default.remove(_this3.state.stocks, { name: e.name }) });
+					};
 	
-	      return _react2.default.createElement(
-	        'div',
-	        { className: 'PortfolioEditor' },
-	        _react2.default.createElement(
-	          'h1',
-	          null,
-	          'Portfolio manager'
-	        ),
-	        _react2.default.createElement(
-	          'form',
-	          { id: 'add-stock', className: 'FormAddStock form-inline' },
-	          _react2.default.createElement(
-	            'div',
-	            { className: 'form-group' },
-	            _react2.default.createElement(
-	              'label',
-	              { 'for': 'exampleInputName2' },
-	              'Add to portfolio stock'
-	            ),
-	            _react2.default.createElement('input', { type: 'text', ref: 'name', className: 'form-control', id: 'exampleInputName2', placeholder: 'stock name' })
-	          ),
-	          _react2.default.createElement(
-	            'div',
-	            { className: 'form-group' },
-	            _react2.default.createElement(
-	              'label',
-	              { 'for': 'exampleInputName2' },
-	              'with amount'
-	            ),
-	            _react2.default.createElement('input', { type: 'number', ref: 'amount', className: 'form-control', id: 'exampleInputName2', placeholder: 'amount of stock' })
-	          ),
-	          _react2.default.createElement(
-	            'div',
-	            { className: 'form-group' },
-	            _react2.default.createElement(
-	              'button',
-	              { className: 'btn btn-info', onClick: this._onClickAdd.bind(this) },
-	              'Add'
-	            )
-	          )
-	        ),
-	        _react2.default.createElement(
-	          'table',
-	          { className: 'table table-striped' },
-	          _react2.default.createElement(
-	            'thead',
-	            null,
-	            _react2.default.createElement(
-	              'tr',
-	              null,
-	              _react2.default.createElement(
-	                'th',
-	                null,
-	                '#'
-	              ),
-	              _react2.default.createElement(
-	                'th',
-	                null,
-	                'Name'
-	              ),
-	              _react2.default.createElement(
-	                'th',
-	                null,
-	                'Amount'
-	              ),
-	              _react2.default.createElement(
-	                'th',
-	                null,
-	                'Price'
-	              ),
-	              _react2.default.createElement(
-	                'th',
-	                null,
-	                'Action'
-	              )
-	            )
-	          ),
-	          _react2.default.createElement(
-	            'tbody',
-	            null,
-	            stockList
-	          )
-	        )
-	      );
-	    }
-	  }]);
+					return _react2.default.createElement(
+						'tr',
+						{ key: e.name },
+						_react2.default.createElement(
+							'td',
+							null,
+							i + 1
+						),
+						_react2.default.createElement(
+							'td',
+							null,
+							e.name
+						),
+						_react2.default.createElement(
+							'td',
+							null,
+							e.amount
+						),
+						_react2.default.createElement(
+							'td',
+							null,
+							'$',
+							e.price
+						),
+						_react2.default.createElement(
+							'td',
+							null,
+							_react2.default.createElement(
+								'button',
+								{ className: 'btn btn-danger', onClick: remove },
+								'Remove'
+							)
+						)
+					);
+				});
 	
-	  return PortfolioEditor;
+				return _react2.default.createElement(
+					'div',
+					{ className: 'PortfolioEditor' },
+					_react2.default.createElement(
+						'h1',
+						null,
+						'Portfolio manager'
+					),
+					_react2.default.createElement(
+						'form',
+						{ id: 'add-stock', className: 'FormAddStock form-inline' },
+						_react2.default.createElement(
+							'div',
+							{ className: 'form-group' },
+							_react2.default.createElement(
+								'label',
+								{ 'for': 'exampleInputName2' },
+								'Add to portfolio stock'
+							),
+							_react2.default.createElement('input', { type: 'text', ref: 'name', className: 'form-control', id: 'exampleInputName2', placeholder: 'stock name' })
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'form-group' },
+							_react2.default.createElement(
+								'label',
+								{ 'for': 'exampleInputName2' },
+								'with amount'
+							),
+							_react2.default.createElement('input', { type: 'number', ref: 'amount', className: 'form-control', id: 'exampleInputName2', placeholder: 'amount of stock' })
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'form-group' },
+							_react2.default.createElement(
+								'button',
+								{ className: 'btn btn-info', onClick: this._onClickAdd.bind(this) },
+								'Add'
+							)
+						)
+					),
+					_react2.default.createElement(
+						'table',
+						{ className: 'table table-striped' },
+						_react2.default.createElement(
+							'thead',
+							null,
+							_react2.default.createElement(
+								'tr',
+								null,
+								_react2.default.createElement(
+									'th',
+									null,
+									'#'
+								),
+								_react2.default.createElement(
+									'th',
+									null,
+									'Name'
+								),
+								_react2.default.createElement(
+									'th',
+									null,
+									'Amount'
+								),
+								_react2.default.createElement(
+									'th',
+									null,
+									'Price'
+								),
+								_react2.default.createElement(
+									'th',
+									null,
+									'Action'
+								)
+							)
+						),
+						_react2.default.createElement(
+							'tbody',
+							null,
+							stockList
+						)
+					)
+				);
+			}
+		}]);
+	
+		return PortfolioEditor;
 	}(_react2.default.Component);
 	
 	var NewPortfolioView = function (_React$Component2) {
-	  _inherits(NewPortfolioView, _React$Component2);
+		_inherits(NewPortfolioView, _React$Component2);
 	
-	  function NewPortfolioView(props) {
-	    _classCallCheck(this, NewPortfolioView);
+		function NewPortfolioView(props) {
+			_classCallCheck(this, NewPortfolioView);
 	
-	    var _this3 = _possibleConstructorReturn(this, (NewPortfolioView.__proto__ || Object.getPrototypeOf(NewPortfolioView)).call(this, props));
+			var _this4 = _possibleConstructorReturn(this, (NewPortfolioView.__proto__ || Object.getPrototypeOf(NewPortfolioView)).call(this, props));
 	
-	    _this3.state = { stocks: [] };
-	    return _this3;
-	  }
+			_this4.state = { stocks: [] };
+			return _this4;
+		}
 	
-	  _createClass(NewPortfolioView, [{
-	    key: '_updatePlot',
-	    value: function _updatePlot() {
-	      var _this4 = this;
+		_createClass(NewPortfolioView, [{
+			key: '_updatePlot',
+			value: function _updatePlot() {
+				var _this5 = this;
 	
-	      $.getJSON("/predictor/api/gen_portfolio_plot?stocks=" + this.props.id, function (data) {
-	        var points = [];
-	        var lastprice = 36000;
-	        for (var i = 800; i < data.data.length; ++i) {
-	          if (i % 5 == 0) {
-	            lastprice += (Math.random() - 0.5) * 100;
-	            data.data[i].close = lastprice;
-	            points.push(data.data[i]);
-	          }
-	        }
-	        plotData(points, (0, _reactDom.findDOMNode)(_this4.refs.plot));
-	      });
-	    }
-	  }, {
-	    key: '_onUpdateStocks',
-	    value: function _onUpdateStocks() {
-	      this.setState({ stocks: this.refs.pmanager.getStocks() });
-	    }
-	  }, {
-	    key: 'componentDidMount',
-	    value: function componentDidMount() {}
-	  }, {
-	    key: 'render',
-	    value: function render() {
-	      return _react2.default.createElement(
-	        'div',
-	        { className: 'container' },
-	        _react2.default.createElement('br', null),
-	        _react2.default.createElement(
-	          'h1',
-	          null,
-	          'New Portfolio'
-	        ),
-	        _react2.default.createElement(
-	          'div',
-	          { className: 'row' },
-	          _react2.default.createElement(
-	            'div',
-	            { className: 'col-sm-6' },
-	            _react2.default.createElement(
-	              'div',
-	              { className: 'form-group' },
-	              _react2.default.createElement(
-	                'label',
-	                { 'for': 'inputName' },
-	                'Name'
-	              ),
-	              _react2.default.createElement('input', { type: 'email', className: 'form-control', id: 'inputName', 'aria-describedby': 'nameHelp', placeholder: 'Identify your portfolio' }),
-	              _react2.default.createElement(
-	                'small',
-	                { id: 'nameHelp', className: 'form-text text-muted' },
-	                'Identify your portfolio.'
-	              )
-	            ),
-	            _react2.default.createElement('hr', null),
-	            _react2.default.createElement(
-	              'form',
-	              { className: 'form-inline' },
-	              _react2.default.createElement(
-	                'div',
-	                { className: 'form-group' },
-	                _react2.default.createElement(
-	                  'label',
-	                  { 'for': 'exampleInputName2' },
-	                  'Get Recommendation for\xA0'
-	                ),
-	                _react2.default.createElement('input', { type: 'text', className: 'form-control', id: 'exampleInputName2', placeholder: 'how many dollars' })
-	              ),
-	              _react2.default.createElement(
-	                'div',
-	                { className: 'form-group' },
-	                _react2.default.createElement(
-	                  'label',
-	                  { 'for': 'exampleInputName2' },
-	                  'of type\xA0'
-	                ),
-	                _react2.default.createElement(
-	                  'select',
-	                  { className: 'form-control', id: 'exampleSelect1' },
-	                  _react2.default.createElement(
-	                    'option',
-	                    null,
-	                    'Control'
-	                  ),
-	                  _react2.default.createElement(
-	                    'option',
-	                    null,
-	                    'Best Expected Return'
-	                  ),
-	                  _react2.default.createElement(
-	                    'option',
-	                    null,
-	                    'Best Expected Return + Diversity'
-	                  )
-	                )
-	              ),
-	              '&nbsp',
-	              _react2.default.createElement(
-	                'div',
-	                { className: 'form-group' },
-	                _react2.default.createElement(
-	                  'button',
-	                  { className: 'btn btn-info' },
-	                  'Suggest'
-	                )
-	              )
-	            ),
-	            _react2.default.createElement('hr', null),
-	            _react2.default.createElement(
-	              'button',
-	              { className: 'btn btn-primary btn-lg' },
-	              'Create Portfolio'
-	            )
-	          ),
-	          _react2.default.createElement(
-	            'div',
-	            { className: 'col-sm-6' },
-	            _react2.default.createElement(
-	              'p',
-	              null,
-	              'Predicted fluctuation'
-	            ),
-	            _react2.default.createElement('div', { ref: 'plot', id: 'data-dump', 'data-prices': '{{ data }}' })
-	          )
-	        ),
-	        _react2.default.createElement(PortfolioEditor, { ref: 'pmanager', onUpdate: this._onUpdateStocks.bind(this) })
-	      );
-	    }
-	  }]);
+				$.getJSON("/predictor/api/gen_portfolio_plot?stocks=" + this.props.id, function (data) {
+					var points = [];
+					var lastprice = 36000;
+					for (var i = 800; i < data.data.length; ++i) {
+						if (i % 5 == 0) {
+							lastprice += (Math.random() - 0.5) * 100;
+							data.data[i].close = lastprice;
+							points.push(data.data[i]);
+						}
+					}
+					plotData(points, (0, _reactDom.findDOMNode)(_this5.refs.plot));
+				});
+			}
+		}, {
+			key: '_onUpdateStocks',
+			value: function _onUpdateStocks() {
+				var stocks = this.refs.pmanager.getStocks();
+				this.setState({ stocks: stocks });
+				this.refs.plot.updateStocks(stocks);
+			}
+		}, {
+			key: '_onClickSave',
+			value: function _onClickSave() {
+				var data = {
+					name: (0, _reactDom.findDOMNode)(this.refs.fname).value,
+					_stocks: JSON.stringify(this.state.stocks)
+				};
 	
-	  return NewPortfolioView;
+				if (data.name.replace(/\s/, '').length == 0) {
+					alert('Please choose a name for this portfolio');
+					return;
+				}
+	
+				$.post("/predictor/api/portfolios", data, function (data) {});
+			}
+		}, {
+			key: 'componentDidMount',
+			value: function componentDidMount() {}
+		}, {
+			key: 'render',
+			value: function render() {
+				return _react2.default.createElement(
+					'div',
+					{ className: 'container' },
+					_react2.default.createElement('br', null),
+					_react2.default.createElement(
+						'h1',
+						null,
+						'New Portfolio'
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'row' },
+						_react2.default.createElement(
+							'div',
+							{ className: 'col-sm-6' },
+							_react2.default.createElement(
+								'div',
+								{ className: 'form-group' },
+								_react2.default.createElement(
+									'label',
+									{ 'for': 'inputName' },
+									'Name'
+								),
+								_react2.default.createElement('input', { type: 'text', ref: 'fname', className: 'form-control', id: 'inputName', 'aria-describedby': 'nameHelp', placeholder: 'Identify your portfolio' }),
+								_react2.default.createElement(
+									'small',
+									{ id: 'nameHelp', className: 'form-text text-muted' },
+									'Identify your portfolio.'
+								)
+							),
+							_react2.default.createElement('hr', null),
+							_react2.default.createElement(
+								'form',
+								{ className: 'form-inline' },
+								_react2.default.createElement(
+									'div',
+									{ className: 'form-group' },
+									_react2.default.createElement(
+										'label',
+										{ 'for': 'exampleInputName2' },
+										'Get Recommendation for'
+									),
+									_react2.default.createElement('input', { type: 'text', className: 'form-control', id: 'exampleInputName2', placeholder: 'how many dollars' })
+								),
+								_react2.default.createElement(
+									'div',
+									{ className: 'form-group' },
+									_react2.default.createElement(
+										'label',
+										{ 'for': 'exampleInputName2' },
+										'of type'
+									),
+									_react2.default.createElement(
+										'select',
+										{ className: 'form-control', id: 'exampleSelect1' },
+										_react2.default.createElement(
+											'option',
+											null,
+											'Control'
+										),
+										_react2.default.createElement(
+											'option',
+											null,
+											'Best Expected Return'
+										),
+										_react2.default.createElement(
+											'option',
+											null,
+											'Best Expected Return + Diversity'
+										)
+									)
+								),
+								'&nbsp',
+								_react2.default.createElement(
+									'div',
+									{ className: 'form-group' },
+									_react2.default.createElement(
+										'button',
+										{ className: 'btn btn-info' },
+										'Suggest'
+									)
+								)
+							),
+							_react2.default.createElement('hr', null),
+							_react2.default.createElement(
+								'button',
+								{ onClick: this._onClickSave.bind(this), className: 'btn btn-primary btn-lg' },
+								'Create Portfolio'
+							)
+						),
+						_react2.default.createElement(
+							'div',
+							{ className: 'col-sm-6' },
+							_react2.default.createElement(
+								'p',
+								null,
+								'Predicted fluctuation'
+							),
+							_react2.default.createElement('div', { ref: 'plot', id: 'data-dump', 'data-prices': '{{ data }}' })
+						)
+					),
+					_react2.default.createElement(PortfolioEditor, { ref: 'pmanager', onUpdate: this._onUpdateStocks.bind(this) })
+				);
+			}
+		}]);
+	
+		return NewPortfolioView;
 	}(_react2.default.Component);
 	
 	exports.default = NewPortfolioView;
@@ -22997,7 +23027,7 @@
 	'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
-	  value: true
+	    value: true
 	});
 	exports.default = CsrfToken;
 	
@@ -23007,10 +23037,41 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	function CsrfToken() {
-	  var token = document.getElementsByTagName('meta')._csrf.getAttribute('content');
-	  return _react2.default.createElement('input', { type: 'hidden', name: 'csrfmiddlewaretoken', value: token });
+	// using jQuery
+	function getCookie(name) {
+	    var cookieValue = null;
+	    if (document.cookie && document.cookie !== '') {
+	        var cookies = document.cookie.split(';');
+	        for (var i = 0; i < cookies.length; i++) {
+	            var cookie = jQuery.trim(cookies[i]);
+	            // Does this cookie string begin with the name we want?
+	            if (cookie.substring(0, name.length + 1) === name + '=') {
+	                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+	                break;
+	            }
+	        }
+	    }
+	    return cookieValue;
 	}
+	
+	var token = getCookie('csrftoken');
+	
+	function CsrfToken() {
+	    return _react2.default.createElement('input', { type: 'hidden', name: 'csrfmiddlewaretoken', value: token });
+	}
+	
+	function csrfSafeMethod(method) {
+	    // these HTTP methods do not require CSRF protection
+	    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method)
+	    );
+	}
+	$.ajaxSetup({
+	    beforeSend: function beforeSend(xhr, settings) {
+	        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+	            xhr.setRequestHeader("X-CSRFToken", token);
+	        }
+	    }
+	});
 
 /***/ },
 /* 181 */
@@ -40276,6 +40337,117 @@
 		return module;
 	}
 
+
+/***/ },
+/* 185 */
+/*!****************************!*\
+  !*** ./app/pages/Home.jsx ***!
+  \****************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _react = __webpack_require__(/*! react */ 1);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(/*! react-dom */ 32);
+	
+	var _lodash = __webpack_require__(/*! lodash */ 183);
+	
+	var _lodash2 = _interopRequireDefault(_lodash);
+	
+	var _csrf = __webpack_require__(/*! ../lib/csrf.jsx */ 180);
+	
+	var _csrf2 = _interopRequireDefault(_csrf);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } // pages/Home.jsx
+	
+	var PortfoliosList = function (_React$Component) {
+		_inherits(PortfoliosList, _React$Component);
+	
+		function PortfoliosList(props) {
+			_classCallCheck(this, PortfoliosList);
+	
+			var _this = _possibleConstructorReturn(this, (PortfoliosList.__proto__ || Object.getPrototypeOf(PortfoliosList)).call(this, props));
+	
+			_this.state = { stocks: [] };
+			return _this;
+		}
+	
+		_createClass(PortfoliosList, [{
+			key: 'componentDidMount',
+			value: function componentDidMount() {}
+		}, {
+			key: 'render',
+			value: function render() {
+				var _list = this.props.items.map(function (el, i) {
+					return _react2.default.createElement(
+						'div',
+						{ className: 'PortfolioListItem' },
+						el.portfolio_name
+					);
+				});
+				return _react2.default.createElement(
+					'div',
+					{ className: 'PortfoliosList' },
+					_list
+				);
+			}
+		}]);
+	
+		return PortfoliosList;
+	}(_react2.default.Component);
+	
+	var NewPortfolioView = function (_React$Component2) {
+		_inherits(NewPortfolioView, _React$Component2);
+	
+		function NewPortfolioView(props) {
+			_classCallCheck(this, NewPortfolioView);
+	
+			var _this2 = _possibleConstructorReturn(this, (NewPortfolioView.__proto__ || Object.getPrototypeOf(NewPortfolioView)).call(this, props));
+	
+			_this2.state = { stocks: [] };
+			return _this2;
+		}
+	
+		_createClass(NewPortfolioView, [{
+			key: 'componentDidMount',
+			value: function componentDidMount() {}
+		}, {
+			key: 'render',
+			value: function render() {
+	
+				return _react2.default.createElement(
+					'div',
+					{ className: 'container' },
+					_react2.default.createElement('br', null),
+					_react2.default.createElement(
+						'h1',
+						null,
+						'Home'
+					),
+					_react2.default.createElement(PortfoliosList, { items: window.portfolios })
+				);
+			}
+		}]);
+	
+		return NewPortfolioView;
+	}(_react2.default.Component);
+	
+	exports.default = NewPortfolioView;
 
 /***/ }
 /******/ ]);

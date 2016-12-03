@@ -274,6 +274,8 @@ class stockAPI():
         stock.stock_name = ticker
         stock.start_date = self.parseMetaDate(meta['startDate'])
         stock.end_date = self.parseMetaDate(meta['endDate'])
+        stock.company_meta = meta['description']
+        stock.company_name = meta['name']
         stock.save()
         mostRecentDay = self.addNewDays(stock, None)
         if not mostRecentDay:

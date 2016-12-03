@@ -7,191 +7,213 @@ import _ from 'lodash'
 import CsrfToken from '../lib/csrf.jsx';
 
 class PortfolioEditor extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = { stocks: [{ name: 'AAPL', amount: 3 }] }
-  }
+	constructor(props) {
+		super(props)
+		this.state = { stocks: [{ name: 'AAPL', amount: 3 }] }
+	}
 
-  getStocks() {
-    return this.state.stocks
-  }
+	getStocks() {
+		return this.state.stocks
+	}
 
-  _onClickAdd() {
-    var name = findDOMNode(this.refs.name).value.toUpperCase()
-    var amount = parseInt(findDOMNode(this.refs.amount).value)
+	_onClickAdd() {
+		var name = findDOMNode(this.refs.name).value.toUpperCase()
+		var amount = parseInt(findDOMNode(this.refs.amount).value)
 
-    if (name.length < 3) {
-      alert('Invalid stock name.')
-      return
-    }
+		if (name.length < 3) {
+			alert('Invalid stock name.')
+			return
+		}
 
-    if (amount < 0) {
-      alert('Invalid amount.')
-      return
-    }
+		if (amount < 0) {
+			alert('Invalid amount.')
+			return
+		}
 
-    findDOMNode(this.refs.name).value = findDOMNode(this.refs.amount).value = ''
+		findDOMNode(this.refs.name).value = findDOMNode(this.refs.amount).value = ''
 
-    var found = _.find(this.state.stocks, { name: name })
-    if (found) {
-      found.amount += amount
-      this.setState({ stocks: this.state.stocks })
-      return
-    }
+		var found = _.find(this.state.stocks, { name: name })
+		if (found) {
+			found.amount += amount
+			this.setState({ stocks: this.state.stocks })
+			return
+		}
 
-    $.getJSON("/predictor/api/get_stock?stock="+name, (data) => {
-      if (data.error) {
-        alert('Stock not found.')
-        return;
-      }
+		$.getJSON("/predictor/api/get_stock?name="+name, (data) => {
+			if (data.error) {
+				alert('Stock not found.')
+				return;
+			}
 
-      this.state.stocks.push({
-        name: name,
-        amount: amount,
-        price: data.current_adjusted_close
-      })
+			this.state.stocks.push({
+				name: name,
+				amount: amount,
+				price: data.current_adjusted_close
+			})
 
-      this.props.onUpdate(this.state.stocks)
-    })
-  }
+			this.props.onUpdate(this.state.stocks)
+		})
+	}
 
-  render() {
+	render() {
 
-    var stockList = this.state.stocks.map((e, i) => {
-      return (
-        <tr key={ e.name }>
-          <td>{ i+1 }</td>
-          <td>{ e.name }</td>
-          <td>{ e.amount }</td>
-          <td>${ e.price }</td>
-          <td><button className="btn btn-danger">Remove</button></td>
-        </tr>
-      )
-    })
+		var stockList = this.state.stocks.map((e, i) => {
+			var remove = () => {
+				this.setState({ stocks: _.remove(this.state.stocks, { name: e.name })})
+			}
 
-    return (
-      <div className="PortfolioEditor">
-        <h1>Portfolio manager</h1>
+			return (
+				<tr key={ e.name }>
+					<td>{ i+1 }</td>
+					<td>{ e.name }</td>
+					<td>{ e.amount }</td>
+					<td>${ e.price }</td>
+					<td><button className="btn btn-danger" onClick={remove}>Remove</button></td>
+				</tr>
+			)
+		})
 
-        <form id="add-stock" className="FormAddStock form-inline">
-          <div className="form-group">
-            <label for="exampleInputName2">Add to portfolio stock</label>
-            <input type="text" ref="name" className="form-control" id="exampleInputName2" placeholder="stock name" />
-          </div>
+		return (
+			<div className="PortfolioEditor">
+				<h1>Portfolio manager</h1>
 
-          <div className="form-group">
-            <label for="exampleInputName2">with amount</label>
-            <input type="number" ref="amount" className="form-control" id="exampleInputName2" placeholder="amount of stock" />
-          </div>
+				<form id="add-stock" className="FormAddStock form-inline">
+					<div className="form-group">
+						<label for="exampleInputName2">Add to portfolio stock</label>
+						<input type="text" ref="name" className="form-control" id="exampleInputName2" placeholder="stock name" />
+					</div>
 
-          <div className="form-group">
-            <button className="btn btn-info" onClick={this._onClickAdd.bind(this)}>Add</button>
-          </div>
-        </form>
+					<div className="form-group">
+						<label for="exampleInputName2">with amount</label>
+						<input type="number" ref="amount" className="form-control" id="exampleInputName2" placeholder="amount of stock" />
+					</div>
 
-        <table className="table table-striped">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Name</th>
-              <th>Amount</th>
-              <th>Price</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {stockList}
-          </tbody>
-        </table>
-      </div>
-    )
-  }
+					<div className="form-group">
+						<button className="btn btn-info" onClick={this._onClickAdd.bind(this)}>Add</button>
+					</div>
+				</form>
+
+				<table className="table table-striped">
+					<thead>
+						<tr>
+							<th>#</th>
+							<th>Name</th>
+							<th>Amount</th>
+							<th>Price</th>
+							<th>Action</th>
+						</tr>
+					</thead>
+					<tbody>
+						{stockList}
+					</tbody>
+				</table>
+			</div>
+		)
+	}
 }
 
 export default class NewPortfolioView extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = { stocks: [] }
-  }
+	constructor(props) {
+		super(props)
+		this.state = { stocks: [] }
+	}
 
-  _updatePlot() {
+	_updatePlot() {
 
-    $.getJSON("/predictor/api/gen_portfolio_plot?stocks="+this.props.id, (data) => {
-      var points = []
-      var lastprice = 36000
-      for (var i=800; i<data.data.length; ++i) {
-        if (i%5 == 0) {
-          lastprice += (Math.random()-0.5)*100
-          data.data[i].close = lastprice
-          points.push(data.data[i])
-        }
-      }
-      plotData(points, findDOMNode(this.refs.plot))
-    })
-  }
+		$.getJSON("/predictor/api/gen_portfolio_plot?stocks="+this.props.id, (data) => {
+			var points = []
+			var lastprice = 36000
+			for (var i=800; i<data.data.length; ++i) {
+				if (i%5 == 0) {
+					lastprice += (Math.random()-0.5)*100
+					data.data[i].close = lastprice
+					points.push(data.data[i])
+				}
+			}
+			plotData(points, findDOMNode(this.refs.plot))
+		})
+	}
 
-  _onUpdateStocks() {
-    this.setState({ stocks: this.refs.pmanager.getStocks() })
-  }
+	_onUpdateStocks() {
+		var stocks = this.refs.pmanager.getStocks()
+		this.setState({ stocks: stocks })
+		this.refs.plot.updateStocks(stocks)
+	}
 
-  componentDidMount() {
-  }
+	_onClickSave() {
+		let data = {
+			name: findDOMNode(this.refs.fname).value,
+			_stocks: JSON.stringify(this.state.stocks)
+		}
 
-  render() {
-    return (
-      <div className="container">
-        <br />
-        <h1>New Portfolio</h1>
+		if (data.name.replace(/\s/, '').length == 0) {
+			alert('Please choose a name for this portfolio')
+			return
+		}
 
-        <div className="row">
-          <div className="col-sm-6">
-            <div className="form-group">
-              <label for="inputName">Name</label>
-              <input type="email" className="form-control" id="inputName" aria-describedby="nameHelp" placeholder="Identify your portfolio" />
-              <small id="nameHelp" className="form-text text-muted">Identify your portfolio.</small>
-            </div>
+		$.post("/predictor/api/portfolios", data, (data) => {
 
-            <hr />
+		})
+	}
 
-            <form className="form-inline">
-              <div className="form-group">
-                <label for="exampleInputName2">Get Recommendation for&nbsp;</label>
-                <input type="text" className="form-control" id="exampleInputName2" placeholder="how many dollars" />
-              </div>
+	componentDidMount() {
+	}
 
-              <div className="form-group">
-                <label for="exampleInputName2">of type&nbsp;</label>
+	render() {
+		return (
+			<div className="container">
+				<br />
+				<h1>New Portfolio</h1>
 
-                <select className="form-control" id="exampleSelect1">
-                  <option>Control</option>
-                  <option>Best Expected Return</option>
-                  <option>Best Expected Return + Diversity</option>
-                </select>
-              </div>
-              &nbsp
+				<div className="row">
+					<div className="col-sm-6">
+						<div className="form-group">
+							<label for="inputName">Name</label>
+							<input type="text" ref="fname" className="form-control" id="inputName" aria-describedby="nameHelp" placeholder="Identify your portfolio" />
+							<small id="nameHelp" className="form-text text-muted">Identify your portfolio.</small>
+						</div>
 
-              <div className="form-group">
-                <button className="btn btn-info">Suggest</button>
-              </div>
-            </form>
+						<hr />
 
-            <hr />
+						<form className="form-inline">
+							<div className="form-group">
+								<label for="exampleInputName2">Get Recommendation for</label>
+								<input type="text" className="form-control" id="exampleInputName2" placeholder="how many dollars" />
+							</div>
 
-            <button className="btn btn-primary btn-lg">
-              Create Portfolio
-            </button>
-          </div>
+							<div className="form-group">
+								<label for="exampleInputName2">of type</label>
 
-          <div className="col-sm-6">
-            <p>Predicted fluctuation</p>
-            <div ref="plot" id="data-dump" data-prices="{{ data }}"></div>
-          </div>
+								<select className="form-control" id="exampleSelect1">
+									<option>Control</option>
+									<option>Best Expected Return</option>
+									<option>Best Expected Return + Diversity</option>
+								</select>
+							</div>
+							&nbsp
 
-        </div>
+							<div className="form-group">
+								<button className="btn btn-info">Suggest</button>
+							</div>
+						</form>
 
-        <PortfolioEditor ref='pmanager' onUpdate={this._onUpdateStocks.bind(this)} />
-      </div>
-    )
-  }
+						<hr />
+
+						<button onClick={this._onClickSave.bind(this)} className="btn btn-primary btn-lg">
+							Create Portfolio
+						</button>
+					</div>
+
+					<div className="col-sm-6">
+						<p>Predicted fluctuation</p>
+						<div ref="plot" id="data-dump" data-prices="{{ data }}"></div>
+					</div>
+
+				</div>
+
+				<PortfolioEditor ref='pmanager' onUpdate={this._onUpdateStocks.bind(this)} />
+			</div>
+		)
+	}
 }
 

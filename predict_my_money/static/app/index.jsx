@@ -4,6 +4,7 @@ import React from 'react';
 import { render, findDOMNode } from 'react-dom';
 
 import NewPortfolioView from './pages/NewPortfolio.jsx';
+import HomeView from './pages/Home.jsx';
 import CsrfToken from './lib/csrf.jsx';
 import { plotData, plotMultipleData } from './lib/plot';
 
@@ -245,6 +246,10 @@ console.log(NewPortfolioView)
 
 window.startPortfolioView = function() {
   render(<PortfolioView stock={window.data.stock} />, document.getElementById('app'));
+}
+
+window.startHomeView = function() {
+  render(<HomeView />, document.getElementById('app'));
 }
 
 window.startNewPortfolioView = function() {

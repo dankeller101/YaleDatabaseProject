@@ -92,10 +92,10 @@ def get_recommendation(request):
 	totalspend = float(request.GET['total_spend'])
 	kwargs = { 'budget': totalspend }
 
-	if "type" in request.GET and request.GET["type"] in ["control", "tsr"]:
+	if "type" in request.GET and request.GET["type"] in ["random", "diverse"]:
 		rtype = request.GET["type"]
 	else:
-		rtype = "diverse"
+		rtype = "high_return"
 
 	a = recommend_interfacer(recommend_type=rtype, budget=totalspend)
 	print a

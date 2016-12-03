@@ -152,7 +152,7 @@ class portfolioAPI():
                 portfolio.current_diversity = recentDay.diversity
                 portfolio.current_value = recentDay.value
                 portfolio.save()
-        return portfolio
+            return portfolio
 
     def fixPortfolioDays(self, portfolio_id, earliest_day=None):
         if not earliest_day:

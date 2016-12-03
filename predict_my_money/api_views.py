@@ -158,6 +158,7 @@ def portfolios(request):
 		portfolio = Portfolio()
 		portfolio.portfolio_name = request.POST['name']
 		portfolio.investor = Investor.objects.get(user=request.user)
+		portfolio.save()
 
 		stocks = json.loads(request.POST["_stocks"])
 
@@ -176,8 +177,6 @@ def portfolios(request):
 			owned.bought_at = stock.current_high
 			owned.amount_owned = quantity
 			owned.save()
-
-		portfolio.save()
 
 		return JsonResponse({ "error": False })
 		# return HttpResponseRedirect(reverse('predictor:home', args=(current_user.id,)))

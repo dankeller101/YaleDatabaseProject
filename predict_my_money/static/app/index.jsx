@@ -242,8 +242,6 @@ class PortfolioView extends React.Component {
   }
 }
 
-console.log(NewPortfolioView)
-
 window.startPortfolioView = function() {
   render(<PortfolioView stock={window.data.stock} />, document.getElementById('app'));
 }

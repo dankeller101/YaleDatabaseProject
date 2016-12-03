@@ -564,8 +564,6 @@
 	  return PortfolioView;
 	}(_react2.default.Component);
 	
-	console.log(_NewPortfolio2.default);
-	
 	window.startPortfolioView = function () {
 	  (0, _reactDom.render)(_react2.default.createElement(PortfolioView, { stock: window.data.stock }), document.getElementById('app'));
 	};
@@ -22669,13 +22667,15 @@
 			key: 'resetStocks',
 			value: function resetStocks(rows) {
 				var stocks = [];
-				for (var i = 0; i < rows.legth; ++i) {
+				_lodash2.default.each(rows, function (el) {
+					console.log(el);
 					stocks.push({
-						name: row[i][0].toUpperCase(),
-						amount: row[i][1].toUpperCase(),
-						price: row[i][2].toUpperCase()
+						name: el[0].toUpperCase(),
+						amount: el[1],
+						price: el[2]
 					});
-				}
+				});
+				this.setState({ stocks: stocks });
 			}
 		}, {
 			key: 'getStocks',
@@ -22929,16 +22929,16 @@
 	
 				var data = {
 					type: (0, _reactDom.findDOMNode)(this.refs.ftype).value,
-					bc: parseInt((0, _reactDom.findDOMNode)(this.refs.fbconst).value)
+					total_spend: parseInt((0, _reactDom.findDOMNode)(this.refs.fbconst).value)
 				};
 	
-				$.getJSON("/predictor/api/get_recommendation", function (data) {
+				$.getJSON("/predictor/api/get_recommendation", data, function (data) {
 					if (data.error) {
 						alert(data.message);
 						return;
 					}
 	
-					_this6.refs.pmanager.resetStocks(data);
+					_this6.refs.pmanager.resetStocks(data.data);
 				});
 			}
 		}, {
@@ -22979,54 +22979,50 @@
 							),
 							_react2.default.createElement('hr', null),
 							_react2.default.createElement(
-								'form',
-								{ className: 'form-inline' },
+								'div',
+								{ className: 'form-group' },
 								_react2.default.createElement(
-									'div',
-									{ className: 'form-group' },
-									_react2.default.createElement(
-										'label',
-										{ 'for': 'exampleInputName2', onClick: this._onClickGetRecom.bind(this) },
-										'Get Recommendation for'
-									),
-									_react2.default.createElement('input', { type: 'text', className: 'form-control', ref: 'fbconst', id: 'exampleInputName2', placeholder: 'how many dollars' })
+									'label',
+									{ 'for': 'exampleInputName2' },
+									'Get Recommendation for'
+								),
+								_react2.default.createElement('input', { type: 'text', className: 'form-control', ref: 'fbconst', id: 'exampleInputName2', placeholder: 'how many dollars' })
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'form-group' },
+								_react2.default.createElement(
+									'label',
+									{ 'for': 'exampleInputName2' },
+									'of type'
 								),
 								_react2.default.createElement(
-									'div',
-									{ className: 'form-group' },
+									'select',
+									{ className: 'form-control', ref: 'ftype', id: 'exampleSelect1' },
 									_react2.default.createElement(
-										'label',
-										{ 'for': 'exampleInputName2' },
-										'of type'
+										'option',
+										{ value: 'control' },
+										'Control'
 									),
 									_react2.default.createElement(
-										'select',
-										{ className: 'form-control', ref: 'ftype', id: 'exampleSelect1' },
-										_react2.default.createElement(
-											'option',
-											{ value: 'control' },
-											'Control'
-										),
-										_react2.default.createElement(
-											'option',
-											{ value: '' },
-											'Best Expected Return'
-										),
-										_react2.default.createElement(
-											'option',
-											{ value: '' },
-											'Best Expected Return + Diversity'
-										)
-									)
-								),
-								_react2.default.createElement(
-									'div',
-									{ className: 'form-group' },
+										'option',
+										{ value: '' },
+										'Best Expected Return'
+									),
 									_react2.default.createElement(
-										'button',
-										{ className: 'btn btn-info' },
-										'Suggest'
+										'option',
+										{ value: '' },
+										'Best Expected Return + Diversity'
 									)
+								)
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'form-group' },
+								_react2.default.createElement(
+									'button',
+									{ className: 'btn btn-info', onClick: this._onClickGetRecom.bind(this) },
+									'Suggest'
 								)
 							),
 							_react2.default.createElement('hr', null),

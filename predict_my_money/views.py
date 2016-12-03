@@ -6,12 +6,13 @@ import json
 from django.shortcuts import render
 from django.template import loader
 from django.urls import reverse
-from predict_my_money.utils import stockAPI, portfolioAPI, stockDayDatabaseInterface
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.views.decorators.http import require_http_methods, require_GET
+from django.contrib.auth.decorators import login_required
 
 from .models import User, Investor, Stock, Portfolio, Stock_Owned, Portfolio_Day
+from predict_my_money.utils import stockAPI, portfolioAPI, stockDayDatabaseInterface
 from predict_my_money.computations.recommender_interface import recommend_diverse_portfolio, recommend_high_return_portfolio, recommend_random_portfolio, \
 	recommend_interfacer
 
@@ -28,30 +29,29 @@ def index(request):
 		return HttpResponseRedirect(reverse('predictor:login'))
 
 
+@login_required
 def home(request):
-	print request.user
+	print Portfolio.objects.all()
+
 	try:
 		user = User.objects.get(pk=request.user.id)
 	except User.DoesNotExist:
 		raise Http404("User does not exist")
 	else:
 		investor = Investor.objects.get(user=request.user.id)
-		return render(request, 'predictor/home.html', {'investor': investor, 'user': user})
+		return render(request, 'predictor/portfolio_detail.html', {'investor': investor, 'user': user})
 
 
 def portfolio_detail(request, portfolio_id):
 	portAPI = portfolioAPI()
 	portfolio = portAPI.getPortfolio(portfolio_id)
-	if portfolio:
-		template = loader.get_template('predictor/portfolio_detail.html')
-		context = {
-			'portfolio' : portfolio
-		}
-		return HttpResponse(template.render(context, request))
-	else:
+	if not portfolio:
 		return render(request, 'predictor/error.html', {
 			'error_message': "Portfolio doesn't exist.",
 		})
+	return render(request, 'predictor/portfolio_detail.html', {
+		'portfolio' : portfolio
+	})
 
 @require_GET
 def stock_detail(request, stock_ticker):

@@ -37,4 +37,5 @@ urlpatterns = [
     url(r'^api/portfolios', api_views.portfolios, name='api_portfolios'),
 
     url(r'^api/get_stock_plot', api_views.get_stock_plot, name='get_stock_plot'),
+    url(r'^api/get_portfolio_plot', api_views.get_portfolio_plot, name='get_portfolio_plot'),
 ]

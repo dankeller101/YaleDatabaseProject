@@ -69,6 +69,24 @@ def portfolio_detail(request, portfolio_id):
 
 #
 
+
+@require_GET
+def get_portfolio_plot(request):
+	ticker = request.GET["stock"]
+	API = stockAPI()
+	stock = API.getStock(ticker)
+
+	if not stock:
+		return JsonResponse({ "data": null }, status=404)
+
+	interface = stockDayDatabaseInterface()
+	days = interface.getAllDaysOrdered(stock)
+	array = []
+	for day in days:
+		array.append({'date' : day.day.strftime("%d-%b-%y"), 'close' : day.adjustedClose})
+
+	return JsonResponse({ "data": array })
+
 @require_GET
 def get_stock_plot(request):
 	ticker = request.GET["stock"]

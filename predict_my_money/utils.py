@@ -143,6 +143,8 @@ class portfolioAPI():
             # if stock does not exist
             return None
         else:
+            if not portfolio:
+                return None
             current_date = datetime.date.today()
             if portfolio.end_date.date < current_date - datetime.timedelta(days=1):
                 recentDay = self.fixPortfolioDays(portfolio_id, portfolio.end_date)

@@ -22689,7 +22689,7 @@
 	        return;
 	      }
 	
-	      $.getJSON("/predictor/api/get_stock?stock=" + name, function (data) {
+	      $.getJSON("/predictor/api/get_stock?name=" + name, function (data) {
 	        if (data.error) {
 	          alert('Stock not found.');
 	          return;
@@ -22707,8 +22707,13 @@
 	  }, {
 	    key: 'render',
 	    value: function render() {
+	      var _this3 = this;
 	
 	      var stockList = this.state.stocks.map(function (e, i) {
+	        var remove = function remove() {
+	          _this3.setState({ stocks: _lodash2.default.remove(_this3.state.stocks, { name: e.name }) });
+	        };
+	
 	        return _react2.default.createElement(
 	          'tr',
 	          { key: e.name },
@@ -22738,7 +22743,7 @@
 	            null,
 	            _react2.default.createElement(
 	              'button',
-	              { className: 'btn btn-danger' },
+	              { className: 'btn btn-danger', onClick: remove },
 	              'Remove'
 	            )
 	          )
@@ -22841,16 +22846,16 @@
 	  function NewPortfolioView(props) {
 	    _classCallCheck(this, NewPortfolioView);
 	
-	    var _this3 = _possibleConstructorReturn(this, (NewPortfolioView.__proto__ || Object.getPrototypeOf(NewPortfolioView)).call(this, props));
+	    var _this4 = _possibleConstructorReturn(this, (NewPortfolioView.__proto__ || Object.getPrototypeOf(NewPortfolioView)).call(this, props));
 	
-	    _this3.state = { stocks: [] };
-	    return _this3;
+	    _this4.state = { stocks: [] };
+	    return _this4;
 	  }
 	
 	  _createClass(NewPortfolioView, [{
 	    key: '_updatePlot',
 	    value: function _updatePlot() {
-	      var _this4 = this;
+	      var _this5 = this;
 	
 	      $.getJSON("/predictor/api/gen_portfolio_plot?stocks=" + this.props.id, function (data) {
 	        var points = [];
@@ -22862,7 +22867,7 @@
 	            points.push(data.data[i]);
 	          }
 	        }
-	        plotData(points, (0, _reactDom.findDOMNode)(_this4.refs.plot));
+	        plotData(points, (0, _reactDom.findDOMNode)(_this5.refs.plot));
 	      });
 	    }
 	  }, {
@@ -22916,7 +22921,7 @@
 	                _react2.default.createElement(
 	                  'label',
 	                  { 'for': 'exampleInputName2' },
-	                  'Get Recommendation for\xA0'
+	                  'Get Recommendation for'
 	                ),
 	                _react2.default.createElement('input', { type: 'text', className: 'form-control', id: 'exampleInputName2', placeholder: 'how many dollars' })
 	              ),
@@ -22926,7 +22931,7 @@
 	                _react2.default.createElement(
 	                  'label',
 	                  { 'for': 'exampleInputName2' },
-	                  'of type\xA0'
+	                  'of type'
 	                ),
 	                _react2.default.createElement(
 	                  'select',

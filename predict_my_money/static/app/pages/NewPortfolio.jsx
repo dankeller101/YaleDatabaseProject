@@ -39,7 +39,7 @@ class PortfolioEditor extends React.Component {
       return
     }
 
-    $.getJSON("/predictor/api/get_stock?stock="+name, (data) => {
+    $.getJSON("/predictor/api/get_stock?name="+name, (data) => {
       if (data.error) {
         alert('Stock not found.')
         return;
@@ -58,13 +58,17 @@ class PortfolioEditor extends React.Component {
   render() {
 
     var stockList = this.state.stocks.map((e, i) => {
+      var remove = () => {
+        this.setState({ stocks: _.remove(this.state.stocks, { name: e.name })})
+      }
+
       return (
         <tr key={ e.name }>
           <td>{ i+1 }</td>
           <td>{ e.name }</td>
           <td>{ e.amount }</td>
           <td>${ e.price }</td>
-          <td><button className="btn btn-danger">Remove</button></td>
+          <td><button className="btn btn-danger" onClick={remove}>Remove</button></td>
         </tr>
       )
     })
@@ -155,12 +159,12 @@ export default class NewPortfolioView extends React.Component {
 
             <form className="form-inline">
               <div className="form-group">
-                <label for="exampleInputName2">Get Recommendation for&nbsp;</label>
+                <label for="exampleInputName2">Get Recommendation for</label>
                 <input type="text" className="form-control" id="exampleInputName2" placeholder="how many dollars" />
               </div>
 
               <div className="form-group">
-                <label for="exampleInputName2">of type&nbsp;</label>
+                <label for="exampleInputName2">of type</label>
 
                 <select className="form-control" id="exampleSelect1">
                   <option>Control</option>

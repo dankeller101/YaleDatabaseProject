@@ -22695,7 +22695,11 @@
 	          return;
 	        }
 	
-	        _this2.state.stocks.push({ name: name, amount: amount, price: data.price });
+	        _this2.state.stocks.push({
+	          name: name,
+	          amount: amount,
+	          price: data.current_adjusted_close
+	        });
 	
 	        _this2.props.onUpdate(_this2.state.stocks);
 	      });

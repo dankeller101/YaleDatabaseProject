@@ -16,14 +16,17 @@ urlpatterns = [
     #example /1/home
     url(r'^home', views.home, name='home'),
     
+
+    url(r'^portfolios/compare', views.portfolio_compare, name='portfolio_compare'),
+
     #example /stock/view/GOOGL
     url(r'^stock/view/(?P<stock_ticker>[a-z]+)', views.stock_detail, name='stock_detail'),
     #example /portfolio/create
-    url(r'^portfolio/create', views.create_portfolio, name='create_portfolio'),
+    url(r'^portfolios/create', views.create_portfolio, name='create_portfolio'),
     #example /portfolio/make
-    url(r'^portfolio/make', views.make_portfolio, name='make_portfolio'),
+    url(r'^portfolios/make', views.make_portfolio, name='make_portfolio'),
     #example /portfolio/view/1
-    url(r'^portfolio/view/(?P<portfolio_id>[0-9]+)', views.portfolio_detail, name='portfolio_detail'),
+    url(r'^portfolios/view/(?P<portfolio_id>[0-9]+)', views.portfolio_detail, name='portfolio_detail'),
     #example /portfolio/recommend
     # url(r'^api/get_recommendation', api_views.get_recommendation, name='get_recommendation'),
     # #example /portfolio/1
@@ -36,6 +39,7 @@ urlpatterns = [
     url(r'^api/portfolios/(?P<id>[0-9]+)', api_views.portfolio, name='api_portfolio'),
     url(r'^api/portfolios', api_views.portfolios, name='api_portfolios'),
 
+    url(r'^api/get_stock', api_views.get_stock, name='get_stock'),
     url(r'^api/get_stock_plot', api_views.get_stock_plot, name='get_stock_plot'),
     url(r'^api/get_portfolio_plot', api_views.get_portfolio_plot, name='get_portfolio_plot'),
 ]

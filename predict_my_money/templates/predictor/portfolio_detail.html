@@ -16,7 +16,7 @@ window.data = {{ investor.portfolio_set }};
 </script>
 {% endblock %}
 
-{% block content %}
+{% block nav %}
 <nav class="navbar navbar-dark bg-inverse">
   <a class="navbar-brand" href="#">StockPredictor</a>
   <ul class="nav navbar-nav">
@@ -44,9 +44,10 @@ window.data = {{ investor.portfolio_set }};
     <button class="btn btn-outline-info" type="submit">Go</button>
   </form>
 </nav>
+{% endblock %}
 
+{% block content %}
 <br />
-
 <div id="app"></div>
 
 {% endblock %}

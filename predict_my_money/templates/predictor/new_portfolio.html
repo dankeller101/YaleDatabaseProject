@@ -13,7 +13,7 @@ window.data = { stock: '{{ stock_ticker }}' };
 <script>startNewPortfolioView();</script>
 {% endblock %}
 
-{% block content %}
+{% block nav %}
 <nav class="navbar navbar-dark bg-inverse">
   <a class="navbar-brand" href="#">StockPredictor</a>
   <ul class="nav navbar-nav">
@@ -41,6 +41,9 @@ window.data = { stock: '{{ stock_ticker }}' };
   </form>
 </nav>
 
+{% endblock %}
+
+{% block content %}
 <div id="app"></div>
 
 {% endblock %}

@@ -52,6 +52,11 @@ def portfolio_detail(request, portfolio_id):
 		'portfolio' : portfolio
 	})
 
+
+@require_GET
+def portfolio_compare(request):
+	return render(request, 'predictor/portfolio_compare.html', {})
+
 @require_GET
 def stock_detail(request, stock_ticker):
 	return render(request, 'predictor/stock.html', {

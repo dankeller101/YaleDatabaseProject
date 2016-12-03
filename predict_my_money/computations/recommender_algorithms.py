@@ -82,16 +82,22 @@ def preprocessing_steps(stock_prices, normalize=True, log=True):
     n, p = stock_prices.shape
 
     # take the log first
-    stock_prices = np.log(stock_prices)
+    if log:
+        stock_prices += 1.0 # add 1 across the board for log
+        stock_prices = np.log(stock_prices)
 
     # then normalize the data -- take care to not run into divide by zero issues
-    stock_prices_mean = np.mean(stock_prices, axis=1).reshape(n, 1)
-    stock_prices_var = np.std(stock_prices, axis=1).reshape(n, 1)
-    ind_zero_var = np.argwhere(stock_prices_var == 0)
-    stock_prices_var[ind_zero_var] = 1.0
+    if normalize:
+        stock_prices_mean = np.mean(stock_prices, axis=1).reshape(n, 1)
+        stock_prices_var = np.std(stock_prices, axis=1).reshape(n, 1)
+        ind_zero_var = np.argwhere(stock_prices_var == 0)
+        stock_prices_var[ind_zero_var] = 1.0
 
-    # normalization step
-    stock_prices = (stock_prices - stock_prices_mean) / stock_prices_var
+        # normalization step
+        stock_prices = (stock_prices - stock_prices_mean) / stock_prices_var
+    else:
+        stock_prices_mean = None
+        stock_prices_var = None
 
     return stock_prices, stock_prices_mean, stock_prices_var
 
@@ -104,6 +110,7 @@ def postprocessing_steps(stock_prices, normalize=True, log=True, mean=None, var=
 
     if log:
         stock_prices = np.exp(stock_prices)
+        stock_prices -= 1.0
 
     return stock_prices
 
@@ -169,7 +176,7 @@ def forecast_price(stock_prices, time_horizon, model='arima', max_order=20, prep
 
     return forecasted_prices
 
-def recommend_high_return_portfolio(stock_ids, stock_prices, budget, time_horizon=14, max_investment=None, model='arima', preprocess=False):
+def recommend_high_return_portfolio(stock_ids, stock_prices, budget, time_horizon=14, max_investment=None, model='var', preprocess=True):
 
     """
     Recommends a portfolio by fitting an autoregressive integrated moving average (ARIMA) model to stock prices,
@@ -200,12 +207,17 @@ def recommend_high_return_portfolio(stock_ids, stock_prices, budget, time_horizo
     if (max_investment is not None) and (max_investment < 0):
         raise ValueError('Max investment must be nonnegative')
 
+    # set max_investment to budget if it is not given
+    if max_investment is None:
+        max_investment = budget
+
     # forecast the prices using model
     forecasted_prices = forecast_price(stock_prices, time_horizon=time_horizon, model=model, preprocess=preprocess)
 
     # compute the TSR
     first_price = stock_prices[:, 0]
-    single_share_tsr = (forecasted_prices - first_price) / first_price
+    last_forecast_price = forecasted_prices[:, -1]
+    single_share_tsr = (last_forecast_price - first_price) / first_price
 
     # initialize portfolio and initial budget
     portfolio = {}
@@ -217,7 +229,7 @@ def recommend_high_return_portfolio(stock_ids, stock_prices, budget, time_horizo
 
         # select the highest predicted TSR, get price, maximum number of shares we can purchase
         i = np.argmax(scratch_tsr)
-        price = stock_prices[i]
+        price = stock_prices[i, -1] # most recent day
         max_shares = int(np.floor(min(current_budget, max_investment) / price))
 
         # break if we reach a stock that we cannot afford a single share
@@ -226,17 +238,18 @@ def recommend_high_return_portfolio(stock_ids, stock_prices, budget, time_horizo
         else:
 
             # if this is the last stock, add all of it
-            if np.sum(scratch_tsr == -np.inf) == 1:
+            if np.sum(scratch_tsr != -np.inf) == 1:
                 portfolio[stock_ids[i].stock_name] = int(np.floor(current_budget / price))
                 break
             else:
                 # select shares, remove from potential stocks, set tsr to negative
                 portfolio[stock_ids[i].stock_name] = max_shares
                 scratch_tsr[i] = -np.inf
+                current_budget -= max_shares * price
 
     return portfolio
 
-def recommend_diverse_portfolio(stock_ids, stock_prices, budget, time_horizon=14, max_investment=None, diverse_thresh=0.2, model='var', preprocess=False):
+def recommend_diverse_portfolio(stock_ids, stock_prices, budget, time_horizon=14, max_investment=None, diverse_thresh=0.2, model='var', preprocess=True):
     """
         Recommends a portfolio by fitting an autoregressive integrated moving average (ARIMA) model to stock prices,
         forecasting to a further time horizon. Next, the correlation matrix is chosen. Stocks are greedily chosen such
@@ -268,14 +281,22 @@ def recommend_diverse_portfolio(stock_ids, stock_prices, budget, time_horizon=14
     if (max_investment is not None) and (max_investment < 0):
         raise ValueError('Max investment must be nonnegative')
 
+    # set max_investment to budget if it is not given
+    if max_investment is None:
+        # max_investment = budget
+
+        # DEBUG -- set it to lower than that
+        max_investment = budget / 6.
+
     n, p = stock_prices.shape
 
     # forecast the prices using model
     forecasted_prices = forecast_price(stock_prices, time_horizon=time_horizon, model=model, preprocess=preprocess)
 
-    # compute the TSR (excluding dividends)
+    # compute the TSR
     first_price = stock_prices[:, 0]
-    single_share_tsr = (forecasted_prices - first_price) / first_price
+    last_forecast_price = forecasted_prices[:, -1]
+    single_share_tsr = (last_forecast_price - first_price) / first_price
 
     # get the matrix of correlation coefficients
     cor_mat = np.abs(np.corrcoef(x=stock_prices))
@@ -291,7 +312,7 @@ def recommend_diverse_portfolio(stock_ids, stock_prices, budget, time_horizon=14
 
         # get the diverse options with respect to the current portfolio
         if not portfolio:
-            diverse_options = set(range(n))
+            diverse_options = [i for i in range(n)]
         else:
             diverse_options = [i for i in diverse_options if np.min(cor_mat[i, port_ind]) < diverse_thresh]
 
@@ -302,7 +323,7 @@ def recommend_diverse_portfolio(stock_ids, stock_prices, budget, time_horizon=14
 
         # else, choose the diverse option with the highest forecasted TSR
         i = diverse_options[np.argmax(scratch_tsr[diverse_options])]
-        price = stock_prices[i]
+        price = stock_prices[i, -1]  # most recent day
         max_shares = int(np.floor(min(current_budget, max_investment) / price))
 
         # break if we reach a stock that we cannot afford a single share
@@ -320,6 +341,7 @@ def recommend_diverse_portfolio(stock_ids, stock_prices, budget, time_horizon=14
                 diverse_options.remove(i)
                 port_ind.append(i)
                 scratch_tsr[i] = -np.inf
+                current_budget -= max_shares * price
 
     return portfolio
 

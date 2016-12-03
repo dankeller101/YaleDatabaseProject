@@ -24,7 +24,11 @@ class stockDayDatabaseInterface():
                     if toBeDestroyed:
                         toBeDestroyed.delete()
                     toBeDestroyed = time
-            return toBeDestroyed
+                return toBeDestroyed
+            elif len(day) == 1:
+                return day[0]
+            else:
+                return None
 
     def getRangeDaysOrdered(self, stock, earliestDate, LatestDate):
         days = Stock_Day.objects.order_by('day').filter(day__lte=LatestDate).filter(day__gte=earliestDate).filter(stock=stock)

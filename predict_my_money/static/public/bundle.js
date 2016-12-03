@@ -22986,7 +22986,7 @@
 									{ className: 'form-group' },
 									_react2.default.createElement(
 										'label',
-										{ 'for': 'exampleInputName2', onClick: 'this._onClickGetRecom.bind(this)' },
+										{ 'for': 'exampleInputName2', onClick: this._onClickGetRecom.bind(this) },
 										'Get Recommendation for'
 									),
 									_react2.default.createElement('input', { type: 'text', className: 'form-control', ref: 'fbconst', id: 'exampleInputName2', placeholder: 'how many dollars' })

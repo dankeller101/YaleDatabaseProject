@@ -55,6 +55,100 @@ class SandP():
         #     "XEL", "XRX", "XLNX", "XL", "XYL", "YHOO", "YUM", "ZBH", "ZION", "ZTS"
         # ]
 
+
+def get_stock_price_array(stock_list, first_date, last_date):
+
+    # initialize interface object
+    interfaceObject = stockDayDatabaseInterface()
+
+    # get all historical stock data into a 2D numpy array -- start with dict, put into numpy array later
+    num_stocks = len(stock_list)
+    stock_price_dict = {}
+
+    for i, stock in enumerate(stock_list):
+
+        # get all days in the range that we have in the database
+        days = interfaceObject.getRangeDaysOrdered(stock, first_date, last_date)
+
+        # add days to stock price
+        for day in days:
+            # only do anything if that day is not None
+            if day:
+                # if this day already exists, update the numpy array
+                if day.day in stock_price_dict.keys():
+                    stock_price_dict[day.day][i] = day.adjustedClose
+                # else if this day does not exist, then create a numpy array initialized to all entries nan
+                else:
+                    stock_price_dict[day.day] = np.empty(num_stocks) * np.nan
+                    stock_price_dict[day.day][i] = day.adjustedClose
+
+    # turn the dictionary into a 2D numpy array using column stack
+    date_list = sorted(stock_price_dict.keys())
+    stock_prices = np.column_stack(tuple([stock_price_dict[k] for k in date_list]))
+
+    # Clean the data
+    # 1. Remove any stock that is missing more than 75% of the data
+    percent_missing_threshold = 0.75
+    n, p = stock_prices.shape
+    keep_rows = np.sum(np.isnan(stock_prices), axis=1) < p * percent_missing_threshold
+    stock_prices = stock_prices[keep_rows, :]
+    stock_list = [stock for i, stock in enumerate(stock_list) if keep_rows[i]]
+
+    # 2. For each day we have,
+    #       If there is less than 75% of the data, remove it
+    #       Otherwise, interpolate data from 5 days before or 5 days after
+    #           if 10 consecutive days are missing, remove the stock
+
+    # remove days with few data points
+    keep_columns = np.sum(np.isnan(stock_prices), axis=0) < p * percent_missing_threshold
+    stock_prices = stock_prices[:, keep_columns]
+    date_list = [date for i, date in enumerate(date_list) if keep_columns[i]]
+
+    # interpolate those where they are missing
+    rows_to_remove = []
+    for ind in np.argwhere(np.isnan(stock_prices)):
+
+        # try going backward 5 days
+        interpolated = False
+        for i in np.arange(1, 6):
+            try:
+                interp = stock_prices[ind[0], ind[1] - i]
+                if np.isreal(interp):
+                    stock_prices[ind[0], ind[1]] = interp
+                    interpolated = True
+                    break
+            except IndexError:
+                break
+
+        # try going forward 5 days
+        if not interpolated:
+            for i in np.arange(1, 6):
+                try:
+                    interp = stock_prices[ind[0], ind[1] + i]
+                    if np.isreal(interp):
+                        stock_prices[ind[0], ind[1]] = interp
+                        interpolated = True
+                        break
+                except IndexError:
+                    break
+
+        # if not interpolated, remove that stock
+        if not interpolated:
+            rows_to_remove.append(ind[0])
+
+    # remove the finals rows that had 10 consecutive days missing
+    stock_prices = np.delete(stock_prices, rows_to_remove, axis=0)
+    stock_list = [stock for i, stock in enumerate(stock_list) if not keep_rows[i]]
+
+    # raise an error if we have too few days to run our model on
+    lower_threshold_on_days = stock_prices.shape[0]  # howl if we have more stocks than days
+    lower_threshold_on_stocks = num_stocks * 0.75
+    if stock_prices.shape[1] <= lower_threshold_on_days or stock_prices.shape[0] <= lower_threshold_on_stocks:
+        raise RuntimeError('There is not enough clean data for the days and stocks requested')
+
+    return stock_prices, stock_list, date_list
+
+
 def recommend_interfacer(recommend_type='random', potential_stocks=None, num_observed_days=730, **kwargs):
 
     """
@@ -214,8 +308,6 @@ def recommend_interfacer(recommend_type='random', potential_stocks=None, num_obs
 
         # remove the finals rows that had 10 consecutive days missing
         stock_prices = np.delete(stock_prices, rows_to_remove, axis=0)
-
-        # TODO: add a front end part that checks that there are less days requested than stocks...maybe we should also check it here
 
         # raise an error if we have too few days to run our model on
         lower_threshold_on_days = stock_prices.shape[0]  # howl if we have more stocks than days

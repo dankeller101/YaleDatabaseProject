@@ -239,7 +239,7 @@ def recommend_high_return_portfolio(stock_ids, stock_prices, budget, time_horizo
 
             # if this is the last stock, add all of it
             if np.sum(scratch_tsr != -np.inf) == 1:
-                portfolio[stock_ids[i].stock_name] = int(np.floor(current_budget / price))
+                portfolio[stock_ids[i].stock_name] = (int(np.floor(current_budget / price)), price)
                 break
             else:
                 # select shares, remove from potential stocks, set tsr to negative
@@ -330,7 +330,7 @@ def recommend_diverse_portfolio(stock_ids, stock_prices, budget, time_horizon=14
 
             # if this is the last stock, add all of it
             if len(diverse_options) == 1:
-                portfolio[stock_ids[i].stock_name] = int(np.floor(current_budget / price))
+                portfolio[stock_ids[i].stock_name] = (int(np.floor(current_budget / price)), price)
                 break
             else:
                 # select shares, remove from diverse options, add to portfolio indices, put tsr as lowest

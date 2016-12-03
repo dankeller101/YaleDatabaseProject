@@ -50,10 +50,27 @@ Describe main contributions of our system at a high level. Compare to existing s
 \section{Functionality and Walkthrough}
 
 \section{Recommender Algorithms}
-Perhaps the most interesting and novel feature of Portfolio Playground is the provided recommender algorithms. In this section, we describe these algorithms in detail.
+Perhaps the most interesting and novel feature of Portfolio Playground is the provided recommender algorithms. In this section, we describe these algorithms in detail. At the end of the section, we point out potential flaws in these algorithms and why these flaws don't pose 
 
 \subsection{Random}
 The random portfolio recommendation algorithm recommends a random portfolio under given budget constraints. At each step of the algorithm, a random stock and number of shares are chosen subject to budget constraints until the budget has been met. A short description of the algorithm is given below.
+
+\begin{algorithm}
+\DontPrintSemicolon
+\KwIn{Ground set $V$, cardinality constraint $k$, deletions $d$, threshold parameter $v$, robust parameter $\alpha$}
+\KwOut{A set $S \subset V$}
+$m \gets \max_{e \in V} f(e)$\;
+$\tau \gets v m$\;
+$A_v=\tau \gets \{e | e \in V, \Delta(e | S) \geq \tau\} $\;
+\While{$|S| < k$ \textbf{and} $|A_v| \geq \alpha d$}{
+    $s \gets \text{ uniformly random element in } A_\tau$\;
+    $S \gets S \cup \{s\}$\;
+    $A_\tau \gets \{e | e \in V, \Delta(e | S) \geq \tau\} $\;
+}
+\Return{$S$}
+\caption{{\sc Fixed Threshold}}
+\label{algo:fixed}
+\end{algorithm}
 
 \subsection{Highest Return}
 The highest return portfolio recommendation algorithm recommends a portfolio that maximizes expected total stock return (TSR) under budget constraints such as total budget and maximum investment per stock. First, a vector auto-regressive model (VAR) is fit to the data, using cross validation for parameter selection. Next, stocks are greedily added to the portfolio until the budget has been met. A short description of the algorithm is given below.

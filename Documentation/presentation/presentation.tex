@@ -78,6 +78,33 @@
 
 \section*{Motivation}
 \begin{frame}{Motivation}
+\centering
+We've \textbf{all} wanted to trade stocks 
+
+\pause
+
+\includegraphics[width=0.5\textwidth]{wallstreet_2}
+
+\pause
+
+...but are afraid to lose large amounts of money
+
+\includegraphics[width=0.5\textwidth]{lose_money}
+  
+\end{frame}
+
+\begin{frame}{Motivation}
+\textbf{Solution:} \emph{Paper Trading} -  simulated trading to practice buying and selling securities without actual money being involved.
+
+\begin{center}
+\includegraphics[width=0.5\textwidth]{stock_stock}
+\end{center}
+
+\pause
+
+Enter \textbf{\textcolor{blue}{ Portfolio Playground}}, the premier paper-trading web application developed at Yale University!
+
+
   
 \end{frame}
 
@@ -150,14 +177,52 @@ The most unique feature of Portfolio Playground is its state-of-the-art recommen
 
 \section{Recommender Algorithms}
 \begin{frame}{Recommender Algorithms - Random}
+The Random algorithm recommends a random portfolio under a total budget constraint.
 
+\begin{block}{Highest Return}
+\begin{enumerate}
+	\item Initialize portfolio $P = \emptyset$. Until budget constraints active,
+		\begin{enumerate}
+			\item $P \leftarrow P +$ random stock, random number of shares (under budget constraint)
+		\end{enumerate}
+\end{enumerate}
+\end{block}
+
+\pause
+This can be used as a ``control portfolio'' and can also test the Efficient Market Hypothesis!
 \end{frame}
 
+
 \begin{frame}{Recommender Algorithms - Highest Return}
+The Highest Return algorithm recommends an optimal forecasted portfolio under budget constraints such as total portfolio budget and maximum investment per stock.
+
+\begin{block}{Highest Return}
+\begin{enumerate}
+	\item Fit a Vector Autoregression Model to historical stock data
+	\item Forecast the stock prices $d$ days away
+	\item Initialize portfolio $P = \emptyset$. Until budget constraints active,
+		\begin{enumerate}
+			\item $P \leftarrow P +$ stock that maximizes TSR
+		\end{enumerate}
+\end{enumerate}
+\end{block}
 
 \end{frame}
 
 \begin{frame}{Recommender Algorithms - Diverse Options}
+The Diverse Options algorithm recommends an optimal portfolio under budget constraints and \emph{diversity} or \emph{correlation} constraints.
+
+\begin{block}{Diverse Options}
+\begin{enumerate}
+	\item Fit a Vector Autoregression Model to historical stock data
+	\item Forecast the stock prices $d$ days away
+	\item Initialize portfolio $P = \emptyset$. Until budget constraints active,
+		\begin{enumerate}
+			\item $A = \{s | corr(s,x) < \sigma \ \forall \ x \in P\}$ (options diverse from $P$)
+			\item $P \leftarrow P +$ stock from $A$ that maximizes TSR
+		\end{enumerate}
+\end{enumerate}
+\end{block}
 
 \end{frame}
 
@@ -178,9 +243,17 @@ A diagram of the architecture goes here.
 
 \end{frame}
 
-\section{Front End}
+\section{Front End Design}
 
-\begin{frame}{Front End}
+\begin{frame}{Front End Design}
+
+What are the design decisions?
+
+\end{frame}
+
+\begin{frame}{Front End Design}
+
+What tools did we use to achieve this?
 
 \end{frame}
 

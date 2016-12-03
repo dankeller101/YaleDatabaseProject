@@ -119,10 +119,12 @@ def get_recommendation(request):
 		rtype = "high_return"
 
 	a = recommend_interfacer(recommend_type=rtype, budget=totalspend)
+	print(a)
 	ret = []
 	for m in a:
-		ret.append([m, a[m]])
-	print ret
+		print(m, a[m])
+		ret.append([m, a[m][0], a[m][1]])
+	print(ret)
 	return JsonResponse({ "data": ret })
 
 def portfolio(request, id):
@@ -155,12 +157,17 @@ def portfolios(request):
 	elif request.method == "POST":
 		portfolio = Portfolio()
 		portfolio.portfolio_name = request.POST['name']
+		portfolio.start_date = datetime.datetime.today()
+		portfolio.end_date = datetime.datetime.today() - datetime.timedelta(days=10000000000)
 		portfolio.investor = Investor.objects.get(user=request.user)
+		portfolio.save()
 
 		stocks = json.loads(request.POST["_stocks"])
 
 		for order in stocks:
-			sname, quantity = order
+			sname = order['name']
+			quantity = order['amount']
+
 			stock = sapi.getStock(sname)
 			if not stock:
 				return JsonResponse({ "error": True, "message": "Stock not found." })

@@ -16,6 +16,8 @@ from predict_my_money.utils import stockAPI, portfolioAPI
 from predict_my_money.computations.recommender_interface import recommend_diverse_portfolio, recommend_high_return_portfolio, recommend_random_portfolio, \
 	recommend_interfacer
 
+sapi = stockAPI()
+papi = portfolioAPI()
 
 def error(request):
 	return HttpResponse("An Error occured.")
@@ -35,14 +37,19 @@ def home(request):
 		user = User.objects.get(pk=request.user.id)
 	except User.DoesNotExist:
 		raise Http404("User does not exist")
-	else:
-		investor = Investor.objects.get(user=request.user.id)
-		return render(request, 'predictor/portfolio_detail.html', {'investor': investor, 'user': user})
+
+	investor = Investor.objects.get(user=request.user.id)
+	portfolios = Portfolio.objects.filter(investor=investor)
+
+	return render(request, 'predictor/home.html', {
+		'investor': investor,
+		'portfolios': portfolios,
+		'user': user
+	})
 
 
 def portfolio_detail(request, portfolio_id):
-	portAPI = portfolioAPI()
-	portfolio = portAPI.getPortfolio(portfolio_id)
+	portfolio = papi.getPortfolio(portfolio_id)
 	if not portfolio:
 		return render(request, 'predictor/error.html', {
 			'error_message': "Portfolio doesn't exist.",
@@ -65,34 +72,6 @@ def stock_detail(request, stock_ticker):
 @require_GET
 def create_portfolio(request):
 	return render(request, 'predictor/new_portfolio.html')
-
-def make_portfolio(request):
-	if request.method == "POST":
-		current_user = request.user
-		API = stockAPI()
-		portfolio = Portfolio()
-		portfolio.portfolio_name = request.POST['name']
-		portfolio.investor = Investor.objects.get(user=current_user)
-		portfolio.save()
-		stocks = request.POST['stock-tickers'].split()
-		stock_owned = Stock_Owned()
-		stock = stocks[0]
-		quantity = stocks[1]
-		stock = API.getStock(stock)
-		if not stock:
-			return render(request, 'predictor/error.html', {
-				'error_message': "Stock doesn't exist.",
-			})
-		stock_owned.portfolio = portfolio
-		stock_owned.stock = stock
-		stock_owned.bought_on = datetime.date.today()
-		stock_owned.bought_at = stock.current_high
-		stock_owned.amount_owned = quantity
-		return HttpResponseRedirect(reverse('predictor:home', args=(current_user.id,)))
-	else:
-		return render(request, 'predictor/error.html', {
-			'error_message': "You didn't submit a portfolio.",
-		})
 
 
 def portfolio_detail_json(request, portfolio_id):

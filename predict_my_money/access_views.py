@@ -20,7 +20,7 @@ def register(request):
 		context = {}
 		return HttpResponse(template.render(context, request))
 	elif request.method == "POST":
-		username = request.POST['username']
+		username = request.POST['email']
 		password = request.POST['password']
 		email = request.POST['email']
 		name = request.POST['name']

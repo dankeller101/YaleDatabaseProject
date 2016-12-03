@@ -23,10 +23,8 @@ urlpatterns = [
     url(r'^stock/view/(?P<stock_ticker>[a-z]+)', views.stock_detail, name='stock_detail'),
     #example /portfolio/create
     url(r'^portfolios/create', views.create_portfolio, name='create_portfolio'),
-    #example /portfolio/make
-    url(r'^portfolios/make', views.make_portfolio, name='make_portfolio'),
     #example /portfolio/view/1
-    url(r'^portfolios/view/(?P<portfolio_id>[0-9]+)', views.portfolio_detail, name='portfolio_detail'),
+    url(r'^portfolios/(?P<portfolio_id>[0-9]+)', views.portfolio_detail, name='portfolio_detail'),
     #example /portfolio/recommend
     # url(r'^api/get_recommendation', api_views.get_recommendation, name='get_recommendation'),
     # #example /portfolio/1

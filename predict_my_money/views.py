@@ -9,11 +9,11 @@ from django.urls import reverse
 from predict_my_money.utils import stockAPI, portfolioAPI, stockDayDatabaseInterface
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseRedirect, HttpResponse, Http404
+from django.views.decorators.http import require_http_methods, require_GET
 
 from .models import User, Investor, Stock, Portfolio, Stock_Owned, Portfolio_Day
 from predict_my_money.computations.recommender_interface import recommend_diverse_portfolio, recommend_high_return_portfolio, recommend_random_portfolio, \
 	recommend_interfacer
-
 
 
 def error(request):
@@ -53,36 +53,15 @@ def portfolio_detail(request, portfolio_id):
 			'error_message': "Portfolio doesn't exist.",
 		})
 
-
+@require_GET
 def stock_detail(request, stock_ticker):
-	if request.method == "POST":
-		ticker = request.POST['ticker']
-	else:
-		ticker = stock_ticker
-	API = stockAPI()
-	stock = API.getStock(ticker)
+	return render(request, 'predictor/stock.html', {
+		'stock_ticker': stock_ticker,
+	})
 
-	if not stock:
-		return render(request, 'predictor/error.html', {
-			'error_message': "Stock does not exist",
-		})
-	else:
-		interface = stockDayDatabaseInterface()
-		days = interface.getAllDaysOrdered(stock)
-		array = []
-		for day in days:
-			array.append({'date' : day.day.strftime("%d-%b-%y"), 'close' : day.adjustedClose})
-		days = json.dumps(array)
-	template = loader.get_template('predictor/stock_detail.html')
-	context = {
-		'data' : days,
-	}
-	return HttpResponse(template.render(context, request))
-
+@require_GET
 def create_portfolio(request):
-	template = loader.get_template('predictor/create_portfolio.html')
-	context = {}
-	return HttpResponse(template.render(context, request));
+	return render(request, 'predictor/new_portfolio.html')
 
 def make_portfolio(request):
 	if request.method == "POST":

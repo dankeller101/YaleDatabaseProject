@@ -8,16 +8,26 @@ var APP_DIR = path.resolve(__dirname, 'app');
 var config = {
 	entry: APP_DIR + '/index.jsx',
 	module: {
-		loaders: [
-			{
-				test: /\.jsx?$/,
-				exclude: /node_modules/,
-				include: APP_DIR,
-				loader: 'babel',
-				query: {
-	        presets:['react']
-	      }
-			}
+    loaders: [
+      {
+        test: /.jsx?$/,
+        loader: 'babel-loader',
+        include: APP_DIR,
+        exclude: /node_modules/,
+        query: {
+          presets: ['es2015', 'react']
+        }
+      }
+		// loaders: [
+		// 	{
+		
+		// 		exclude: /node_modules/,
+		// 		include: APP_DIR,
+		// 		loader: 'babel',
+		// 		query: {
+	 //        presets:['react']
+	 //      }
+		// 	}
 		]
 	},
 	output: {

@@ -45,7 +45,11 @@ class PortfolioEditor extends React.Component {
         return;
       }
 
-      this.state.stocks.push({ name: name, amount: amount, price: data.price})
+      this.state.stocks.push({
+        name: name,
+        amount: amount,
+        price: data.current_adjusted_close
+      })
 
       this.props.onUpdate(this.state.stocks)
     })

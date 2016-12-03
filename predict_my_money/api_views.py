@@ -90,20 +90,35 @@ def get_portfolio_plot(request):
 
 @require_GET
 def get_stock(request):
-	ticker = request.GET["stock"]
+	ticker = request.GET["name"]
 	API = stockAPI()
 	stock = API.getStock(ticker)
 
 	if not stock:
 		return JsonResponse({ "data": null }, status=404)
 
-	interface = stockDayDatabaseInterface()
-	days = interface.getAllDaysOrdered(stock)
-	array = []
-	for day in days:
-		array.append({'date' : day.day.strftime("%d-%b-%y"), 'close' : day.adjustedClose})
 
-	return JsonResponse({ "data": array })
+
+	# interface = stockDayDatabaseInterface()
+
+	# days = interface.getLatestPrice(stock)
+	# print(days)
+	# # array = []
+	# for day in days:
+	# 	array.append({'date' : day.day.strftime("%d-%b-%y"), 'close' : day.adjustedClose})
+
+	return JsonResponse({
+		"data": {
+		    "stock_name": stock.stock_name, 
+		    "company_name": stock.company_name, 
+		    "company_meta": stock.company_meta, 
+		    "current_high": stock.current_high, 
+		    "current_low": stock.current_low, 
+		    "current_adjusted_close": stock.current_adjusted_close, 
+		    "start_date": stock.start_date, 
+		    "end_date": stock.end_date, 
+		}
+	})
 
 @require_GET
 def get_stock_plot(request):

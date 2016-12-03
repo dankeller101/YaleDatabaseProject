@@ -16,36 +16,6 @@ window.data = {{ investor.portfolio_set }};
 </script>
 {% endblock %}
 
-{% block nav %}
-<nav class="navbar navbar-dark bg-inverse">
-  <a class="navbar-brand" href="#">StockPredictor</a>
-  <ul class="nav navbar-nav">
-    <li class="nav-item active">
-      <a class="nav-link" href="#">Portfolios<span class="sr-only">(current)</span></a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="#">Stocks</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link" href="#">New Portfolio</a>
-    </li>
-    <li class="nav-item">
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="http://example.com" id="responsiveNavbarDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ user.username }}</a>
-        <div class="dropdown-menu" aria-labelledby="responsiveNavbarDropdown">
-          <a class="dropdown-item" href="/predictor/logout">Logout</a>
-        </div>
-      </li>
-    </li>
-  </ul>
-
-  <form class="form-inline float-xs-right">
-    <input class="form-control" type="text" placeholder="Search stocks" />
-    <button class="btn btn-outline-info" type="submit">Go</button>
-  </form>
-</nav>
-{% endblock %}
-
 {% block content %}
 <br />
 <div id="app"></div>

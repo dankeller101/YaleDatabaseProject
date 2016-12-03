@@ -8,6 +8,7 @@ window.data = { stock: '{{ stock_ticker }}' };
 window.portfolios = [
 {% for p in portfolios %}
 {
+    id: '{{ p.id|escapejs }}',
     portfolio_name: '{{ p.portfolio_name|escapejs }}',
     current_diversity: '{{ p.current_diversity|escapejs }}',
     current_value: '{{ p.current_value|escapejs }}',

@@ -6,6 +6,10 @@
 *.aux
 *.log
 *.synctex.gz
+*.out
+*.toc
+*.snm
+*.nav
 
 # not sure what this is
 .DS_Store

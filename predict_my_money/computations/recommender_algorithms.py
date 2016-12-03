@@ -283,10 +283,7 @@ def recommend_diverse_portfolio(stock_ids, stock_prices, budget, time_horizon=14
 
     # set max_investment to budget if it is not given
     if max_investment is None:
-        # max_investment = budget
-
-        # DEBUG -- set it to lower than that
-        max_investment = budget / 6.
+        max_investment = budget
 
     n, p = stock_prices.shape
 

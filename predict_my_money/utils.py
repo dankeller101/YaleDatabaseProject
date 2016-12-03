@@ -189,8 +189,22 @@ class stockAPI():
     def getStock(self, ticker):
         ticker = ticker.lower()
         try:
-            # see if stock exists in database
-            stock = Stock.objects.get(stock_name=ticker)
+            ## see if stock exists in database
+            # stock = Stock.objects.get(stock_name=ticker)
+
+            # NEW CODE BY CHRIS
+            stock = Stock.objects.filter(stock_name=ticker)
+            if len(stock) > 1:
+                keep = stock[-1]
+                for s in stock[:-1]:
+                    s.delete()
+                stock = keep
+            elif len(stock) == 1:
+                stock = stock[0]
+            else:
+                stock = self.createNewStock(ticker)
+            # END NEW CODE BY CHRIS
+
         except Stock.DoesNotExist:
             # if stock does not exist
             stock = self.createNewStock(ticker)

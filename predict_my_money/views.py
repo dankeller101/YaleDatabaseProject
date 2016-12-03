@@ -31,11 +31,8 @@ def index(request):
 
 @login_required
 def home(request):
-<<<<<<< HEAD
-	print Portfolio.objects.all()
-=======
 	print(Portfolio.objects.all())
->>>>>>> aabca55eb04067e3c3eb2bca6f63072d211584c1
+
 	try:
 		user = User.objects.get(pk=request.user.id)
 	except User.DoesNotExist:

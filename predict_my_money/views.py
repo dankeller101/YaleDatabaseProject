@@ -31,7 +31,7 @@ def index(request):
 
 @login_required
 def home(request):
-	print Portfolio.objects.all()
+	print(Portfolio.objects.all())
 	try:
 		user = User.objects.get(pk=request.user.id)
 	except User.DoesNotExist:

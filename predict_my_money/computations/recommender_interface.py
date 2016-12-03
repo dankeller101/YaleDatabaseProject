@@ -234,4 +234,5 @@ def recommend_interfacer(recommend_type='random', potential_stocks=None, num_obs
         portfolio = recommend_diverse_portfolio(stock_ids=potential_stocks, stock_prices=stock_prices, **kwargs)
 
     #return a JSON compile of the recommended portfolio that front end code will deal with
-    return HttpResponse(json.dumps(portfolio), content_type="application/json")
+    return portfolio
+    # return HttpResponse(json.dumps(portfolio), content_type="application/json")

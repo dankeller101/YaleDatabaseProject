@@ -1,8 +1,8 @@
 <h3>{{ portfolio.portfolio_name }}</h3>
 
-        <div>
+<div>
 {#        this code does not work#}
-            {% for stock in portfolio.stock_owned_set.all %}
-                {{ stock.stock.stock_name }} {{ stock.amount_owned }}
-            {% endfor %}
-        </div>
+{% for stock in portfolio.stock_owned_set.all %}
+    {{ stock.stock.stock_name }} {{ stock.amount_owned }}
+{% endfor %}
+</div>

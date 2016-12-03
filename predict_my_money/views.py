@@ -48,7 +48,8 @@ def home(request):
 	})
 
 
-def portfolio_detail(request, portfolio_id):
+@require_GET
+def portfolio(request, portfolio_id):
 	portfolio = papi.getPortfolio(portfolio_id)
 	if not portfolio:
 		return render(request, 'predictor/error.html', {
@@ -60,7 +61,17 @@ def portfolio_detail(request, portfolio_id):
 
 
 @require_GET
-def portfolio_compare(request):
+def portfolio_compare(request, pid0, pid1):
+	p0 = papi.getPortfolio(pid0)
+	p1 = papi.getPortfolio(pid1)
+
+	if not p0 or not p1:
+		return render(request, 'predictor/error.html', {
+			'error_message': "Portfolio doesn't exist.",
+		})
+
+	
+
 	return render(request, 'predictor/portfolio_compare.html', {})
 
 @require_GET

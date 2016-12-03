@@ -143,6 +143,8 @@ class portfolioAPI():
             # if stock does not exist
             return None
         else:
+            if not portfolio:
+                return None
             current_date = datetime.date.today()
             if portfolio.end_date.date < current_date - datetime.timedelta(days=1):
                 recentDay = self.fixPortfolioDays(portfolio_id, portfolio.end_date)
@@ -150,7 +152,7 @@ class portfolioAPI():
                 portfolio.current_diversity = recentDay.diversity
                 portfolio.current_value = recentDay.value
                 portfolio.save()
-        return portfolio
+            return portfolio
 
     def fixPortfolioDays(self, portfolio_id, earliest_day=None):
         if not earliest_day:
@@ -332,6 +334,13 @@ class stockAPI():
             # stock = Stock.objects.get(stock_name=ticker)
 
             # NEW CODE BY CHRIS
+            stock = Stock.objects.get(stock_name=ticker)
+
+        except Stock.DoesNotExist:
+            # if stock does not exist
+            stock = self.createNewStock(ticker)
+
+        except Stock.MultipleObjectsReturned:
             stock = Stock.objects.filter(stock_name=ticker)
             if len(stock) > 1:
                 keep = stock[-1]
@@ -343,11 +352,9 @@ class stockAPI():
             else:
                 stock = self.createNewStock(ticker)
             # END NEW CODE BY CHRIS
-
-        except Stock.DoesNotExist:
-            # if stock does not exist
-            stock = self.createNewStock(ticker)
         else:
+            if not stock:
+                return None
             current_date = datetime.date.today()
             if stock.end_date < current_date:
                 stock = self.updateStockWithDays(stock)

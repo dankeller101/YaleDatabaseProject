@@ -12,14 +12,19 @@ class PortfoliosList extends React.Component {
 		super(props)
 		this.state = { stocks: [] }
 	}
+	
 	componentDidMount() {
 	}
 
 	render() {
 		var _list = this.props.items.map((el, i) => {
+			var access = () => {
+				location.href = "/predictor/portfolios/"+el.id
+			}
 			return (
 				<div className="PortfolioListItem">
 					{ el.portfolio_name }
+					<button onClick={access}>See portfolio</button>
 				</div>
 			)
 		})

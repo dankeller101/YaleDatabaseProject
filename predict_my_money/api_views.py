@@ -149,7 +149,7 @@ def portfolios(request):
 			storage[portfolio.portfolio_name] = [portfolio.current_value, portfolio.current_diversity]
 		return HttpResponse(json.dumps(storage), content_type="application/json")
 	
-	elif request.method == "PUT":
+	elif request.method == "POST":
 		portfolio = Portfolio()
 		portfolio.portfolio_name = request.POST['name']
 		portfolio.investor = Investor.objects.get(user=request.user)
@@ -160,7 +160,7 @@ def portfolios(request):
 			sname, quantity = order
 			stock = sapi.getStock(stock)
 			if not stock:
-				return JsonResponse({ error: true, message: "Stock not found." })
+				return JsonResponse({ "error": True, "message": "Stock not found." })
 
 			owned = Stock_Owned()
 			owned.portfolio = portfolio
@@ -172,7 +172,7 @@ def portfolios(request):
 
 		portfolio.save()
 
-		return JsonResponse({ error: false })
+		return JsonResponse({ "error": False })
 		# return HttpResponseRedirect(reverse('predictor:home', args=(current_user.id,)))
 	else:
 		return HttpResponseBadRequest("Invalid method.")

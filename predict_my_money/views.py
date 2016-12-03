@@ -12,7 +12,7 @@ from django.views.decorators.http import require_http_methods, require_GET
 from django.contrib.auth.decorators import login_required
 
 from .models import User, Investor, Stock, Portfolio, Stock_Owned, Portfolio_Day
-from predict_my_money.utils import stockAPI, portfolioAPI, stockDayDatabaseInterface
+from predict_my_money.utils import stockAPI, portfolioAPI
 from predict_my_money.computations.recommender_interface import recommend_diverse_portfolio, recommend_high_return_portfolio, recommend_random_portfolio, \
 	recommend_interfacer
 

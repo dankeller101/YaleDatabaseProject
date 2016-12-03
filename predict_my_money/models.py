@@ -19,6 +19,7 @@ class Portfolio(models.Model):
     current_diversity = models.FloatField(default=0)
     current_value = models.FloatField(default=0)
     total_invested = models.IntegerField(default=0)
+    start_date = models.DateField('Creation Date of Portfolio', null=True)
     end_date = models.DateField('Latest Record', null=True)
 
     def __str__(self):
@@ -36,6 +37,8 @@ class Portfolio_Day(models.Model):
 
 class Stock(models.Model):
     stock_name = models.CharField(max_length=10)
+    company_name = models.CharField(max_length=255, null=True)
+    company_meta = models.TextField(null=True)
     current_high = models.IntegerField(default=0)
     current_low = models.IntegerField(default=0)
     current_adjusted_close = models.IntegerField(default=0)

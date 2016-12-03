@@ -211,7 +211,7 @@ export default class NewPortfolioView extends React.Component {
 
 						<form className="form-inline">
 							<div className="form-group">
-								<label for="exampleInputName2" onClick="this._onClickGetRecom.bind(this)">Get Recommendation for</label>
+								<label for="exampleInputName2" onClick={this._onClickGetRecom.bind(this)}>Get Recommendation for</label>
 								<input type="text" className="form-control" ref="fbconst" id="exampleInputName2" placeholder="how many dollars" />
 							</div>
 

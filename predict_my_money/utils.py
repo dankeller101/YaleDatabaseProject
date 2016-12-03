@@ -348,6 +348,8 @@ class stockAPI():
             # if stock does not exist
             stock = self.createNewStock(ticker)
         else:
+            if not stock:
+                return None
             current_date = datetime.date.today()
             if stock.end_date < current_date:
                 stock = self.updateStockWithDays(stock)

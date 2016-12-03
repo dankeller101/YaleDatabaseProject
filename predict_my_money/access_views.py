@@ -47,12 +47,12 @@ def login(request):
 		password = request.POST['password']
 		user = authenticate(username=username, password=password)
 		
-		if user:
+		if not user:
 			return render(request, 'predictor/error.html', {
-				'error_message': "Invalid Login.",
+				'error_message': "Failed to log you in.",
 			})
 
-		login(request, user)
+		djangoLogin(request, user)
 		return HttpResponseRedirect(reverse('predictor'))
 	else:
 		return HttpResponseBadRequest("Invalid method.")

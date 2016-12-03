@@ -1,8 +1,74 @@
-<h3>{{ portfolio.portfolio_name }}</h3>
+{% extends "predictor/base.html" %}
+{% load static %}
+
+
+{% block head %}
+<script>
+window.data = { stock: '{{ stock_ticker }}' };
+</script>
+{% endblock %}
+
+{% block js %}
+<script src="{% static 'predictor/portfolio.js' %}"></script>
+<script>startPortfolioView();</script>
+<script>
+window.data = {{ investor.portfolio_set }};
+</script>
+{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-dark bg-inverse">
+  <a class="navbar-brand" href="#">StockPredictor</a>
+  <ul class="nav navbar-nav">
+    <li class="nav-item active">
+      <a class="nav-link" href="#">Portfolios<span class="sr-only">(current)</span></a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#">Stocks</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#">New Portfolio</a>
+    </li>
+    <li class="nav-item">
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="http://example.com" id="responsiveNavbarDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{ user.username }}</a>
+        <div class="dropdown-menu" aria-labelledby="responsiveNavbarDropdown">
+          <a class="dropdown-item" href="/predictor/logout">Logout</a>
+        </div>
+      </li>
+    </li>
+  </ul>
+
+  <form class="form-inline float-xs-right">
+    <input class="form-control" type="text" placeholder="Search stocks" />
+    <button class="btn btn-outline-info" type="submit">Go</button>
+  </form>
+</nav>
+
+<br />
+
+<div id="app"></div>
+
+{% endblock %}
+
+<!-- 
+{% block asdfasdf %}
+<h1> Home of {{ user.first_name }} {{ user.last_name }}</h1>
 
 <div>
-{#        this code does not work#}
-{% for stock in portfolio.stock_owned_set.all %}
-    {{ stock.stock.stock_name }} {{ stock.amount_owned }}
-{% endfor %}
+	{% for portfolio in investor.portfolio_set.all %}
+		<div>
+		<a href="{% url 'predictor:portfolio_detail'  portfolio_id=portfolio.pk  %}">
+			{{ portfolio.portfolio_name }}
+			</a>
+		</div>
+		<div>
+			{{ portfolio.current_diversity }}
+		</div>
+		<div>
+			{{ portfolio.total_invested }}
+		</div>
+
+	{% endfor %}
 </div>
+{% endblock %} -->

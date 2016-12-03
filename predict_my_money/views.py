@@ -29,7 +29,7 @@ def index(request):
 
 
 def home(request):
-	print request.user
+	print(request.user)
 	try:
 		user = User.objects.get(pk=request.user.id)
 	except User.DoesNotExist:

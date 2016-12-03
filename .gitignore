@@ -14,3 +14,5 @@ db.sqlite3
 
 # not sure what this is
 .DS_Store
+
+*.sqlite3

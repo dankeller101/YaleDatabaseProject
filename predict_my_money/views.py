@@ -31,7 +31,11 @@ def index(request):
 
 @login_required
 def home(request):
+<<<<<<< HEAD
+	print Portfolio.objects.all()
+=======
 	print(Portfolio.objects.all())
+>>>>>>> aabca55eb04067e3c3eb2bca6f63072d211584c1
 	try:
 		user = User.objects.get(pk=request.user.id)
 	except User.DoesNotExist:
@@ -51,6 +55,11 @@ def portfolio_detail(request, portfolio_id):
 	return render(request, 'predictor/portfolio_detail.html', {
 		'portfolio' : portfolio
 	})
+
+
+@require_GET
+def portfolio_compare(request):
+	return render(request, 'predictor/portfolio_compare.html', {})
 
 @require_GET
 def stock_detail(request, stock_ticker):

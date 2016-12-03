@@ -1,0 +1,18 @@
+{% extends "predictor/base.html" %}
+{% load static %}
+
+
+{% block head %}
+<script>
+window.data = { stock: '{{ stock_ticker }}' };
+</script>
+{% endblock %}
+
+{% block js %}
+<script src="{% static 'predictor/d3.min.js' %}"></script>
+<script>startPortfolioCompareView();</script>
+{% endblock %}
+
+{% block content %}
+<div id="app"></div>
+{% endblock %}

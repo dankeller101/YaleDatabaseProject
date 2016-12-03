@@ -13,6 +13,10 @@ body {
   shape-rendering: crispEdges;
 }
 
+.line2 {
+  stroke: #5F8 !important;
+}
+
 
 .line {
   fill: none;
@@ -125,8 +129,21 @@ body {
 
 .FormAddStock {
   margin: 10px 0;
-  
+
   .form-group, label {
     margin-right: 10px;
   }
+}
+
+.PortfolioEditor {
+  & > h1 {
+    font-size: 15px;
+    text-transform: uppercase;
+  }
+
+  padding: 10px;
+  background: #DDD;
+  border: 1px solid #EEE;
+  margin-top: 30px;
+
 }

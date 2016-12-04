@@ -109,6 +109,11 @@ The diverse option recommendation algorithm recommends a portfolio that maximize
 		\end{enumerate}
 \end{enumerate}
 
+\subsection{Potential Flaws}
+There are a few potential flaws in our recommendation algorithms, but they are mainly theoretical and not of any real practical concern here. Note that maximizing total stock return is exactly an instance of the knapsack problem. Indeed, we can only choose integral variables (i.e. we can't take 3/4 share of a stock) and our budget is limited by the current prices. Clearly, the optimizing total stock return is NP-Hard. 
+
+We considered using clever integer programming methods for maximizing total stock return, but determined that a greedy algorithm worked reasonably well. Indeed, the greedy algorithm can perform arbitrarily poorly on general knapsack instances. However, this occurs when objects have wildly different values and costs. Fortunately, stocks do not have this worst-case property and so the greedy algorithm should perform relatively well at a much lower computational cost.
+
 \section{Database Design}
 In order to build Portfolio Playground and provide the data for the various recommendation algorithms it employs, we needed to determine which data we needed, find it, and then store it in a way that computations would not be repeated or take excessive amounts of time.  This section on database design will detail the choices we made with regard to which data we wanted, how we found it, and how we designed our database.
 

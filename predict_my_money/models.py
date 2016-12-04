@@ -62,7 +62,7 @@ class Stock_Owned(models.Model):
     amount_owned = models.IntegerField(default=0)
 
     def __str__(self):
-        return self.user + ' ' + self.stock
+        return self.amount_owned.__str__() + ' ' + self.stock.__str__()
 
 class Stock_Day(models.Model):
     stock = models.ForeignKey(Stock, on_delete=models.CASCADE)

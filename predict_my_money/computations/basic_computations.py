@@ -39,7 +39,7 @@ def compute_tsr(stock_prices, num_shares):
     individual_tsr = num_shares * ((stock_prices - first_day_price) / first_day_price)
 
     # sum for portfolio TSR
-    tsr = np.sum(individual_tsr, axis=1)
+    tsr = np.sum(individual_tsr, axis=0)
 
     return tsr
 
@@ -63,12 +63,18 @@ def compute_diversity(stock_prices, num_shares):
         raise ValueError('Number of shares must be positive')
     if np.any(stock_prices < 0):
         raise ValueError('Stock prices must be nonnegative')
+    if stock_prices.shape[1] <= 1:
+        raise ValueError('Not enough days to compute diversity over')
 
     n, p = stock_prices.shape
 
     # get the matrix of correlation coefficients
     cor_mat = np.abs(np.corrcoef(x=stock_prices))
     cor_vec = cor_mat[np.triu_indices(n, k=1)]
+
+    if np.any(np.isnan(cor_vec)):
+        print('Whoah we reached an issue where cor_mat is nan')
+        pass
 
     # get weight matrix
     num_shares = num_shares[:].astype(float)
@@ -78,5 +84,9 @@ def compute_diversity(stock_prices, num_shares):
 
     # get diversity score as weighted sum
     diversity_score = 1. - np.inner(cor_vec, norm_weight_vec)
+
+    if not np.isreal(diversity_score):
+        print('We reached an issue here where diversity is not real')
+        pass
 
     return diversity_score

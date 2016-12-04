@@ -120,7 +120,7 @@
 	    value: function componentDidMount() {
 	      var _this3 = this;
 	
-	      $.getJSON("/predictor/api/get_stock_plot?stock=aapl", function (data) {
+	      $.getJSON("/predictor/api/get_stock_plot?name=aapl", function (data) {
 	        var points = [];
 	        for (var i = 0; i < data.data.length; ++i) {
 	          if (i % 100) {
@@ -167,7 +167,7 @@
 	    value: function componentDidMount() {
 	      var _this5 = this;
 	
-	      $.getJSON("/predictor/api/get_portfolio_plot?stock=aapl", function (data) {
+	      $.getJSON("/predictor/api/get_portfolio_plot?name=aapl", function (data) {
 	        var points0 = [],
 	            points1 = [];
 	        var lastprice0 = 0,
@@ -407,7 +407,7 @@
 	    value: function componentDidMount() {
 	      var _this7 = this;
 	
-	      $.getJSON("/predictor/api/get_portfolio_plot?stock=aapl", function (data) {
+	      $.getJSON("/predictor/api/get_portfolio_plot?name=aapl", function (data) {
 	        var points = [];
 	        var lastprice = 36000;
 	        for (var i = 800; i < data.data.length; ++i) {
@@ -22659,9 +22659,10 @@
 		function PortfolioEditor(props) {
 			_classCallCheck(this, PortfolioEditor);
 	
+			// this.state = { stocks: [{ name: 'AAPL', amount: 3, price: 20 }] }
 			var _this = _possibleConstructorReturn(this, (PortfolioEditor.__proto__ || Object.getPrototypeOf(PortfolioEditor)).call(this, props));
 	
-			_this.state = { stocks: [{ name: 'AAPL', amount: 3 }] };
+			_this.state = { stocks: [] };
 			return _this;
 		}
 	
@@ -22677,6 +22678,11 @@
 					});
 				});
 				this.setState({ stocks: stocks });
+			}
+		}, {
+			key: 'componentWillUpdate',
+			value: function componentWillUpdate() {
+				// this.props.onUpdateStocks(this.state.stocks)
 			}
 		}, {
 			key: 'getStocks',
@@ -22708,7 +22714,7 @@
 				if (found) {
 					found.amount += amount;
 					this.setState({ stocks: this.state.stocks });
-					this.props.onUpdate(this.state.stocks);
+					this.props.onUpdateStocks(this.state.stocks);
 					return;
 				}
 	
@@ -22718,13 +22724,17 @@
 						return;
 					}
 	
-					_this2.state.stocks.push({
+					var stocks = _lodash2.default.clone(_this2.state.stocks);
+	
+					stocks.push({
 						name: name,
 						amount: amount,
 						price: data.data.current_adjusted_close
 					});
 	
-					_this2.props.onUpdate(_this2.state.stocks);
+					_this2.setState({ stocks: stocks }, function () {
+						_this2.props.onUpdateStocks(_this2.state.stocks);
+					});
 				});
 			}
 		}, {
@@ -22734,10 +22744,13 @@
 	
 				var stockList = this.state.stocks.map(function (e, i) {
 					var remove = function remove() {
-						_lodash2.default.remove(_this3.state.stocks, { name: e.name });
-						console.log(_this3.state.stocks);
-						_this3.setState({ stocks: _lodash2.default.remove(_this3.state.stocks, { name: e.name }) });
-						console.log(_this3.state.stock);
+						var cloned = _lodash2.default.cloneDeep(_this3.state.stocks);
+						var stocks = _lodash2.default.filter(cloned, function (i) {
+							return i.name != e.name;
+						});
+						_this3.setState({ stocks: stocks }, function () {
+							_this3.props.onUpdateStocks(_this3.state.stocks);
+						});
 					};
 	
 					return _react2.default.createElement(
@@ -22792,7 +22805,7 @@
 							{ className: 'form-group' },
 							_react2.default.createElement(
 								'label',
-								{ 'for': 'exampleInputName2' },
+								{ htmlFor: 'exampleInputName2' },
 								'Add to portfolio stock'
 							),
 							_react2.default.createElement('input', { type: 'text', ref: 'name', className: 'form-control', id: 'exampleInputName2', placeholder: 'stock name' })
@@ -22802,7 +22815,7 @@
 							{ className: 'form-group' },
 							_react2.default.createElement(
 								'label',
-								{ 'for': 'exampleInputName2' },
+								{ htmlFor: 'exampleInputName2' },
 								'with amount'
 							),
 							_react2.default.createElement('input', { type: 'number', ref: 'amount', className: 'form-control', id: 'exampleInputName2', placeholder: 'amount of stock' })
@@ -22912,6 +22925,8 @@
 					// 	}
 					// }
 	
+					$((0, _reactDom.findDOMNode)(_this5.refs.plot)).html('');
+	
 					(0, _plot.plotData)(points, (0, _reactDom.findDOMNode)(_this5.refs.plot));
 				});
 			}
@@ -22944,7 +22959,9 @@
 		_createClass(NewPortfolioView, [{
 			key: '_onUpdateStocks',
 			value: function _onUpdateStocks() {
+	
 				var stocks = this.refs.pmanager.getStocks();
+				console.log("stocks are", JSON.stringify(stocks));
 				this.setState({ stocks: stocks });
 				this.refs.plot.updateStocks(stocks);
 			}
@@ -22993,7 +23010,7 @@
 		}, {
 			key: 'componentDidMount',
 			value: function componentDidMount() {
-				this.refs.plot.updateStocks(this.state.stocks);
+				// this.refs.plot.updateStocks(this.state.stocks)
 			}
 		}, {
 			key: 'render',
@@ -23018,7 +23035,7 @@
 								{ className: 'form-group' },
 								_react2.default.createElement(
 									'label',
-									{ 'for': 'inputName' },
+									{ htmlFor: 'inputName' },
 									'Name'
 								),
 								_react2.default.createElement('input', { type: 'text', ref: 'fname', className: 'form-control', id: 'inputName', 'aria-describedby': 'nameHelp', placeholder: 'Identify your portfolio' }),
@@ -23034,7 +23051,7 @@
 								{ className: 'form-group' },
 								_react2.default.createElement(
 									'label',
-									{ 'for': 'exampleInputName2' },
+									{ htmlFor: 'exampleInputName2' },
 									'Get Recommendation for'
 								),
 								_react2.default.createElement('input', { type: 'text', className: 'form-control', ref: 'fbconst', id: 'exampleInputName2', placeholder: 'how many dollars' })
@@ -23044,7 +23061,7 @@
 								{ className: 'form-group' },
 								_react2.default.createElement(
 									'label',
-									{ 'for': 'exampleInputName2' },
+									{ htmlFor: 'exampleInputName2' },
 									'of type'
 								),
 								_react2.default.createElement(
@@ -23094,7 +23111,7 @@
 							_react2.default.createElement(Plot, { ref: 'plot' })
 						)
 					),
-					_react2.default.createElement(PortfolioEditor, { ref: 'pmanager', onUpdate: this._onUpdateStocks.bind(this) })
+					_react2.default.createElement(PortfolioEditor, { ref: 'pmanager', onUpdateStocks: this._onUpdateStocks.bind(this) })
 				);
 			}
 		}]);
@@ -40213,7 +40230,8 @@
 	exports.plotData = plotData;
 	exports.plotMultipleData = plotMultipleData;
 	function plotData(data, el) {
-	  console.log('data', data);
+	  // console.log('data', data)
+	  console.log('plotData');
 	
 	  var margin = { top: 20, right: 50, bottom: 30, left: 50 },
 	      width = $(el).width() - margin.left - margin.right,

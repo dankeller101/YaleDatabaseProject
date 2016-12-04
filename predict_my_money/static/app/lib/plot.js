@@ -1,6 +1,7 @@
 
 export function plotData(data, el) {
-  console.log('data', data)
+  // console.log('data', data)
+  console.log('plotData')
 
   var margin = {top: 20, right: 50, bottom: 30, left: 50},
     width = $(el).width() - margin.left - margin.right,

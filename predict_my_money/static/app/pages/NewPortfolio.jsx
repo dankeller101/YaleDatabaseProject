@@ -10,7 +10,8 @@ import CsrfToken from '../lib/csrf.jsx';
 class PortfolioEditor extends React.Component {
 	constructor(props) {
 		super(props)
-		this.state = { stocks: [{ name: 'AAPL', amount: 3 }] }
+		// this.state = { stocks: [{ name: 'AAPL', amount: 3, price: 20 }] }
+		this.state = { stocks: [] }
 	}
 
 	resetStocks(rows) {
@@ -23,6 +24,10 @@ class PortfolioEditor extends React.Component {
 			})
 		})
 		this.setState({ stocks: stocks })
+	}
+
+	componentWillUpdate() {
+		// this.props.onUpdateStocks(this.state.stocks)
 	}
 
 	getStocks() {
@@ -50,7 +55,7 @@ class PortfolioEditor extends React.Component {
 		if (found) {
 			found.amount += amount
 			this.setState({ stocks: this.state.stocks })
-			this.props.onUpdate(this.state.stocks)
+			this.props.onUpdateStocks(this.state.stocks)
 			return
 		}
 
@@ -60,23 +65,28 @@ class PortfolioEditor extends React.Component {
 				return;
 			}
 
-			this.state.stocks.push({
+			var stocks = _.clone(this.state.stocks)
+
+			stocks.push({
 				name: name,
 				amount: amount,
 				price: data.data.current_adjusted_close
 			})
 
-			this.props.onUpdate(this.state.stocks)
+			this.setState({ stocks: stocks }, () => {
+				this.props.onUpdateStocks(this.state.stocks)
+			})
 		})
 	}
 
 	render() {
 		var stockList = this.state.stocks.map((e, i) => {
 			var remove = () => {
-				_.remove(this.state.stocks, { name: e.name })
-				console.log(this.state.stocks)
-				this.setState({ stocks: _.remove(this.state.stocks, { name: e.name })})
-				console.log(this.state.stock)
+				var cloned = _.cloneDeep(this.state.stocks)
+				var stocks = _.filter(cloned, (i) => i.name != e.name)
+				this.setState({ stocks: stocks }, () => {
+					this.props.onUpdateStocks(this.state.stocks)
+				})
 			}
 
 			return (
@@ -96,12 +106,12 @@ class PortfolioEditor extends React.Component {
 
 				<form id="add-stock" className="FormAddStock form-inline">
 					<div className="form-group">
-						<label for="exampleInputName2">Add to portfolio stock</label>
+						<label htmlFor="exampleInputName2">Add to portfolio stock</label>
 						<input type="text" ref="name" className="form-control" id="exampleInputName2" placeholder="stock name" />
 					</div>
 
 					<div className="form-group">
-						<label for="exampleInputName2">with amount</label>
+						<label htmlFor="exampleInputName2">with amount</label>
 						<input type="number" ref="amount" className="form-control" id="exampleInputName2" placeholder="amount of stock" />
 					</div>
 
@@ -164,6 +174,8 @@ class Plot extends React.Component {
 			// 	}
 			// }
 
+			$(findDOMNode(this.refs.plot)).html('');
+
 			plotData(points, findDOMNode(this.refs.plot))
 		})
 
@@ -185,7 +197,9 @@ export default class NewPortfolioView extends React.Component {
 	}
 
 	_onUpdateStocks() {
+
 		var stocks = this.refs.pmanager.getStocks()
+		console.log("stocks are", JSON.stringify(stocks))
 		this.setState({ stocks: stocks })
 		this.refs.plot.updateStocks(stocks)
 	}
@@ -229,7 +243,7 @@ export default class NewPortfolioView extends React.Component {
 	}
 
 	componentDidMount() {
-		this.refs.plot.updateStocks(this.state.stocks)
+		// this.refs.plot.updateStocks(this.state.stocks)
 	}
 
 	render() {
@@ -241,7 +255,7 @@ export default class NewPortfolioView extends React.Component {
 				<div className="row">
 					<div className="col-sm-6">
 						<div className="form-group">
-							<label for="inputName">Name</label>
+							<label htmlFor="inputName">Name</label>
 							<input type="text" ref="fname" className="form-control" id="inputName" aria-describedby="nameHelp" placeholder="Identify your portfolio" />
 							<small id="nameHelp" className="form-text text-muted">Identify your portfolio.</small>
 						</div>
@@ -249,12 +263,12 @@ export default class NewPortfolioView extends React.Component {
 						<hr />
 
 						<div className="form-group">
-							<label for="exampleInputName2">Get Recommendation for</label>
+							<label htmlFor="exampleInputName2">Get Recommendation for</label>
 							<input type="text" className="form-control" ref="fbconst" id="exampleInputName2" placeholder="how many dollars" />
 						</div>
 
 						<div className="form-group">
-							<label for="exampleInputName2">of type</label>
+							<label htmlFor="exampleInputName2">of type</label>
 
 							<select className="form-control" ref='ftype' id="exampleSelect1">
 								<option value='random'>Control</option>
@@ -281,7 +295,7 @@ export default class NewPortfolioView extends React.Component {
 
 				</div>
 
-				<PortfolioEditor ref='pmanager' onUpdate={this._onUpdateStocks.bind(this)} />
+				<PortfolioEditor ref='pmanager' onUpdateStocks={this._onUpdateStocks.bind(this)} />
 			</div>
 		)
 	}

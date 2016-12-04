@@ -83,7 +83,7 @@ def get_stock(request):
 
 @require_GET
 def get_stock_plot(request):
-	ticker = request.GET["stock"]
+	ticker = request.GET["name"]
 	stock = sapi.getStock(ticker)
 
 	if not stock:
@@ -91,6 +91,7 @@ def get_stock_plot(request):
 
 	interface = stockDayDatabaseInterface()
 	days = interface.getAllDaysOrdered(stock)
+	print 'days', days
 	array = []
 	for day in days:
 		array.append({'date' : day.day.strftime("%d-%b-%y"), 'close' : day.adjustedClose})

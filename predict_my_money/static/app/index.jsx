@@ -40,7 +40,6 @@ class StockView extends React.Component {
 				<h1>{this.props.stock}</h1>
 
 				<div id="data-dump" data-prices="{{ data }}"></div>
-
 			</div>
 		)
 	}

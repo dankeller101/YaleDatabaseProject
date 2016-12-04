@@ -20,6 +20,7 @@ from predict_my_money.computations.recommender_interface import \
 
 sapi = stockAPI()
 papi = portfolioAPI()
+stockDayInterface = stockDayDatabaseInterface()
 
 # Create your views here.
 def portfolio_detail(request, portfolio_id):
@@ -45,19 +46,42 @@ def portfolio_detail(request, portfolio_id):
 
 @require_GET
 def get_portfolio_plot(request):
-	ticker = request.GET["stock"]
-	stock = sapi.getStock(ticker)
+	pid = request.GET["id"]
+	portfolio = papi.getPortfolio(pid)
 
-	if not stock:
-		return JsonResponse({ "data": None }, status=404)
+	if not portfolio:
+		return JsonResponse({ "data": [], error: True }, status=404)
 
-	interface = stockDayDatabaseInterface()
-	days = interface.getAllDaysOrdered(stock)
-	array = []
-	for day in days:
-		array.append({'date' : day.day.strftime("%d-%b-%y"), 'close' : day.adjustedClose})
+	print papi.getStocksOwned(pid)
+	print "what?", portfolio
 
-	return JsonResponse({ "data": array })
+	# alldays = {}
+
+	# for key in stocks:
+	# 	stockinfo = stocks[key]
+	# 	stock = sapi.getStock(stockinfo["name"])
+	# 	if not stock:
+	# 		continue
+	# 	for stockday in interface.getAllDaysOrdered(stock):
+	# 		obj = {
+	# 			"name": stockinfo["name"],
+	# 			"price": stockday.adjustedClose,
+	# 			"date": stockday.day.strftime("%d-%b-%y")
+	# 		}
+
+	# 		key = stockday.day.strftime("%d-%b-%y")
+	# 		if not key in alldays:
+	# 			alldays[key] = []
+	# 		alldays[key].append(obj)
+
+	# result = []
+	# keylist = alldays.keys()
+	# keylist.sort()
+	# for key in keylist:
+	# 	result.append(alldays[key])
+	    # print "%s: %s" % (key, alldays[key])
+
+	return JsonResponse({ "data": [] })
 
 
 @require_GET
@@ -97,6 +121,8 @@ def get_stock_plot(request):
 		array.append({'date' : day.day.strftime("%d-%b-%y"), 'close' : day.adjustedClose})
 
 	return JsonResponse({ "data": array })
+
+
 
 @require_GET
 def gen_portfolio_price_plot(request):
@@ -150,22 +176,12 @@ def get_recommendation(request):
 	return JsonResponse({ "data": ret })
 
 def portfolio(request, id):
-	if request.method == "GET":
-		portfolio = papi.getPortfolio(id)
-		if portfolio:
-			template = loader.get_template('predictor/portfolio_detail.html')
-			context = {
-				'portfolio' : portfolio
-			}
-			return HttpResponse(template.render(context, request))
-		else:
-			return render(request, 'predictor/error.html', {
-				'error_message': "Portfolio doesn't exist.",
-			})
-	elif request.method == "POST":
-		return HttpResponseBadRequest("Not implemented.")
-	else:
-		return HttpResponseBadRequest("Invalid method.")
+	portfolio = papi.getPortfolio(id)
+
+	if not portfolio:
+		return JsonResponse({ "data": [], error: true }, status=404)
+
+	return JsonResponse({ "data": [] })
 
 def portfolios(request):
 	if request.method == "GET":

@@ -134,8 +134,14 @@ class stockDayDatabaseInterface():
 class portfolioAPI():
 #controls portfolio maintenance
 
-    def getPortfolio(self, portfolio_id):
+    def getStocksOwned(self, portfolio_id):
+        portfolio = Portfolio.objects.get(pk=portfolio_id)
+        if not portfolio:
+            return None
+        
+        return Stock_Owned.objects.filter(portfolio=portfolio)
 
+    def getPortfolio(self, portfolio_id):
         try:
             # see if stock exists in database
             portfolio = Portfolio.objects.get(pk=portfolio_id)

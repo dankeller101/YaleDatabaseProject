@@ -61,15 +61,15 @@
 	
 	var _NewPortfolio2 = _interopRequireDefault(_NewPortfolio);
 	
-	var _Home = __webpack_require__(/*! ./pages/Home.jsx */ 185);
+	var _Home = __webpack_require__(/*! ./pages/Home.jsx */ 184);
 	
 	var _Home2 = _interopRequireDefault(_Home);
 	
-	var _csrf = __webpack_require__(/*! ./lib/csrf.jsx */ 180);
+	var _csrf = __webpack_require__(/*! ./lib/csrf.jsx */ 183);
 	
 	var _csrf2 = _interopRequireDefault(_csrf);
 	
-	var _plot = __webpack_require__(/*! ./lib/plot */ 181);
+	var _plot = __webpack_require__(/*! ./lib/plot */ 182);
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
@@ -563,8 +563,6 @@
 	
 	  return PortfolioView;
 	}(_react2.default.Component);
-	
-	console.log(_NewPortfolio2.default);
 	
 	window.startPortfolioView = function () {
 	  (0, _reactDom.render)(_react2.default.createElement(PortfolioView, { stock: window.data.stock }), document.getElementById('app'));
@@ -22637,11 +22635,13 @@
 	
 	var _reactDom = __webpack_require__(/*! react-dom */ 32);
 	
-	var _lodash = __webpack_require__(/*! lodash */ 183);
+	var _lodash = __webpack_require__(/*! lodash */ 180);
 	
 	var _lodash2 = _interopRequireDefault(_lodash);
 	
-	var _csrf = __webpack_require__(/*! ../lib/csrf.jsx */ 180);
+	var _plot = __webpack_require__(/*! ../lib/plot */ 182);
+	
+	var _csrf = __webpack_require__(/*! ../lib/csrf.jsx */ 183);
 	
 	var _csrf2 = _interopRequireDefault(_csrf);
 	
@@ -22669,13 +22669,15 @@
 			key: 'resetStocks',
 			value: function resetStocks(rows) {
 				var stocks = [];
-				for (var i = 0; i < rows.legth; ++i) {
+				_lodash2.default.each(rows, function (el) {
+					console.log(el);
 					stocks.push({
-						name: row[i][0].toUpperCase(),
-						amount: row[i][1].toUpperCase(),
-						price: row[i][2].toUpperCase()
+						name: el[0].toUpperCase(),
+						amount: el[1],
+						price: el[2]
 					});
-				}
+				});
+				this.setState({ stocks: stocks });
 			}
 		}, {
 			key: 'getStocks',
@@ -22690,7 +22692,7 @@
 				var name = (0, _reactDom.findDOMNode)(this.refs.name).value.toUpperCase();
 				var amount = parseInt((0, _reactDom.findDOMNode)(this.refs.amount).value);
 	
-				if (name.length < 3) {
+				if (name.length == 0) {
 					alert('Invalid stock name.');
 					return;
 				}
@@ -22706,6 +22708,7 @@
 				if (found) {
 					found.amount += amount;
 					this.setState({ stocks: this.state.stocks });
+					this.props.onUpdate(this.state.stocks);
 					return;
 				}
 	
@@ -22863,37 +22866,78 @@
 		return PortfolioEditor;
 	}(_react2.default.Component);
 	
-	var NewPortfolioView = function (_React$Component2) {
-		_inherits(NewPortfolioView, _React$Component2);
+	var Plot = function (_React$Component2) {
+		_inherits(Plot, _React$Component2);
+	
+		function Plot() {
+			_classCallCheck(this, Plot);
+	
+			return _possibleConstructorReturn(this, (Plot.__proto__ || Object.getPrototypeOf(Plot)).apply(this, arguments));
+		}
+	
+		_createClass(Plot, [{
+			key: 'updateStocks',
+			value: function updateStocks(_stocks) {
+				var _this5 = this;
+	
+				var stocks = _lodash2.default.keyBy(_stocks, 'name');
+	
+				$.getJSON("/predictor/api/gen_portfolio_price_plot?stocks=" + encodeURIComponent(JSON.stringify(stocks)), function (data) {
+					if (!data) {
+						return;
+					}
+	
+					var points = [];
+					for (var i = 0; i < data.data.length; ++i) {
+						var row = data.data[i];
+						console.log(row);
+						// points.push({
+						// 	// name: "",
+						// 	// name: "",
+						// 	// name: "",
+						// });
+					}
+	
+					// var points = []
+					// var lastprice = 36000
+					// for (var i=800; i<data.data.length; ++i) {
+					// 	if (i%5 == 0) {
+					// 		lastprice += (Math.random()-0.5)*100
+					// 		data.data[i].close = lastprice
+					// 		points.push(data.data[i])
+					// 	}
+					// }
+	
+					(0, _plot.plotData)(points, (0, _reactDom.findDOMNode)(_this5.refs.plot));
+				});
+			}
+		}, {
+			key: 'render',
+			value: function render() {
+				return _react2.default.createElement(
+					'div',
+					{ className: 'NewPortfolioPlot' },
+					_react2.default.createElement('div', { ref: 'plot', id: 'data-dump' })
+				);
+			}
+		}]);
+	
+		return Plot;
+	}(_react2.default.Component);
+	
+	var NewPortfolioView = function (_React$Component3) {
+		_inherits(NewPortfolioView, _React$Component3);
 	
 		function NewPortfolioView(props) {
 			_classCallCheck(this, NewPortfolioView);
 	
-			var _this4 = _possibleConstructorReturn(this, (NewPortfolioView.__proto__ || Object.getPrototypeOf(NewPortfolioView)).call(this, props));
+			var _this6 = _possibleConstructorReturn(this, (NewPortfolioView.__proto__ || Object.getPrototypeOf(NewPortfolioView)).call(this, props));
 	
-			_this4.state = { stocks: [] };
-			return _this4;
+			_this6.state = { stocks: [] };
+			return _this6;
 		}
 	
 		_createClass(NewPortfolioView, [{
-			key: '_updatePlot',
-			value: function _updatePlot() {
-				var _this5 = this;
-	
-				$.getJSON("/predictor/api/gen_portfolio_plot?stocks=" + this.props.id, function (data) {
-					var points = [];
-					var lastprice = 36000;
-					for (var i = 800; i < data.data.length; ++i) {
-						if (i % 5 == 0) {
-							lastprice += (Math.random() - 0.5) * 100;
-							data.data[i].close = lastprice;
-							points.push(data.data[i]);
-						}
-					}
-					plotData(points, (0, _reactDom.findDOMNode)(_this5.refs.plot));
-				});
-			}
-		}, {
 			key: '_onUpdateStocks',
 			value: function _onUpdateStocks() {
 				var stocks = this.refs.pmanager.getStocks();
@@ -22925,20 +22969,21 @@
 		}, {
 			key: '_onClickGetRecom',
 			value: function _onClickGetRecom() {
-				var _this6 = this;
+				var _this7 = this;
 	
+				this.refs.pmanager.resetStocks();
 				var data = {
 					type: (0, _reactDom.findDOMNode)(this.refs.ftype).value,
-					bc: parseInt((0, _reactDom.findDOMNode)(this.refs.fbconst).value)
+					total_spend: parseInt((0, _reactDom.findDOMNode)(this.refs.fbconst).value)
 				};
 	
-				$.getJSON("/predictor/api/get_recommendation", function (data) {
+				$.getJSON("/predictor/api/get_recommendation", data, function (data) {
 					if (data.error) {
 						alert(data.message);
 						return;
 					}
 	
-					_this6.refs.pmanager.resetStocks(data);
+					_this7.refs.pmanager.resetStocks(data.data);
 				});
 			}
 		}, {
@@ -22979,54 +23024,50 @@
 							),
 							_react2.default.createElement('hr', null),
 							_react2.default.createElement(
-								'form',
-								{ className: 'form-inline' },
+								'div',
+								{ className: 'form-group' },
 								_react2.default.createElement(
-									'div',
-									{ className: 'form-group' },
-									_react2.default.createElement(
-										'label',
-										{ 'for': 'exampleInputName2', onClick: this._onClickGetRecom.bind(this) },
-										'Get Recommendation for'
-									),
-									_react2.default.createElement('input', { type: 'text', className: 'form-control', ref: 'fbconst', id: 'exampleInputName2', placeholder: 'how many dollars' })
+									'label',
+									{ 'for': 'exampleInputName2' },
+									'Get Recommendation for'
+								),
+								_react2.default.createElement('input', { type: 'text', className: 'form-control', ref: 'fbconst', id: 'exampleInputName2', placeholder: 'how many dollars' })
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'form-group' },
+								_react2.default.createElement(
+									'label',
+									{ 'for': 'exampleInputName2' },
+									'of type'
 								),
 								_react2.default.createElement(
-									'div',
-									{ className: 'form-group' },
+									'select',
+									{ className: 'form-control', ref: 'ftype', id: 'exampleSelect1' },
 									_react2.default.createElement(
-										'label',
-										{ 'for': 'exampleInputName2' },
-										'of type'
+										'option',
+										{ value: 'random' },
+										'Control'
 									),
 									_react2.default.createElement(
-										'select',
-										{ className: 'form-control', ref: 'ftype', id: 'exampleSelect1' },
-										_react2.default.createElement(
-											'option',
-											{ value: 'control' },
-											'Control'
-										),
-										_react2.default.createElement(
-											'option',
-											{ value: '' },
-											'Best Expected Return'
-										),
-										_react2.default.createElement(
-											'option',
-											{ value: '' },
-											'Best Expected Return + Diversity'
-										)
-									)
-								),
-								_react2.default.createElement(
-									'div',
-									{ className: 'form-group' },
+										'option',
+										{ value: 'high_return' },
+										'Best Expected Return'
+									),
 									_react2.default.createElement(
-										'button',
-										{ className: 'btn btn-info' },
-										'Suggest'
+										'option',
+										{ value: 'diverse' },
+										'Best Expected Return + Diversity'
 									)
+								)
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'form-group' },
+								_react2.default.createElement(
+									'button',
+									{ className: 'btn btn-info', onClick: this._onClickGetRecom.bind(this) },
+									'Suggest'
 								)
 							),
 							_react2.default.createElement('hr', null),
@@ -23044,7 +23085,7 @@
 								null,
 								'Predicted fluctuation'
 							),
-							_react2.default.createElement('div', { ref: 'plot', id: 'data-dump', 'data-prices': '{{ data }}' })
+							_react2.default.createElement(Plot, { ref: 'plot' })
 						)
 					),
 					_react2.default.createElement(PortfolioEditor, { ref: 'pmanager', onUpdate: this._onUpdateStocks.bind(this) })
@@ -23059,233 +23100,6 @@
 
 /***/ },
 /* 180 */
-/*!**************************!*\
-  !*** ./app/lib/csrf.jsx ***!
-  \**************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-	    value: true
-	});
-	exports.default = CsrfToken;
-	
-	var _react = __webpack_require__(/*! react */ 1);
-	
-	var _react2 = _interopRequireDefault(_react);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	// using jQuery
-	function getCookie(name) {
-	    var cookieValue = null;
-	    if (document.cookie && document.cookie !== '') {
-	        var cookies = document.cookie.split(';');
-	        for (var i = 0; i < cookies.length; i++) {
-	            var cookie = jQuery.trim(cookies[i]);
-	            // Does this cookie string begin with the name we want?
-	            if (cookie.substring(0, name.length + 1) === name + '=') {
-	                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-	                break;
-	            }
-	        }
-	    }
-	    return cookieValue;
-	}
-	
-	var token = getCookie('csrftoken');
-	
-	function CsrfToken() {
-	    return _react2.default.createElement('input', { type: 'hidden', name: 'csrfmiddlewaretoken', value: token });
-	}
-	
-	function csrfSafeMethod(method) {
-	    // these HTTP methods do not require CSRF protection
-	    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method)
-	    );
-	}
-	$.ajaxSetup({
-	    beforeSend: function beforeSend(xhr, settings) {
-	        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-	            xhr.setRequestHeader("X-CSRFToken", token);
-	        }
-	    }
-	});
-
-/***/ },
-/* 181 */
-/*!*************************!*\
-  !*** ./app/lib/plot.js ***!
-  \*************************/
-/***/ function(module, exports) {
-
-	"use strict";
-	
-	function plotData(data, el) {
-	
-	  var margin = { top: 20, right: 50, bottom: 30, left: 50 },
-	      width = $(el).width() - margin.left - margin.right,
-	      height = $(el).width() / 2 - margin.top - margin.bottom;
-	
-	  var parseDate = d3.timeParse("%d-%b-%y"),
-	      bisectDate = d3.bisector(function (d) {
-	    return d.date;
-	  }).left,
-	      formatValue = d3.format(",.2f"),
-	      formatCurrency = function formatCurrency(d) {
-	    return "$" + formatValue(d);
-	  };
-	
-	  var x = d3.scaleTime().range([0, width]);
-	  var y = d3.scaleLinear().range([height, 0]);
-	
-	  var xAxis = d3.axisBottom().scale(x);
-	  var yAxis = d3.axisLeft().scale(y);
-	
-	  var line = d3.line().x(function (d) {
-	    return x(d.date);
-	  }).y(function (d) {
-	    return y(d.close);
-	  }).curve(d3.curveBasis);
-	
-	  var svg = d3.select(el).append("svg").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-	
-	  data.forEach(function (d) {
-	    d.date = parseDate(d.date);
-	    d.close = +d.close;
-	  });
-	
-	  data.sort(function (a, b) {
-	    return a.date - b.date;
-	  });
-	
-	  x.domain([data[0].date, data[data.length - 1].date]);
-	  y.domain(d3.extent(data, function (d) {
-	    return d.close;
-	  }));
-	
-	  svg.append("g").attr("class", "x axis").attr("transform", "translate(0," + height + ")").call(xAxis);
-	
-	  svg.append("g").attr("class", "y axis").call(yAxis).append("text").attr("transform", "rotate(-90)").attr("y", 4).attr("dy", ".71em").style("text-anchor", "end").text("Price ($)");
-	
-	  var path = svg.append("path").datum(data).attr("class", "line").attr("d", line);
-	
-	  var focus = svg.append("g").attr("class", "focus").style("display", "none");
-	
-	  focus.append("circle").attr("r", 4.5);
-	
-	  focus.append("text").attr("x", 9).attr("dy", ".35em");
-	
-	  svg.append("rect").attr("class", "overlay").attr("width", width).attr("height", height).on("mouseover", function () {
-	    focus.style("display", null);
-	  }).on("mouseout", function () {
-	    focus.style("display", "none");
-	  }).on("mousemove", mousemove);
-	
-	  function mousemove() {
-	    var x0 = x.invert(d3.mouse(this)[0]),
-	        i = bisectDate(data, x0, 1),
-	        d0 = data[i - 1],
-	        d1 = data[i],
-	        d = x0 - d0.date > d1.date - x0 ? d1 : d0;
-	    focus.attr("transform", "translate(" + x(d.date) + "," + y(d.close) + ")");
-	    focus.select("text").text(formatCurrency(d.close));
-	  }
-	}
-	
-	function plotMultipleData(data1, data2, el) {
-	
-	  var margin = { top: 20, right: 50, bottom: 30, left: 50 },
-	      width = $(el).width() - margin.left - margin.right,
-	      height = $(el).width() / 2 - margin.top - margin.bottom;
-	
-	  var parseDate = d3.timeParse("%d-%b-%y"),
-	      bisectDate = d3.bisector(function (d) {
-	    return d.date;
-	  }).left,
-	      formatValue = d3.format(",.2f"),
-	      formatCurrency = function formatCurrency(d) {
-	    return formatValue(d);
-	  };
-	
-	  var x = d3.scaleTime().range([0, width]);
-	  var y = d3.scaleLinear().range([height, 0]);
-	
-	  var xAxis = d3.axisBottom().scale(x);
-	  var yAxis = d3.axisLeft().scale(y);
-	
-	  var line1 = d3.line().x(function (d) {
-	    return x(d.date);
-	  }).y(function (d) {
-	    return y(d.close);
-	  }).curve(d3.curveBasis);
-	
-	  var line2 = d3.line().x(function (d) {
-	    return x(d.date);
-	  }).y(function (d) {
-	    return y(d.close);
-	  }).curve(d3.curveBasis);
-	
-	  var svg = d3.select(el).append("svg").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-	
-	  data1.forEach(function (d) {
-	    d.date = parseDate(d.date);
-	    d.close = +d.close;
-	  });
-	
-	  data2.forEach(function (d) {
-	    d.date = parseDate(d.date);
-	    d.close = +d.close;
-	  });
-	
-	  data1.sort(function (a, b) {
-	    return a.date - b.date;
-	  });
-	
-	  data2.sort(function (a, b) {
-	    return a.date - b.date;
-	  });
-	
-	  x.domain([data1[0].date, data1[data1.length - 1].date]);
-	  y.domain(d3.extent(data1.concat(data2), function (d) {
-	    return d.close;
-	  }));
-	
-	  svg.append("g").attr("class", "x axis").attr("transform", "translate(0," + height + ")").call(xAxis);
-	
-	  svg.append("g").attr("class", "y axis").call(yAxis).append("text").attr("transform", "rotate(-90)").attr("y", 4).attr("dy", ".71em").style("text-anchor", "end").text("TSR");
-	
-	  var path2 = svg.append("path").datum(data2).attr("class", "line line2").attr("d", line2);
-	
-	  var path1 = svg.append("path").datum(data1).attr("class", "line").attr("d", line1);
-	
-	  var focus = svg.append("g").attr("class", "focus").style("display", "none");
-	
-	  focus.append("circle").attr("r", 4.5);
-	
-	  focus.append("text").attr("x", 9).attr("dy", ".35em");
-	
-	  svg.append("rect").attr("class", "overlay").attr("width", width).attr("height", height).on("mouseover", function () {
-	    focus.style("display", null);
-	  }).on("mouseout", function () {
-	    focus.style("display", "none");
-	  }).on("mousemove", mousemove);
-	
-	  function mousemove() {
-	    var x0 = x.invert(d3.mouse(this)[0]),
-	        i = bisectDate(data1, x0, 1),
-	        d0 = data1[i - 1],
-	        d1 = data1[i],
-	        d = x0 - d0.date > d1.date - x0 ? d1 : d0;
-	    focus.attr("transform", "translate(" + x(d.date) + "," + y(d.close) + ")");
-	    focus.select("text").text(formatCurrency(d.close));
-	  }
-	}
-
-/***/ },
-/* 182 */,
-/* 183 */
 /*!****************************!*\
   !*** ./~/lodash/lodash.js ***!
   \****************************/
@@ -40357,10 +40171,10 @@
 	  }
 	}.call(this));
 	
-	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(/*! ./../webpack/buildin/module.js */ 184)(module)))
+	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(/*! ./../webpack/buildin/module.js */ 181)(module)))
 
 /***/ },
-/* 184 */
+/* 181 */
 /*!***********************************!*\
   !*** (webpack)/buildin/module.js ***!
   \***********************************/
@@ -40379,7 +40193,233 @@
 
 
 /***/ },
-/* 185 */
+/* 182 */
+/*!*************************!*\
+  !*** ./app/lib/plot.js ***!
+  \*************************/
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	function plotData(data, el) {
+	
+	  var margin = { top: 20, right: 50, bottom: 30, left: 50 },
+	      width = $(el).width() - margin.left - margin.right,
+	      height = $(el).width() / 2 - margin.top - margin.bottom;
+	
+	  var parseDate = d3.timeParse("%d-%b-%y"),
+	      bisectDate = d3.bisector(function (d) {
+	    return d.date;
+	  }).left,
+	      formatValue = d3.format(",.2f"),
+	      formatCurrency = function formatCurrency(d) {
+	    return "$" + formatValue(d);
+	  };
+	
+	  var x = d3.scaleTime().range([0, width]);
+	  var y = d3.scaleLinear().range([height, 0]);
+	
+	  var xAxis = d3.axisBottom().scale(x);
+	  var yAxis = d3.axisLeft().scale(y);
+	
+	  var line = d3.line().x(function (d) {
+	    return x(d.date);
+	  }).y(function (d) {
+	    return y(d.close);
+	  }).curve(d3.curveBasis);
+	
+	  var svg = d3.select(el).append("svg").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+	
+	  data.forEach(function (d) {
+	    d.date = parseDate(d.date);
+	    d.close = +d.close;
+	  });
+	
+	  data.sort(function (a, b) {
+	    return a.date - b.date;
+	  });
+	
+	  x.domain([data[0].date, data[data.length - 1].date]);
+	  y.domain(d3.extent(data, function (d) {
+	    return d.close;
+	  }));
+	
+	  svg.append("g").attr("class", "x axis").attr("transform", "translate(0," + height + ")").call(xAxis);
+	
+	  svg.append("g").attr("class", "y axis").call(yAxis).append("text").attr("transform", "rotate(-90)").attr("y", 4).attr("dy", ".71em").style("text-anchor", "end").text("Price ($)");
+	
+	  var path = svg.append("path").datum(data).attr("class", "line").attr("d", line);
+	
+	  var focus = svg.append("g").attr("class", "focus").style("display", "none");
+	
+	  focus.append("circle").attr("r", 4.5);
+	
+	  focus.append("text").attr("x", 9).attr("dy", ".35em");
+	
+	  svg.append("rect").attr("class", "overlay").attr("width", width).attr("height", height).on("mouseover", function () {
+	    focus.style("display", null);
+	  }).on("mouseout", function () {
+	    focus.style("display", "none");
+	  }).on("mousemove", mousemove);
+	
+	  function mousemove() {
+	    var x0 = x.invert(d3.mouse(this)[0]),
+	        i = bisectDate(data, x0, 1),
+	        d0 = data[i - 1],
+	        d1 = data[i],
+	        d = x0 - d0.date > d1.date - x0 ? d1 : d0;
+	    focus.attr("transform", "translate(" + x(d.date) + "," + y(d.close) + ")");
+	    focus.select("text").text(formatCurrency(d.close));
+	  }
+	}
+	
+	function plotMultipleData(data1, data2, el) {
+	
+	  var margin = { top: 20, right: 50, bottom: 30, left: 50 },
+	      width = $(el).width() - margin.left - margin.right,
+	      height = $(el).width() / 2 - margin.top - margin.bottom;
+	
+	  var parseDate = d3.timeParse("%d-%b-%y"),
+	      bisectDate = d3.bisector(function (d) {
+	    return d.date;
+	  }).left,
+	      formatValue = d3.format(",.2f"),
+	      formatCurrency = function formatCurrency(d) {
+	    return formatValue(d);
+	  };
+	
+	  var x = d3.scaleTime().range([0, width]);
+	  var y = d3.scaleLinear().range([height, 0]);
+	
+	  var xAxis = d3.axisBottom().scale(x);
+	  var yAxis = d3.axisLeft().scale(y);
+	
+	  var line1 = d3.line().x(function (d) {
+	    return x(d.date);
+	  }).y(function (d) {
+	    return y(d.close);
+	  }).curve(d3.curveBasis);
+	
+	  var line2 = d3.line().x(function (d) {
+	    return x(d.date);
+	  }).y(function (d) {
+	    return y(d.close);
+	  }).curve(d3.curveBasis);
+	
+	  var svg = d3.select(el).append("svg").attr("width", width + margin.left + margin.right).attr("height", height + margin.top + margin.bottom).append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+	
+	  data1.forEach(function (d) {
+	    d.date = parseDate(d.date);
+	    d.close = +d.close;
+	  });
+	
+	  data2.forEach(function (d) {
+	    d.date = parseDate(d.date);
+	    d.close = +d.close;
+	  });
+	
+	  data1.sort(function (a, b) {
+	    return a.date - b.date;
+	  });
+	
+	  data2.sort(function (a, b) {
+	    return a.date - b.date;
+	  });
+	
+	  x.domain([data1[0].date, data1[data1.length - 1].date]);
+	  y.domain(d3.extent(data1.concat(data2), function (d) {
+	    return d.close;
+	  }));
+	
+	  svg.append("g").attr("class", "x axis").attr("transform", "translate(0," + height + ")").call(xAxis);
+	
+	  svg.append("g").attr("class", "y axis").call(yAxis).append("text").attr("transform", "rotate(-90)").attr("y", 4).attr("dy", ".71em").style("text-anchor", "end").text("TSR");
+	
+	  var path2 = svg.append("path").datum(data2).attr("class", "line line2").attr("d", line2);
+	
+	  var path1 = svg.append("path").datum(data1).attr("class", "line").attr("d", line1);
+	
+	  var focus = svg.append("g").attr("class", "focus").style("display", "none");
+	
+	  focus.append("circle").attr("r", 4.5);
+	
+	  focus.append("text").attr("x", 9).attr("dy", ".35em");
+	
+	  svg.append("rect").attr("class", "overlay").attr("width", width).attr("height", height).on("mouseover", function () {
+	    focus.style("display", null);
+	  }).on("mouseout", function () {
+	    focus.style("display", "none");
+	  }).on("mousemove", mousemove);
+	
+	  function mousemove() {
+	    var x0 = x.invert(d3.mouse(this)[0]),
+	        i = bisectDate(data1, x0, 1),
+	        d0 = data1[i - 1],
+	        d1 = data1[i],
+	        d = x0 - d0.date > d1.date - x0 ? d1 : d0;
+	    focus.attr("transform", "translate(" + x(d.date) + "," + y(d.close) + ")");
+	    focus.select("text").text(formatCurrency(d.close));
+	  }
+	}
+
+/***/ },
+/* 183 */
+/*!**************************!*\
+  !*** ./app/lib/csrf.jsx ***!
+  \**************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.default = CsrfToken;
+	
+	var _react = __webpack_require__(/*! react */ 1);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	// using jQuery
+	function getCookie(name) {
+	    var cookieValue = null;
+	    if (document.cookie && document.cookie !== '') {
+	        var cookies = document.cookie.split(';');
+	        for (var i = 0; i < cookies.length; i++) {
+	            var cookie = jQuery.trim(cookies[i]);
+	            // Does this cookie string begin with the name we want?
+	            if (cookie.substring(0, name.length + 1) === name + '=') {
+	                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+	                break;
+	            }
+	        }
+	    }
+	    return cookieValue;
+	}
+	
+	var token = getCookie('csrftoken');
+	
+	function CsrfToken() {
+	    return _react2.default.createElement('input', { type: 'hidden', name: 'csrfmiddlewaretoken', value: token });
+	}
+	
+	function csrfSafeMethod(method) {
+	    // these HTTP methods do not require CSRF protection
+	    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method)
+	    );
+	}
+	$.ajaxSetup({
+	    beforeSend: function beforeSend(xhr, settings) {
+	        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+	            xhr.setRequestHeader("X-CSRFToken", token);
+	        }
+	    }
+	});
+
+/***/ },
+/* 184 */
 /*!****************************!*\
   !*** ./app/pages/Home.jsx ***!
   \****************************/
@@ -40399,11 +40439,11 @@
 	
 	var _reactDom = __webpack_require__(/*! react-dom */ 32);
 	
-	var _lodash = __webpack_require__(/*! lodash */ 183);
+	var _lodash = __webpack_require__(/*! lodash */ 180);
 	
 	var _lodash2 = _interopRequireDefault(_lodash);
 	
-	var _csrf = __webpack_require__(/*! ../lib/csrf.jsx */ 180);
+	var _csrf = __webpack_require__(/*! ../lib/csrf.jsx */ 183);
 	
 	var _csrf2 = _interopRequireDefault(_csrf);
 	

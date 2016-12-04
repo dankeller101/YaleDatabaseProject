@@ -20,7 +20,7 @@ class Portfolio(models.Model):
     current_value = models.FloatField(default=0)
     total_invested = models.IntegerField(default=0)
     start_date = models.DateField('Creation Date of Portfolio', null=True)
-    end_date = models.DateField('Latest Record', null=True)
+    end_date = models.DateField('Latest Record')
 
     def __str__(self):
         return self.portfolio_name

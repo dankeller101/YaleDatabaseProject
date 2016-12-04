@@ -3,6 +3,7 @@
 import React from 'react'
 import { findDOMNode } from 'react-dom'
 import _ from 'lodash'
+import { plotData, plotMultipleData } from '../lib/plot';
 
 import CsrfToken from '../lib/csrf.jsx';
 
@@ -33,7 +34,7 @@ class PortfolioEditor extends React.Component {
 		var name = findDOMNode(this.refs.name).value.toUpperCase()
 		var amount = parseInt(findDOMNode(this.refs.amount).value)
 
-		if (name.length < 3) {
+		if (name.length == 0) {
 			alert('Invalid stock name.')
 			return
 		}
@@ -49,6 +50,7 @@ class PortfolioEditor extends React.Component {
 		if (found) {
 			found.amount += amount
 			this.setState({ stocks: this.state.stocks })
+			this.props.onUpdate(this.state.stocks)
 			return
 		}
 
@@ -127,26 +129,55 @@ class PortfolioEditor extends React.Component {
 	}
 }
 
+class Plot extends React.Component {
+	updateStocks(_stocks) {
+		var stocks = _.keyBy(_stocks, 'name');
+
+		$.getJSON("/predictor/api/gen_portfolio_price_plot?stocks="+encodeURIComponent(JSON.stringify(stocks)),
+		 (data) => {
+			if (!data) {
+				return;
+			}
+
+			var points = [];
+			for (var i=0; i<data.data.length; ++i) {
+				var row = data.data[i];
+				console.log(row);
+				// points.push({
+				// 	// name: "",
+				// 	// name: "",
+				// 	// name: "",
+				// });
+			}
+
+			// var points = []
+			// var lastprice = 36000
+			// for (var i=800; i<data.data.length; ++i) {
+			// 	if (i%5 == 0) {
+			// 		lastprice += (Math.random()-0.5)*100
+			// 		data.data[i].close = lastprice
+			// 		points.push(data.data[i])
+			// 	}
+			// }
+
+			plotData(points, findDOMNode(this.refs.plot))
+		})
+
+	}
+
+	render() {
+		return (
+			<div className="NewPortfolioPlot">
+				<div ref="plot" id="data-dump"></div>
+			</div>
+		)
+	}
+}
+
 export default class NewPortfolioView extends React.Component {
 	constructor(props) {
 		super(props)
 		this.state = { stocks: [] }
-	}
-
-	_updatePlot() {
-
-		$.getJSON("/predictor/api/gen_portfolio_plot?stocks="+this.props.id, (data) => {
-			var points = []
-			var lastprice = 36000
-			for (var i=800; i<data.data.length; ++i) {
-				if (i%5 == 0) {
-					lastprice += (Math.random()-0.5)*100
-					data.data[i].close = lastprice
-					points.push(data.data[i])
-				}
-			}
-			plotData(points, findDOMNode(this.refs.plot))
-		})
 	}
 
 	_onUpdateStocks() {
@@ -177,6 +208,7 @@ export default class NewPortfolioView extends React.Component {
 	}
 
 	_onClickGetRecom() {
+		this.refs.pmanager.resetStocks()
 		let data = {
 			type: findDOMNode(this.refs.ftype).value,
 			total_spend: parseInt(findDOMNode(this.refs.fbconst).value)
@@ -220,9 +252,9 @@ export default class NewPortfolioView extends React.Component {
 							<label for="exampleInputName2">of type</label>
 
 							<select className="form-control" ref='ftype' id="exampleSelect1">
-								<option value='control'>Control</option>
-								<option value=''>Best Expected Return</option>
-								<option value=''>Best Expected Return + Diversity</option>
+								<option value='random'>Control</option>
+								<option value='high_return'>Best Expected Return</option>
+								<option value='diverse'>Best Expected Return + Diversity</option>
 							</select>
 						</div>
 
@@ -239,7 +271,7 @@ export default class NewPortfolioView extends React.Component {
 
 					<div className="col-sm-6">
 						<p>Predicted fluctuation</p>
-						<div ref="plot" id="data-dump" data-prices="{{ data }}"></div>
+						<Plot ref='plot' />
 					</div>
 
 				</div>

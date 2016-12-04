@@ -49,7 +49,7 @@ def get_portfolio_plot(request):
 	stock = sapi.getStock(ticker)
 
 	if not stock:
-		return JsonResponse({ "data": null }, status=404)
+		return JsonResponse({ "data": None }, status=404)
 
 	interface = stockDayDatabaseInterface()
 	days = interface.getAllDaysOrdered(stock)
@@ -66,17 +66,7 @@ def get_stock(request):
 	stock = sapi.getStock(ticker)
 
 	if not stock:
-		return JsonResponse({ "data": null }, status=404)
-
-
-
-	# interface = stockDayDatabaseInterface()
-
-	# days = interface.getLatestPrice(stock)
-	# print(days)
-	# # array = []
-	# for day in days:
-	# 	array.append({'date' : day.day.strftime("%d-%b-%y"), 'close' : day.adjustedClose})
+		return JsonResponse({ "data": None }, status=404)
 
 	return JsonResponse({
 		"data": {
@@ -93,7 +83,7 @@ def get_stock(request):
 
 @require_GET
 def get_stock_plot(request):
-	ticker = request.GET["stock"]
+	ticker = request.GET["name"]
 	stock = sapi.getStock(ticker)
 
 	if not stock:
@@ -101,12 +91,44 @@ def get_stock_plot(request):
 
 	interface = stockDayDatabaseInterface()
 	days = interface.getAllDaysOrdered(stock)
+	print 'days', days
 	array = []
 	for day in days:
 		array.append({'date' : day.day.strftime("%d-%b-%y"), 'close' : day.adjustedClose})
 
 	return JsonResponse({ "data": array })
 
+@require_GET
+def gen_portfolio_price_plot(request):
+	stocks = json.loads(request.GET['stocks'])
+	interface = stockDayDatabaseInterface()
+	alldays = {}
+
+	for key in stocks:
+		stockinfo = stocks[key]
+		stock = sapi.getStock(stockinfo["name"])
+		if not stock:
+			continue
+		for stockday in interface.getAllDaysOrdered(stock):
+			obj = {
+				"name": stockinfo["name"],
+				"price": stockday.adjustedClose,
+				"date": stockday.day.strftime("%d-%b-%y")
+			}
+
+			key = stockday.day.strftime("%d-%b-%y")
+			if not key in alldays:
+				alldays[key] = []
+			alldays[key].append(obj)
+
+	result = []
+	keylist = alldays.keys()
+	keylist.sort()
+	for key in keylist:
+		result.append(alldays[key])
+	    # print "%s: %s" % (key, alldays[key])
+
+	return JsonResponse({ "data": result })
 
 @require_GET
 def get_recommendation(request):
@@ -158,7 +180,7 @@ def portfolios(request):
 		portfolio = Portfolio()
 		portfolio.portfolio_name = request.POST['name']
 		portfolio.start_date = datetime.datetime.today()
-		portfolio.end_date = datetime.datetime.today() - datetime.timedelta(days=10000000000)
+		portfolio.end_date = datetime.datetime.today() - datetime.timedelta(days=100000)
 		portfolio.investor = Investor.objects.get(user=request.user)
 		portfolio.save()
 
@@ -179,8 +201,6 @@ def portfolios(request):
 			owned.bought_at = stock.current_high
 			owned.amount_owned = quantity
 			owned.save()
-
-		portfolio.save()
 
 		return JsonResponse({ "error": False })
 		# return HttpResponseRedirect(reverse('predictor:home', args=(current_user.id,)))

@@ -91,7 +91,7 @@ def get_stock_price_array(stock_list, first_date, last_date):
 
     # remove the finals rows that had 10 consecutive days missing
     stock_prices = np.delete(stock_prices, rows_to_remove, axis=0)
-    stock_list = [stock for i, stock in enumerate(stock_list) if not keep_rows[i]]
+    stock_list = [stock for i, stock in enumerate(stock_list) if stock not in rows_to_remove]
 
     # raise an error if we have too few days to run our model on
     lower_threshold_on_days = stock_prices.shape[0]  # howl if we have more stocks than days
@@ -146,8 +146,10 @@ class portfolioAPI():
             if not portfolio:
                 return None
             current_date = datetime.date.today()
-            if portfolio.end_date.date < current_date - datetime.timedelta(days=1):
+            if portfolio.end_date < current_date - datetime.timedelta(days=3):
                 recentDay = self.fixPortfolioDays(portfolio_id, portfolio.end_date)
+                if not recentDay:
+                    return portfolio
                 portfolio.end_date = recentDay.day
                 portfolio.current_diversity = recentDay.diversity
                 portfolio.current_value = recentDay.value
@@ -166,13 +168,17 @@ class portfolioAPI():
         stockapi = stockAPI()
 
         #all stock_owned objects connected to this portfolio
-        stocks = Stock_Owned.objects.get(portfolio=portfolio)
+        try:
+            stocks = Stock_Owned.objects.filter(portfolio=portfolio)
+        except Stock_Owned.DoesNotExist:
+            return None
+
 
         #fill stocksObjects array with stock objects
         stocksObjects = []
         for stock in stocks:
             #get stock objects
-            stock = Stock.objects.get(pk=stock.stock)
+            stock = Stock.objects.get(pk=stock.stock.pk)
             #update stock with newest days
             stock = stockapi.getStock(stock.stock_name)
             stocksObjects.append(stock)
@@ -189,38 +195,44 @@ class portfolioAPI():
 
         #find first index
         endFrame = portfolio.end_date + datetime.timedelta(days=1)
-        startFrame = endFrame + datetime.timedelta(days=60)
+        if endFrame < datetime.date.today() - datetime.timedelta(days=4000):
+            endFrame = days_in[0] + datetime.timedelta(days=60)
+        startFrame = endFrame - datetime.timedelta(days=60)
         startIndex = 0
         endIndex = 0
 
         for index, day in enumerate(days_in):
-            if day < startFrame:
-                startIndex = index
-            else:
+            if day > startFrame:
                 startIndex = index
                 break
+            else:
+                startIndex = index
         for index, day in enumerate(days_in):
             if day < endFrame:
                 endIndex = index
             else:
-                endIndex = index
                 break
 
         tsr_array = predict_my_money.computations.basic_computations.compute_tsr(cleanedArray, stock_amounts)
 
         mostRecentDay = None
+        number_days = len(days_in)
         #create Portfolio_Day objects
-        while endFrame < today - datetime.timedelta(days=1):
+        while endFrame < today - datetime.timedelta(days=2):
             newPortDay = Portfolio_Day()
             newPortDay.portfolio = portfolio
             newPortDay.day = endFrame
             newPortDay.value = tsr_array[endIndex]
-            newPortDay.diversity = predict_my_money.computations.basic_computations.compute_diversity(cleanedArray[:, startIndex:endIndex + 1], stock_amounts)
+            diversity = predict_my_money.computations.basic_computations.compute_diversity(cleanedArray[:, startIndex:endIndex + 1], stock_amounts)
+            if not diversity:
+                print("start" + startIndex.__str__() + " end " + endIndex.__str__())
+                diversity = 0
+            newPortDay.diversity = diversity
             newPortDay.save()
             mostRecentDay = newPortDay
             endFrame = endFrame + datetime.timedelta(days=1)
             startFrame = startFrame + datetime.timedelta(days=1)
-            if days_in[startIndex + 1] >= startFrame:
+            if days_in[startIndex + 1] <= startFrame:
                 startIndex += 1
             if days_in[endIndex + 1] <= endFrame:
                 endIndex += 1
@@ -284,6 +296,7 @@ class stockAPI():
             return stock
         stock.current_high = mostRecentDay['high']
         stock.current_low = mostRecentDay['low']
+        stock.current_adjusted_close = mostRecentDay['adjClose'] if mostRecentDay['adjClose'] else mostRecentDay['close']
         stock.end_date = self.parseDate(mostRecentDay['date'])
         stock.save()
         return stock

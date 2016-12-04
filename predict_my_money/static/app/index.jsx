@@ -23,7 +23,7 @@ class StockView extends React.Component {
   }
 
 	componentDidMount() {
-		$.getJSON("/predictor/api/get_stock_plot?stock=aapl", (data) => {
+		$.getJSON("/predictor/api/get_stock_plot?name=aapl", (data) => {
       var points = [];
       for (var i=0; i<data.data.length; ++i) {
         if (i%100) {
@@ -55,7 +55,7 @@ class PortfolioCompareView extends React.Component {
   }
 
   componentDidMount() {
-    $.getJSON("/predictor/api/get_portfolio_plot?stock=aapl", (data) => {
+    $.getJSON("/predictor/api/get_portfolio_plot?name=aapl", (data) => {
       var points0 = [], points1 = [];
       var lastprice0 = 0, lastprice1 = 0;
       for (var i=800; i<data.data.length; ++i) {
@@ -163,7 +163,7 @@ class PortfolioView extends React.Component {
   }
 
   componentDidMount() {
-    $.getJSON("/predictor/api/get_portfolio_plot?stock=aapl", (data) => {
+    $.getJSON("/predictor/api/get_portfolio_plot?name=aapl", (data) => {
       var points = [];
       var lastprice = 36000;
       for (var i=800; i<data.data.length; ++i) {
@@ -241,8 +241,6 @@ class PortfolioView extends React.Component {
     )
   }
 }
-
-console.log(NewPortfolioView)
 
 window.startPortfolioView = function() {
   render(<PortfolioView stock={window.data.stock} />, document.getElementById('app'));

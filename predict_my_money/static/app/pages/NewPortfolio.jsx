@@ -3,27 +3,35 @@
 import React from 'react'
 import { findDOMNode } from 'react-dom'
 import _ from 'lodash'
+import { plotData, plotMultipleData } from '../lib/plot';
 
 import CsrfToken from '../lib/csrf.jsx';
 
 class PortfolioEditor extends React.Component {
 	constructor(props) {
 		super(props)
-		this.state = { stocks: [{ name: 'AAPL', amount: 3 }] }
+		// this.state = { stocks: [{ name: 'AAPL', amount: 3, price: 20 }] }
+		this.state = { stocks: [] }
 	}
 
 	resetStocks(rows) {
 		var stocks = [];
-		for (var i=0; i<rows.legth; ++i) {
+		_.each(rows, (el) => {
 			stocks.push({
-				name: row[i][0].toUpperCase(),
-				amount: row[i][1].toUpperCase(),
-				price: row[i][2].toUpperCase(),
+				name: el[0].toUpperCase(),
+				amount: el[1],
+				price: el[2],
 			})
-		}
+		})
+		this.setState({ stocks: stocks })
+	}
+
+	componentWillUpdate() {
+		// this.props.onUpdateStocks(this.state.stocks)
 	}
 
 	getStocks() {
+		console.log(this.state.stocks)
 		return this.state.stocks
 	}
 
@@ -31,7 +39,7 @@ class PortfolioEditor extends React.Component {
 		var name = findDOMNode(this.refs.name).value.toUpperCase()
 		var amount = parseInt(findDOMNode(this.refs.amount).value)
 
-		if (name.length < 3) {
+		if (name.length == 0) {
 			alert('Invalid stock name.')
 			return
 		}
@@ -47,6 +55,7 @@ class PortfolioEditor extends React.Component {
 		if (found) {
 			found.amount += amount
 			this.setState({ stocks: this.state.stocks })
+			this.props.onUpdateStocks(this.state.stocks)
 			return
 		}
 
@@ -56,23 +65,28 @@ class PortfolioEditor extends React.Component {
 				return;
 			}
 
-			this.state.stocks.push({
+			var stocks = _.clone(this.state.stocks)
+
+			stocks.push({
 				name: name,
 				amount: amount,
-				price: data.current_adjusted_close
+				price: data.data.current_adjusted_close
 			})
 
-			this.props.onUpdate(this.state.stocks)
+			this.setState({ stocks: stocks }, () => {
+				this.props.onUpdateStocks(this.state.stocks)
+			})
 		})
 	}
 
 	render() {
 		var stockList = this.state.stocks.map((e, i) => {
 			var remove = () => {
-				_.remove(this.state.stocks, { name: e.name })
-				console.log(this.state.stocks)
-				this.setState({ stocks: _.remove(this.state.stocks, { name: e.name })})
-				console.log(this.state.stock)
+				var cloned = _.cloneDeep(this.state.stocks)
+				var stocks = _.filter(cloned, (i) => i.name != e.name)
+				this.setState({ stocks: stocks }, () => {
+					this.props.onUpdateStocks(this.state.stocks)
+				})
 			}
 
 			return (
@@ -92,12 +106,12 @@ class PortfolioEditor extends React.Component {
 
 				<form id="add-stock" className="FormAddStock form-inline">
 					<div className="form-group">
-						<label for="exampleInputName2">Add to portfolio stock</label>
+						<label htmlFor="exampleInputName2">Add to portfolio stock</label>
 						<input type="text" ref="name" className="form-control" id="exampleInputName2" placeholder="stock name" />
 					</div>
 
 					<div className="form-group">
-						<label for="exampleInputName2">with amount</label>
+						<label htmlFor="exampleInputName2">with amount</label>
 						<input type="number" ref="amount" className="form-control" id="exampleInputName2" placeholder="amount of stock" />
 					</div>
 
@@ -125,30 +139,67 @@ class PortfolioEditor extends React.Component {
 	}
 }
 
+class Plot extends React.Component {
+	updateStocks(_stocks) {
+		var stocks = _.keyBy(_stocks, 'name');
+
+		$.getJSON("/predictor/api/gen_portfolio_price_plot?stocks="+encodeURIComponent(JSON.stringify(stocks)),
+		 (data) => {
+			if (!data) {
+				return;
+			}
+
+			var points = [];
+			for (var i=0; i<data.data.length; ++i) {
+				var row = data.data[i];
+				// console.log(row);
+				// console.log(_.map(row, 'price'))
+				var sum = _.sumBy(row, (el) => {
+					// console.log(stocks[el.name].amount, el.price)
+					return stocks[el.name].amount*el.price;
+				})
+				points.push({
+					close: sum,
+					date: row[0].date
+				});
+			}
+
+			// var points = []
+			// var lastprice = 36000
+			// for (var i=800; i<data.data.length; ++i) {
+			// 	if (i%5 == 0) {
+			// 		lastprice += (Math.random()-0.5)*100
+			// 		data.data[i].close = lastprice
+			// 		points.push(data.data[i])
+			// 	}
+			// }
+
+			$(findDOMNode(this.refs.plot)).html('');
+
+			plotData(points, findDOMNode(this.refs.plot))
+		})
+
+	}
+
+	render() {
+		return (
+			<div className="NewPortfolioPlot">
+				<div ref="plot" id="data-dump"></div>
+			</div>
+		)
+	}
+}
+
 export default class NewPortfolioView extends React.Component {
 	constructor(props) {
 		super(props)
 		this.state = { stocks: [] }
 	}
 
-	_updatePlot() {
-
-		$.getJSON("/predictor/api/gen_portfolio_plot?stocks="+this.props.id, (data) => {
-			var points = []
-			var lastprice = 36000
-			for (var i=800; i<data.data.length; ++i) {
-				if (i%5 == 0) {
-					lastprice += (Math.random()-0.5)*100
-					data.data[i].close = lastprice
-					points.push(data.data[i])
-				}
-			}
-			plotData(points, findDOMNode(this.refs.plot))
-		})
-	}
-
 	_onUpdateStocks() {
+
 		var stocks = this.refs.pmanager.getStocks()
+		console.log("stocks are", JSON.stringify(stocks))
 		this.setState({ stocks: stocks })
 		this.refs.plot.updateStocks(stocks)
 	}
@@ -175,22 +226,24 @@ export default class NewPortfolioView extends React.Component {
 	}
 
 	_onClickGetRecom() {
+		this.refs.pmanager.resetStocks()
 		let data = {
 			type: findDOMNode(this.refs.ftype).value,
-			bc: parseInt(findDOMNode(this.refs.fbconst).value)
+			total_spend: parseInt(findDOMNode(this.refs.fbconst).value)
 		}
 
-		$.getJSON("/predictor/api/get_recommendation", (data) => {
+		$.getJSON("/predictor/api/get_recommendation", data, (data) => {
 			if (data.error) {
 				alert(data.message)
 				return
 			}
 
-			this.refs.pmanager.resetStocks(data)
+			this.refs.pmanager.resetStocks(data.data)
 		})
 	}
 
 	componentDidMount() {
+		// this.refs.plot.updateStocks(this.state.stocks)
 	}
 
 	render() {
@@ -202,33 +255,31 @@ export default class NewPortfolioView extends React.Component {
 				<div className="row">
 					<div className="col-sm-6">
 						<div className="form-group">
-							<label for="inputName">Name</label>
+							<label htmlFor="inputName">Name</label>
 							<input type="text" ref="fname" className="form-control" id="inputName" aria-describedby="nameHelp" placeholder="Identify your portfolio" />
 							<small id="nameHelp" className="form-text text-muted">Identify your portfolio.</small>
 						</div>
 
 						<hr />
 
-						<form className="form-inline">
-							<div className="form-group">
-								<label for="exampleInputName2" onClick={this._onClickGetRecom.bind(this)}>Get Recommendation for</label>
-								<input type="text" className="form-control" ref="fbconst" id="exampleInputName2" placeholder="how many dollars" />
-							</div>
+						<div className="form-group">
+							<label htmlFor="exampleInputName2">Get Recommendation for</label>
+							<input type="text" className="form-control" ref="fbconst" id="exampleInputName2" placeholder="how many dollars" />
+						</div>
 
-							<div className="form-group">
-								<label for="exampleInputName2">of type</label>
+						<div className="form-group">
+							<label htmlFor="exampleInputName2">of type</label>
 
-								<select className="form-control" ref='ftype' id="exampleSelect1">
-									<option value='control'>Control</option>
-									<option value=''>Best Expected Return</option>
-									<option value=''>Best Expected Return + Diversity</option>
-								</select>
-							</div>
+							<select className="form-control" ref='ftype' id="exampleSelect1">
+								<option value='random'>Control</option>
+								<option value='high_return'>Best Expected Return</option>
+								<option value='diverse'>Best Expected Return + Diversity</option>
+							</select>
+						</div>
 
-							<div className="form-group">
-								<button className="btn btn-info">Suggest</button>
-							</div>
-						</form>
+						<div className="form-group">
+							<button className="btn btn-info" onClick={this._onClickGetRecom.bind(this)}>Suggest</button>
+						</div>
 
 						<hr />
 
@@ -239,12 +290,12 @@ export default class NewPortfolioView extends React.Component {
 
 					<div className="col-sm-6">
 						<p>Predicted fluctuation</p>
-						<div ref="plot" id="data-dump" data-prices="{{ data }}"></div>
+						<Plot ref='plot' />
 					</div>
 
 				</div>
 
-				<PortfolioEditor ref='pmanager' onUpdate={this._onUpdateStocks.bind(this)} />
+				<PortfolioEditor ref='pmanager' onUpdateStocks={this._onUpdateStocks.bind(this)} />
 			</div>
 		)
 	}

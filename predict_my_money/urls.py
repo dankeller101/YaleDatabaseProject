@@ -33,11 +33,13 @@ urlpatterns = [
     # url(r'^portfolios', views.account_portfolios_json, name='account_portfolios_json'),
 
     # JSON API below
+    url(r'^api/gen_portfolio_price_plot', api_views.gen_portfolio_price_plot, name='gen_portfolio_price_plot'),
     url(r'^api/get_recommendation', api_views.get_recommendation, name='get_recommendation'),
     url(r'^api/portfolios/(?P<id>[0-9]+)', api_views.portfolio, name='api_portfolio'),
     url(r'^api/portfolios', api_views.portfolios, name='api_portfolios'),
 
-    url(r'^api/get_stock', api_views.get_stock, name='get_stock'),
-    url(r'^api/get_stock_plot', api_views.get_stock_plot, name='get_stock_plot'),
+    url(r'^api/get_stock_plot$', api_views.get_stock_plot, name='get_stock_plot'),
+    url(r'^api/get_stock$', api_views.get_stock, name='get_stock'),
+
     url(r'^api/get_portfolio_plot', api_views.get_portfolio_plot, name='get_portfolio_plot'),
 ]

@@ -70,8 +70,6 @@ def portfolio_compare(request, pid0, pid1):
 			'error_message': "Portfolio doesn't exist.",
 		})
 
-	
-
 	return render(request, 'predictor/portfolio_compare.html', {})
 
 @require_GET

@@ -53,7 +53,7 @@ def login(request):
 			})
 
 		djangoLogin(request, user)
-		return HttpResponseRedirect(reverse('predictor'))
+		return HttpResponseRedirect(reverse('predictor:home'))
 	else:
 		return HttpResponseBadRequest("Invalid method.")
 

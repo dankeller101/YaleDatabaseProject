@@ -103,9 +103,8 @@ def gen_portfolio_price_plot(request):
 	interface = stockDayDatabaseInterface()
 	alldays = {}
 
-	print stocks
-
-	for stockinfo in stocks:
+	for key in stocks:
+		stockinfo = stocks[key]
 		stock = sapi.getStock(stockinfo["name"])
 		if not stock:
 			continue

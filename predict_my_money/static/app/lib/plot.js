@@ -1,5 +1,6 @@
 
-function plotData(data, el) {
+export function plotData(data, el) {
+  console.log('data', data)
 
   var margin = {top: 20, right: 50, bottom: 30, left: 50},
     width = $(el).width() - margin.left - margin.right,
@@ -90,7 +91,7 @@ function plotData(data, el) {
 }
 
 
-function plotMultipleData(data1, data2, el) {
+export function plotMultipleData(data1, data2, el) {
 
   var margin = {top: 20, right: 50, bottom: 30, left: 50},
     width = $(el).width() - margin.left - margin.right,

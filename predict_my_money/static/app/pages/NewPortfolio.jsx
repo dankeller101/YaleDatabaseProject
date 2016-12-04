@@ -16,17 +16,17 @@ class PortfolioEditor extends React.Component {
 	resetStocks(rows) {
 		var stocks = [];
 		_.each(rows, (el) => {
-			console.log(el)
 			stocks.push({
 				name: el[0].toUpperCase(),
 				amount: el[1],
 				price: el[2],
-			})			
+			})
 		})
 		this.setState({ stocks: stocks })
 	}
 
 	getStocks() {
+		console.log(this.state.stocks)
 		return this.state.stocks
 	}
 
@@ -63,7 +63,7 @@ class PortfolioEditor extends React.Component {
 			this.state.stocks.push({
 				name: name,
 				amount: amount,
-				price: data.current_adjusted_close
+				price: data.data.current_adjusted_close
 			})
 
 			this.props.onUpdate(this.state.stocks)
@@ -142,12 +142,16 @@ class Plot extends React.Component {
 			var points = [];
 			for (var i=0; i<data.data.length; ++i) {
 				var row = data.data[i];
-				console.log(row);
-				// points.push({
-				// 	// name: "",
-				// 	// name: "",
-				// 	// name: "",
-				// });
+				// console.log(row);
+				// console.log(_.map(row, 'price'))
+				var sum = _.sumBy(row, (el) => {
+					// console.log(stocks[el.name].amount, el.price)
+					return stocks[el.name].amount*el.price;
+				})
+				points.push({
+					close: sum,
+					date: row[0].date
+				});
 			}
 
 			// var points = []
@@ -225,6 +229,7 @@ export default class NewPortfolioView extends React.Component {
 	}
 
 	componentDidMount() {
+		this.refs.plot.updateStocks(this.state.stocks)
 	}
 
 	render() {

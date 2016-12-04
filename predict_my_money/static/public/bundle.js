@@ -22670,7 +22670,6 @@
 			value: function resetStocks(rows) {
 				var stocks = [];
 				_lodash2.default.each(rows, function (el) {
-					console.log(el);
 					stocks.push({
 						name: el[0].toUpperCase(),
 						amount: el[1],
@@ -22682,6 +22681,7 @@
 		}, {
 			key: 'getStocks',
 			value: function getStocks() {
+				console.log(this.state.stocks);
 				return this.state.stocks;
 			}
 		}, {
@@ -22721,7 +22721,7 @@
 					_this2.state.stocks.push({
 						name: name,
 						amount: amount,
-						price: data.current_adjusted_close
+						price: data.data.current_adjusted_close
 					});
 	
 					_this2.props.onUpdate(_this2.state.stocks);
@@ -22890,12 +22890,16 @@
 					var points = [];
 					for (var i = 0; i < data.data.length; ++i) {
 						var row = data.data[i];
-						console.log(row);
-						// points.push({
-						// 	// name: "",
-						// 	// name: "",
-						// 	// name: "",
-						// });
+						// console.log(row);
+						// console.log(_.map(row, 'price'))
+						var sum = _lodash2.default.sumBy(row, function (el) {
+							// console.log(stocks[el.name].amount, el.price)
+							return stocks[el.name].amount * el.price;
+						});
+						points.push({
+							close: sum,
+							date: row[0].date
+						});
 					}
 	
 					// var points = []
@@ -22988,7 +22992,9 @@
 			}
 		}, {
 			key: 'componentDidMount',
-			value: function componentDidMount() {}
+			value: function componentDidMount() {
+				this.refs.plot.updateStocks(this.state.stocks);
+			}
 		}, {
 			key: 'render',
 			value: function render() {
@@ -40201,7 +40207,13 @@
 
 	"use strict";
 	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.plotData = plotData;
+	exports.plotMultipleData = plotMultipleData;
 	function plotData(data, el) {
+	  console.log('data', data);
 	
 	  var margin = { top: 20, right: 50, bottom: 30, left: 50 },
 	      width = $(el).width() - margin.left - margin.right,

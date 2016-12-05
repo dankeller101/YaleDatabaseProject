@@ -192,6 +192,20 @@ def gen_portfolio_price_plot(request):
 	return JsonResponse({ "data": result })
 
 @require_GET
+def get_portfolio_values(request):
+	try:
+		portfolio = Portfolio.objects.get(pk=request.GET['portfolio'])
+	except Portfolio.DoesNotExist:
+		return JsonResponse({'success':False})
+	else:
+		days = Portfolio_Day.objects.filter(portfolio=portfolio)
+		daysDict = {}
+		for day in days:
+			daysDict[day.day.__str__()] = [day.value, day.diversity]
+		daysDict['success'] = True
+		return JsonResponse({daysDict})
+
+@require_GET
 def get_recommendation(request):
 	totalspend = float(request.GET['total_spend'])
 	kwargs = { 'budget': totalspend }

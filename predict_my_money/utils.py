@@ -163,11 +163,12 @@ class portfolioAPI():
             return portfolio
 
     def fixPortfolioDays(self, portfolio_id, earliest_day=None):
-        if not earliest_day:
-            earliest_day = datetime.datetime.strptime('01-01-2012', '%m-%d-%Y') + datetime.timedelta(days=60)
 
         today = datetime.date.today()
         portfolio = Portfolio.objects.get(pk=portfolio_id)
+
+        if not earliest_day:
+            earliest_day = portfolio.start_date
 
         #instantiate interfaces
         stockInterface = stockDayDatabaseInterface()

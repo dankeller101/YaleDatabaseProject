@@ -2,12 +2,13 @@
 export function plotData(data, el) {
   // console.log('data', data)
   console.log('plotData')
+  $(el).html('');
 
   var margin = {top: 20, right: 50, bottom: 30, left: 50},
     width = $(el).width() - margin.left - margin.right,
     height = $(el).width()/2 - margin.top - margin.bottom;
 
-  var parseDate = d3.timeParse("%d-%b-%y"),
+  var parseDate = d3.timeParse("%Y-%m-%d"), // %d-%b-%y"),
     bisectDate = d3.bisector(function(d) { return d.date; }).left,
     formatValue = d3.format(",.2f"),
     formatCurrency = function(d) { return "$" + formatValue(d); };
@@ -98,7 +99,7 @@ export function plotMultipleData(data1, data2, el) {
     width = $(el).width() - margin.left - margin.right,
     height = $(el).width()/2 - margin.top - margin.bottom;
 
-  var parseDate = d3.timeParse("%d-%b-%y"),
+  var parseDate = d3.timeParse("%Y-%m-%d"), // %d-%b-%y"),
     bisectDate = d3.bisector(function(d) { return d.date; }).left,
     formatValue = d3.format(",.2f"),
     formatCurrency = function(d) { return formatValue(d); };

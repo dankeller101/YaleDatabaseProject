@@ -99,6 +99,9 @@ body {
   .jumbotron {
     border-bottom: 0; } }
 
+.navbar {
+  margin-bottom: 20px; }
+
 .FormAddStock {
   margin: 10px 0; }
   .FormAddStock .form-group, .FormAddStock label {
@@ -112,3 +115,8 @@ body {
   .PortfolioEditor > h1 {
     font-size: 15px;
     text-transform: uppercase; }
+
+footer {
+  font-size: .9em;
+  margin-top: 30px;
+  margin-bottom: 30px; }

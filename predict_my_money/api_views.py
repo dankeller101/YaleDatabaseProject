@@ -1,6 +1,6 @@
 """api_views.py"""
 
-import datetime
+import datetime, time
 import json
 
 from django.shortcuts import render
@@ -52,36 +52,30 @@ def get_portfolio_plot(request):
 	if not portfolio:
 		return JsonResponse({ "data": [], error: True }, status=404)
 
-	print papi.getStocksOwned(pid)
-	print "what?", portfolio
+	ownstocks = papi.getStocksOwned(pid)
+	if not ownstocks:
+		return JsonResponse({ "data": [], error: True }, status=404)
 
-	# alldays = {}
+	alldays = {}
+	stocksbyname = {}
 
-	# for key in stocks:
-	# 	stockinfo = stocks[key]
-	# 	stock = sapi.getStock(stockinfo["name"])
-	# 	if not stock:
-	# 		continue
-	# 	for stockday in interface.getAllDaysOrdered(stock):
-	# 		obj = {
-	# 			"name": stockinfo["name"],
-	# 			"price": stockday.adjustedClose,
-	# 			"date": stockday.day.strftime("%d-%b-%y")
-	# 		}
+	for ostock in ownstocks:
+		stocksbyname[ostock.stock.stock_name] = ostock.amount_owned
+		for stockday in stockDayInterface.getAllDaysOrdered(ostock.stock):
+			key = int(time.mktime(stockday.day.timetuple()))
 
-	# 		key = stockday.day.strftime("%d-%b-%y")
-	# 		if not key in alldays:
-	# 			alldays[key] = []
-	# 		alldays[key].append(obj)
+			if not key in alldays:
+				alldays[key] = 0
+			alldays[key] += stockday.adjustedClose*ostock.amount_owned
 
-	# result = []
-	# keylist = alldays.keys()
-	# keylist.sort()
-	# for key in keylist:
-	# 	result.append(alldays[key])
-	    # print "%s: %s" % (key, alldays[key])
+	result = []
+	keylist = alldays.keys()
+	keylist.sort()
+	for key in keylist:
+		date = datetime.datetime.utcfromtimestamp(key).strftime("%Y-%m-%d")
+		result.append({ "date": date, "close": alldays[key] })
 
-	return JsonResponse({ "data": [] })
+	return JsonResponse({ "data": result })
 
 
 @require_GET
@@ -111,18 +105,16 @@ def get_stock_plot(request):
 	stock = sapi.getStock(ticker)
 
 	if not stock:
-		return JsonResponse({ "data": null }, status=404)
+		return JsonResponse({ "data": None }, status=404)
 
 	interface = stockDayDatabaseInterface()
 	days = interface.getAllDaysOrdered(stock)
-	print 'days', days
+	print('days', days)
 	array = []
 	for day in days:
-		array.append({'date' : day.day.strftime("%d-%b-%y"), 'close' : day.adjustedClose})
+		array.append({'date' : day.day.strftime("%Y-%m-%d"), 'close' : day.adjustedClose})
 
 	return JsonResponse({ "data": array })
-
-
 
 @require_GET
 def gen_portfolio_price_plot(request):
@@ -132,6 +124,7 @@ def gen_portfolio_price_plot(request):
 
 	for key in stocks:
 		stockinfo = stocks[key]
+		print(stockinfo["name"])
 		stock = sapi.getStock(stockinfo["name"])
 		if not stock:
 			continue
@@ -139,10 +132,10 @@ def gen_portfolio_price_plot(request):
 			obj = {
 				"name": stockinfo["name"],
 				"price": stockday.adjustedClose,
-				"date": stockday.day.strftime("%d-%b-%y")
+				"date": stockday.day.strftime("%Y-%m-%d")
 			}
 
-			key = stockday.day.strftime("%d-%b-%y")
+			key = stockday.day.strftime("%Y-%m-%d")
 			if not key in alldays:
 				alldays[key] = []
 			alldays[key].append(obj)

@@ -4,17 +4,11 @@
 
 {% block head %}
 <script>
-window.data = { stock: '{{ stock_ticker }}' };
+window.data = { stock: { name: '{{ stock_ticker }}' } };
 </script>
 {% endblock %}
 
 {% block js %}
 <script src="{% static 'predictor/d3.min.js' %}"></script>
 <script>startStockView();</script>
-{% endblock %}
-
-{% block content %}
-
-<div id="app"></div>
-
 {% endblock %}

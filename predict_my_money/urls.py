@@ -20,11 +20,11 @@ urlpatterns = [
     url(r'^portfolios/compare/(?P<pid0>[0-9]+)/(?P<pid1>[0-9]+)', views.portfolio_compare, name='portfolio_compare'),
 
     #example /stock/view/GOOGL
-    url(r'^stock/view/(?P<stock_ticker>[a-z]+)', views.stock_detail, name='stock_detail'),
+    url(r'^stocks/(?P<stock_ticker>[\w]+)', views.stock_detail, name='stock_detail'),
     #example /portfolio/create
     url(r'^portfolios/create', views.create_portfolio, name='create_portfolio'),
     #example /portfolio/view/1
-    url(r'^portfolios/(?P<portfolio_id>[0-9]+)', views.portfolio, name='portfolio'),
+    url(r'^portfolios/(?P<pid>[0-9]+)', views.portfolio, name='portfolio'),
     #example /portfolio/recommend
     # url(r'^api/get_recommendation', api_views.get_recommendation, name='get_recommendation'),
     # #example /portfolio/1

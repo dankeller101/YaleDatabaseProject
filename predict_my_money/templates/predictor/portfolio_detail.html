@@ -4,16 +4,31 @@
 
 {% block head %}
 <script>
-window.data = { stock: '{{ stock_ticker }}' };
+window.data = {};
+window.data.portfolio = {
+    id: {{ portfolio.id|escapejs }},
+    portfolio_name: '{{ portfolio.portfolio_name|escapejs }}',
+    current_diversity: {{ portfolio.current_diversity|escapejs }},
+    current_value: {{ portfolio.current_value|escapejs }},
+    total_invested: {{ portfolio.total_invested|escapejs }},
+    start_date: '{{ portfolio.start_date|escapejs }}',
+    end_date: '{{ portfolio.end_date|escapejs }}',
+}
+window.data.portfolio.stocks = [
+{% for s in stocks %}
+{
+    name: '{{ s.stock.stock_name|escapejs }}',
+    owned: '{{ s.amount_owned|escapejs }}',
+    price: '{{ s.stock.current_adjusted_close|escapejs }}',
+    price_then: '{{ s.bought_at|escapejs }}',
+},
+{% endfor %}
+]
 </script>
 {% endblock %}
 
 {% block js %}
-<script src="{% static 'predictor/portfolio.js' %}"></script>
 <script>startPortfolioView();</script>
-<script>
-window.data = {{ investor.portfolio_set }};
-</script>
 {% endblock %}
 
 {% block content %}
@@ -21,25 +36,3 @@ window.data = {{ investor.portfolio_set }};
 <div id="app"></div>
 
 {% endblock %}
-
-<!-- 
-{% block asdfasdf %}
-<h1> Home of {{ user.first_name }} {{ user.last_name }}</h1>
-
-<div>
-	{% for portfolio in investor.portfolio_set.all %}
-		<div>
-		<a href="{% url 'predictor:portfolio_detail'  portfolio_id=portfolio.pk  %}">
-			{{ portfolio.portfolio_name }}
-			</a>
-		</div>
-		<div>
-			{{ portfolio.current_diversity }}
-		</div>
-		<div>
-			{{ portfolio.total_invested }}
-		</div>
-
-	{% endfor %}
-</div>
-{% endblock %} -->

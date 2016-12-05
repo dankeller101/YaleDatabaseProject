@@ -167,9 +167,6 @@ class portfolioAPI():
         today = datetime.date.today()
         portfolio = Portfolio.objects.get(pk=portfolio_id)
 
-        if not earliest_day:
-            earliest_day = portfolio.start_date
-
         #instantiate interfaces
         stockInterface = stockDayDatabaseInterface()
         stockapi = stockAPI()
@@ -190,7 +187,14 @@ class portfolioAPI():
             stock = stockapi.getStock(stock.stock_name)
             stocksObjects.append(stock)
 
-        creationDateWithBuffer = portfolio.end_date - datetime.timedelta(days=70)
+        if not earliest_day:
+            earliest_day = portfolio.start_date - datetime.timedelta(days=2000)
+            update = False
+        else:
+            earliest_day = earliest_day - datetime.timedelta(days=70)
+            update = True
+
+        creationDateWithBuffer = earliest_day
 
         cleanedArray, stocks_in, days_in = get_stock_price_array(stocksObjects, creationDateWithBuffer, today)
 
@@ -201,7 +205,13 @@ class portfolioAPI():
         stock_amounts = np.array([stock.amount_owned for stock in stocks])
 
         #find first index
-        endFrame = portfolio.end_date + datetime.timedelta(days=1)
+        if update:
+            endFrame = portfolio.end_date + datetime.timedelta(days=1)
+        else:
+            endFrame = portfolio.start_date - datetime.timedelta(days=1000)
+
+
+
         if endFrame < datetime.date.today() - datetime.timedelta(days=4000):
             endFrame = days_in[0] + datetime.timedelta(days=60)
         startFrame = endFrame - datetime.timedelta(days=60)

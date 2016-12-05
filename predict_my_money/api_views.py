@@ -33,7 +33,7 @@ def portfolio_detail(request, portfolio_id):
 	days = Portfolio_Day.objects.order_by('day').filter(portfolio=portfolio)
 	daysDict = {}
 	for day in days:
-		daysDict[day.day.__str__()] = {'value':day.value, 'diversity':day.diversity}
+		daysDict[day.day.__str__()] = {'value':day.value if day.day >= portfolio.start_date else None, 'diversity':day.diversity}
 	storage['investor'] = investor
 	storage['name'] = name
 	storage['diversity'] = diversity
@@ -69,7 +69,7 @@ def get_portfolio_tsr_plot(request):
 		# if pday.day < portfolio.start_date:
 		points.append({
 			"date": pday.day.strftime("%Y-%m-%d"),
-			"close": pday.value,
+			"close": pday.value if pday.day >= portfolio.start_date else None,
 			"diversity": pday.diversity
 		})
 

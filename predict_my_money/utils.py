@@ -152,7 +152,16 @@ class portfolioAPI():
             if not portfolio:
                 return None
             current_date = datetime.date.today()
-            if portfolio.end_date < current_date - datetime.timedelta(days=3):
+            if portfolio.first_update == 0:
+                recentDay = self.fixPortfolioDays(portfolio_id)
+                if not recentDay:
+                    return portfolio
+                portfolio.first_update = 1
+                portfolio.end_date = recentDay.day
+                portfolio.current_diversity = recentDay.diversity
+                portfolio.current_value = recentDay.value
+                portfolio.save()
+            elif portfolio.end_date < current_date - datetime.timedelta(days=3):
                 recentDay = self.fixPortfolioDays(portfolio_id, portfolio.end_date)
                 if not recentDay:
                     return portfolio

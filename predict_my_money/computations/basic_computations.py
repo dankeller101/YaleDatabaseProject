@@ -63,8 +63,8 @@ def compute_diversity(stock_prices, num_shares):
         raise ValueError('Number of shares must be positive')
     if np.any(stock_prices < 0):
         raise ValueError('Stock prices must be nonnegative')
-    if stock_prices.shape[1] <= 1:
-        raise ValueError('Not enough days to compute diversity over')
+    if stock_prices.shape[0] <= 1:
+        return 0
 
     n, p = stock_prices.shape
 

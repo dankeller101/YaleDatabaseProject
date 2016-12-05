@@ -103,7 +103,7 @@ def get_portfolio_plot(request):
 			alldays[key] += stockday.adjustedClose*ostock.amount_owned
 
 	result = []
-	keylist = alldays.keys()
+	keylist = list(alldays.keys())
 	keylist.sort()
 	for key in keylist:
 		date = datetime.datetime.utcfromtimestamp(key).strftime("%Y-%m-%d")

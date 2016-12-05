@@ -21,6 +21,7 @@ class Portfolio(models.Model):
     total_invested = models.IntegerField(default=0)
     start_date = models.DateField('Creation Date of Portfolio', null=True)
     end_date = models.DateField('Latest Record', null=True)
+    first_update = models.IntegerField(default=0)
 
     def __str__(self):
         return self.portfolio_name
@@ -32,8 +33,9 @@ class Portfolio_Day(models.Model):
     value = models.IntegerField(default=0)
     diversity = models.FloatField(default=0.0)
 
+
     def __str__(self):
-        return self.day
+        return self. portfolio.portfolio_name + self.day.__str__()
 
 class Stock(models.Model):
     stock_name = models.CharField(max_length=10)

@@ -43,7 +43,7 @@ def login(request):
 		context = {}
 		return HttpResponse(template.render(context, request))
 	elif request.method == "POST":
-		username = request.POST['username']
+		username = request.POST['email']
 		password = request.POST['password']
 		user = authenticate(username=username, password=password)
 		

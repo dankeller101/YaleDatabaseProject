@@ -15,7 +15,7 @@ export default class PortfolioCompareView extends React.Component {
   }
 
   componentDidMount() {
-    $.getJSON("/predictor/api/get_portfolio_plot?id="+this.props.data1.id, (data) => {
+    $.getJSON("/predictor/api/get_portfolio_tsr_plot?id="+this.props.data1.id, (data) => {
       var points1 = []
       for (var i=0; i<data.data.length; ++i) {
         if (i%5 == 0) {
@@ -23,7 +23,7 @@ export default class PortfolioCompareView extends React.Component {
         }
       }
 
-			$.getJSON("/predictor/api/get_portfolio_plot?id="+this.props.data2.id, (data) => {
+			$.getJSON("/predictor/api/get_portfolio_tsr_plot?id="+this.props.data2.id, (data) => {
 	      var points2 = []
 	      for (var i=0; i<data.data.length; ++i) {
 	        if (i%5 == 0) {

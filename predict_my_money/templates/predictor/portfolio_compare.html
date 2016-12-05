@@ -8,9 +8,9 @@ window.data = {};
 window.data.portfolio1 = {
     id: {{ portfolio1.id|escapejs }},
     portfolio_name: '{{ portfolio1.portfolio_name|escapejs }}',
-    current_diversity: {{ portfolio1.current_diversity|escapejs }},
-    current_value: {{ portfolio1.current_value|escapejs }},
-    total_invested: {{ portfolio1.total_invested|escapejs }},
+    current_diversity: {{ portfolio1.current_diversity }},
+    current_value: {{ portfolio1.current_value }},
+    total_invested: {{ portfolio1.total_invested }},
     start_date: '{{ portfolio1.start_date|escapejs }}',
     end_date: '{{ portfolio1.end_date|escapejs }}',
 }
@@ -27,9 +27,9 @@ window.data.portfolio1.stocks = [
 window.data.portfolio2 = {
     id: {{ portfolio2.id|escapejs }},
     portfolio_name: '{{ portfolio2.portfolio_name|escapejs }}',
-    current_diversity: {{ portfolio2.current_diversity|escapejs }},
-    current_value: {{ portfolio2.current_value|escapejs }},
-    total_invested: {{ portfolio2.total_invested|escapejs }},
+    current_diversity: {{ portfolio2.current_diversity }},
+    current_value: {{ portfolio2.current_value }},
+    total_invested: {{ portfolio2.total_invested }},
     start_date: '{{ portfolio2.start_date|escapejs }}',
     end_date: '{{ portfolio2.end_date|escapejs }}',
 }

@@ -43,6 +43,48 @@ def portfolio_detail(request, portfolio_id):
 
 #
 
+@require_GET
+def get_portfolio_tsr_plot(request):
+	pid = request.GET["id"]
+	portfolio = papi.getPortfolio(pid)
+
+	if not portfolio:
+		return JsonResponse({ "data": [], error: True }, status=404)
+
+	ownstocks = papi.getStocksOwned(pid)
+	if not ownstocks:
+		return JsonResponse({ "data": [], error: True }, status=404)
+
+	alldays = {}
+	stocksbyname = {}
+
+	portfolio.start_date = datetime.datetime.now() - datetime.timedelta(days=100)
+	portfolio.save()
+
+	start = int(time.mktime(portfolio.start_date.timetuple()))
+
+	for ostock in ownstocks:
+		stocksbyname[ostock.stock.stock_name] = ostock.amount_owned
+		for stockday in stockDayInterface.getAllDaysOrdered(ostock.stock):
+
+			if stockday.day < portfolio.start_date:
+				continue
+
+			key = int(time.mktime(stockday.day.timetuple()))
+
+			if not key in alldays:
+				alldays[key] = 0
+			alldays[key] += stockday.adjustedClose*ostock.amount_owned
+
+	result = []
+	keylist = alldays.keys()
+	keylist.sort()
+	for key in keylist:
+		date = datetime.datetime.utcfromtimestamp(key).strftime("%Y-%m-%d")
+		result.append({ "date": date, "close": alldays[key] })
+
+	return JsonResponse({ "data": result })
+
 
 @require_GET
 def get_portfolio_plot(request):
@@ -159,7 +201,10 @@ def get_recommendation(request):
 	else:
 		rtype = "high_return"
 
-	a = recommend_interfacer(recommend_type=rtype, budget=totalspend)
+	timehorizon = int(request.GET['timehorizon'])
+	maxinvest = float(request.GET['maxinvest'])
+
+	a = recommend_interfacer(recommend_type=rtype, budget=totalspend, time_horizon=timehorizon, max_investment=maxinvest)
 	print(a)
 	ret = []
 	for m in a:

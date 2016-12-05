@@ -22613,7 +22613,9 @@
 	
 				var data = {
 					type: (0, _reactDom.findDOMNode)(this.refs.ftype).value,
-					total_spend: parseInt((0, _reactDom.findDOMNode)(this.refs.fbconst).value)
+					total_spend: parseInt((0, _reactDom.findDOMNode)(this.refs.fbconst).value),
+					timehorizon: (0, _reactDom.findDOMNode)(this.refs.f_timehorizon).value,
+					maxinvest: (0, _reactDom.findDOMNode)(this.refs.f_maxinvest).value
 				};
 	
 				$.getJSON("/predictor/api/get_recommendation", data, function (data) {
@@ -22695,19 +22697,39 @@
 									_react2.default.createElement(
 										'option',
 										{ value: 'random' },
-										'Control'
+										'Random'
 									),
 									_react2.default.createElement(
 										'option',
 										{ value: 'high_return' },
-										'Best Expected Return'
+										'Highest Return'
 									),
 									_react2.default.createElement(
 										'option',
 										{ value: 'diverse' },
-										'Best Expected Return + Diversity'
+										'Diverse Option'
 									)
 								)
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'form-group' },
+								_react2.default.createElement(
+									'label',
+									{ htmlFor: 'exampleInputName2' },
+									'and time horizon'
+								),
+								_react2.default.createElement('input', { type: 'text', className: 'form-control', ref: 'f_timehorizon', id: '', placeholder: 'Integer' })
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'form-group' },
+								_react2.default.createElement(
+									'label',
+									{ htmlFor: 'exampleInputName2' },
+									'with Max investment'
+								),
+								_react2.default.createElement('input', { type: 'text', className: 'form-control', ref: 'f_maxinvest', id: '', placeholder: 'Float' })
 							),
 							_react2.default.createElement(
 								'div',
@@ -40363,7 +40385,7 @@
 	    value: function componentDidMount() {
 	      var _this2 = this;
 	
-	      $.getJSON("/predictor/api/get_portfolio_plot?id=" + this.props.data1.id, function (data) {
+	      $.getJSON("/predictor/api/get_portfolio_tsr_plot?id=" + this.props.data1.id, function (data) {
 	        var points1 = [];
 	        for (var i = 0; i < data.data.length; ++i) {
 	          if (i % 5 == 0) {
@@ -40371,7 +40393,7 @@
 	          }
 	        }
 	
-	        $.getJSON("/predictor/api/get_portfolio_plot?id=" + _this2.props.data2.id, function (data) {
+	        $.getJSON("/predictor/api/get_portfolio_tsr_plot?id=" + _this2.props.data2.id, function (data) {
 	          var points2 = [];
 	          for (var i = 0; i < data.data.length; ++i) {
 	            if (i % 5 == 0) {

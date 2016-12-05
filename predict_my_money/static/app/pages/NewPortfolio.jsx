@@ -14,15 +14,10 @@ class PortfolioEditor extends React.Component {
 		this.state = { stocks: [] }
 	}
 
-	resetStocks(rows) {
-		var stocks = [];
-		_.each(rows, (el) => {
-			stocks.push({
-				name: el[0].toUpperCase(),
-				amount: el[1],
-				price: el[2],
-			})
-		})
+	resetStocks(stocks) {
+		if (stocks == undefined) {
+			stocks = [];
+		}
 		this.setState({ stocks: stocks })
 	}
 
@@ -142,7 +137,6 @@ class PortfolioEditor extends React.Component {
 class Plot extends React.Component {
 	updateStocks(_stocks) {
 		var stocks = _.keyBy(_stocks, 'name');
-
 		$.getJSON("/predictor/api/gen_portfolio_price_plot?stocks="+encodeURIComponent(JSON.stringify(stocks)),
 		 (data) => {
 			if (!data) {
@@ -152,29 +146,11 @@ class Plot extends React.Component {
 			var points = [];
 			for (var i=0; i<data.data.length; ++i) {
 				var row = data.data[i];
-				// console.log(row);
-				// console.log(_.map(row, 'price'))
 				var sum = _.sumBy(row, (el) => {
-					// console.log(stocks[el.name].amount, el.price)
 					return stocks[el.name].amount*el.price;
 				})
-				points.push({
-					close: sum,
-					date: row[0].date
-				});
+				points.push({ close: sum, date: row[0].date });
 			}
-
-			// var points = []
-			// var lastprice = 36000
-			// for (var i=800; i<data.data.length; ++i) {
-			// 	if (i%5 == 0) {
-			// 		lastprice += (Math.random()-0.5)*100
-			// 		data.data[i].close = lastprice
-			// 		points.push(data.data[i])
-			// 	}
-			// }
-
-			$(findDOMNode(this.refs.plot)).html('');
 
 			plotData(points, findDOMNode(this.refs.plot))
 		})
@@ -227,6 +203,7 @@ export default class NewPortfolioView extends React.Component {
 
 	_onClickGetRecom() {
 		this.refs.pmanager.resetStocks()
+
 		let data = {
 			type: findDOMNode(this.refs.ftype).value,
 			total_spend: parseInt(findDOMNode(this.refs.fbconst).value)
@@ -238,12 +215,20 @@ export default class NewPortfolioView extends React.Component {
 				return
 			}
 
-			this.refs.pmanager.resetStocks(data.data)
-		})
-	}
+			var stocks = [];
+			_.each(data.data, (el) => {
+				stocks.push({
+					name: el[0].toUpperCase(),
+					amount: el[1],
+					price: el[2],
+				})
+			})
 
-	componentDidMount() {
-		// this.refs.plot.updateStocks(this.state.stocks)
+			this.setState({ stocks: stocks }, () => {
+				this.refs.pmanager.resetStocks(this.state.stocks)
+				this.refs.plot.updateStocks(this.state.stocks)
+			})
+		})
 	}
 
 	render() {

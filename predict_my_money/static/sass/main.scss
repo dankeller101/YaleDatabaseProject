@@ -13,7 +13,7 @@ body {
   shape-rendering: crispEdges;
 }
 
-.line2 {
+.line2, .lgreen {
   stroke: #5F8 !important;
 }
 
@@ -126,6 +126,9 @@ body {
 
 //////////
 
+.navbar {
+  margin-bottom: 20px;
+}
 
 .FormAddStock {
   margin: 10px 0;
@@ -146,4 +149,18 @@ body {
   border: 1px solid #EEE;
   margin-top: 30px;
 
+}
+
+.portfolio1 {
+  color: #0bf;
+}
+
+.portfolio2 {
+  color: #5F8;
+}
+
+footer {
+  font-size: .9em;
+  margin-top: 30px;
+  margin-bottom: 30px;
 }

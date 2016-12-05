@@ -4,17 +4,22 @@
 
 {% block head %}
 <script>
-window.data = { stock: '{{ stock_ticker }}' };
+window.data = {};
+window.data.stock = {
+	stock_name: '{{ stock.stock_name }}'
+	company_name: '{{ stock.company_name }}'
+	company_meta: '{{ stock.company_meta }}'
+	current_high: '{{ stock.current_high }}'
+	current_low: '{{ stock.current_low }}'
+	current_adjusted_close: '{{ stock.current_adjusted_close }}'
+	start_date: '{{ stock.start_date }}'
+	end_date: '{{ stock.end_date }}'
+};
+
 </script>
 {% endblock %}
 
 {% block js %}
 <script src="{% static 'predictor/d3.min.js' %}"></script>
 <script>startStockView();</script>
-{% endblock %}
-
-{% block content %}
-
-<div id="app"></div>
-
 {% endblock %}

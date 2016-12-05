@@ -4,7 +4,46 @@
 
 {% block head %}
 <script>
-window.data = { stock: '{{ stock_ticker }}' };
+window.data = {};
+window.data.portfolio1 = {
+    id: {{ portfolio1.id|escapejs }},
+    portfolio_name: '{{ portfolio1.portfolio_name|escapejs }}',
+    current_diversity: {{ portfolio1.current_diversity|escapejs }},
+    current_value: {{ portfolio1.current_value|escapejs }},
+    total_invested: {{ portfolio1.total_invested|escapejs }},
+    start_date: '{{ portfolio1.start_date|escapejs }}',
+    end_date: '{{ portfolio1.end_date|escapejs }}',
+}
+window.data.portfolio1.stocks = [
+{% for s in stocks1 %}
+{
+    name: '{{ s.stock.stock_name|escapejs }}',
+    owned: '{{ s.amount_owned|escapejs }}',
+    price: '{{ s.stock.current_adjusted_close|escapejs }}',
+    price_then: '{{ s.bought_at|escapejs }}',
+},
+{% endfor %}
+]
+window.data.portfolio2 = {
+    id: {{ portfolio2.id|escapejs }},
+    portfolio_name: '{{ portfolio2.portfolio_name|escapejs }}',
+    current_diversity: {{ portfolio2.current_diversity|escapejs }},
+    current_value: {{ portfolio2.current_value|escapejs }},
+    total_invested: {{ portfolio2.total_invested|escapejs }},
+    start_date: '{{ portfolio2.start_date|escapejs }}',
+    end_date: '{{ portfolio2.end_date|escapejs }}',
+}
+window.data.portfolio2.stocks = [
+{% for s in stocks2 %}
+{
+    name: '{{ s.stock.stock_name|escapejs }}',
+    owned: '{{ s.amount_owned|escapejs }}',
+    price: '{{ s.stock.current_adjusted_close|escapejs }}',
+    price_then: '{{ s.bought_at|escapejs }}',
+},
+{% endfor %}
+]
+</script>
 </script>
 {% endblock %}
 

@@ -10,7 +10,7 @@ body {
   stroke: #AAA;
   shape-rendering: crispEdges; }
 
-.line2 {
+.line2, .lgreen {
   stroke: #5F8 !important; }
 
 .line {
@@ -99,6 +99,9 @@ body {
   .jumbotron {
     border-bottom: 0; } }
 
+.navbar {
+  margin-bottom: 20px; }
+
 .FormAddStock {
   margin: 10px 0; }
   .FormAddStock .form-group, .FormAddStock label {
@@ -112,3 +115,14 @@ body {
   .PortfolioEditor > h1 {
     font-size: 15px;
     text-transform: uppercase; }
+
+.portfolio1 {
+  color: #0bf; }
+
+.portfolio2 {
+  color: #5F8; }
+
+footer {
+  font-size: .9em;
+  margin-top: 30px;
+  margin-bottom: 30px; }

@@ -23,8 +23,8 @@ class PortfoliosList extends React.Component {
 			}
 			return (
 				<div className="PortfolioListItem">
-					{ el.portfolio_name }
-					<button onClick={access}>See portfolio</button>
+					<h3>{ el.portfolio_name }</h3>&nbsp;
+					<button className="btn btn-info" onClick={access}>See portfolio</button>
 				</div>
 			)
 		})

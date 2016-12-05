@@ -134,8 +134,14 @@ class stockDayDatabaseInterface():
 class portfolioAPI():
 #controls portfolio maintenance
 
-    def getPortfolio(self, portfolio_id):
+    def getStocksOwned(self, portfolio_id):
+        portfolio = Portfolio.objects.get(pk=portfolio_id)
+        if not portfolio:
+            return None
+        
+        return Stock_Owned.objects.filter(portfolio=portfolio)
 
+    def getPortfolio(self, portfolio_id):
         try:
             # see if stock exists in database
             portfolio = Portfolio.objects.get(pk=portfolio_id)
@@ -224,7 +230,8 @@ class portfolioAPI():
             newPortDay.day = endFrame
             newPortDay.value = tsr_array[endIndex]
             diversity = predict_my_money.computations.basic_computations.compute_diversity(cleanedArray[:, startIndex:endIndex + 1], stock_amounts)
-            if not diversity:
+            print("start" + startIndex.__str__() + " end " + endIndex.__str__())
+            if not diversity or np.isnan(diversity):
                 print("start" + startIndex.__str__() + " end " + endIndex.__str__())
                 diversity = 0
             newPortDay.diversity = diversity

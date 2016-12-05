@@ -49,19 +49,26 @@ def home(request):
 
 
 @require_GET
-def portfolio(request, portfolio_id):
-	portfolio = papi.getPortfolio(portfolio_id)
+def portfolio(request, pid):
+	portfolio = papi.getPortfolio(pid)
 	if not portfolio:
 		return render(request, 'predictor/error.html', {
+			"portfolio": portfolio,
 			'error_message': "Portfolio doesn't exist.",
 		})
+
+	stocks = papi.getStocksOwned(pid)
+
 	return render(request, 'predictor/portfolio_detail.html', {
-		'portfolio' : portfolio
+		'portfolio' : portfolio,
+		'stocks': stocks,
 	})
 
 
 @require_GET
 def portfolio_compare(request, pid0, pid1):
+	print(pid0, pid1)
+
 	p0 = papi.getPortfolio(pid0)
 	p1 = papi.getPortfolio(pid1)
 
@@ -70,12 +77,26 @@ def portfolio_compare(request, pid0, pid1):
 			'error_message': "Portfolio doesn't exist.",
 		})
 
-	return render(request, 'predictor/portfolio_compare.html', {})
+	stocks0 = papi.getStocksOwned(pid0)
+	stocks1 = papi.getStocksOwned(pid1)
+
+	return render(request, 'predictor/portfolio_compare.html', {
+		"portfolio1": p0,
+		"stocks1": stocks0,
+		"portfolio2": p1,
+		"stocks2": stocks1,
+	})
 
 @require_GET
-def stock_detail(request, stock_ticker):
+def stock_detail(request, ticker):
+	stock = sapi.getStock(ticker)
+	if not stock:
+		return render(request, 'predictor/error.html', {
+			'error_message': "Stock doesn't exist."
+		})
+
 	return render(request, 'predictor/stock.html', {
-		'stock_ticker': stock_ticker,
+		'stock': stock,
 	})
 
 @require_GET

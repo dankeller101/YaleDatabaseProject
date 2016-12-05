@@ -61,7 +61,15 @@
 	
 	var _NewPortfolio2 = _interopRequireDefault(_NewPortfolio);
 	
-	var _Home = __webpack_require__(/*! ./pages/Home.jsx */ 184);
+	var _Portfolio = __webpack_require__(/*! ./pages/Portfolio.jsx */ 184);
+	
+	var _Portfolio2 = _interopRequireDefault(_Portfolio);
+	
+	var _PortfolioCompare = __webpack_require__(/*! ./pages/PortfolioCompare.jsx */ 185);
+	
+	var _PortfolioCompare2 = _interopRequireDefault(_PortfolioCompare);
+	
+	var _Home = __webpack_require__(/*! ./pages/Home.jsx */ 186);
 	
 	var _Home2 = _interopRequireDefault(_Home);
 	
@@ -120,14 +128,20 @@
 	    value: function componentDidMount() {
 	      var _this3 = this;
 	
-	      $.getJSON("/predictor/api/get_stock_plot?name=aapl", function (data) {
+	      $.getJSON("/predictor/api/get_stock_plot?name=" + this.props.data.stock_name, function (data) {
+	        if (!data.data || data.error) {
+	          alert('Stock not found.');
+	          return;
+	        }
 	        var points = [];
 	        for (var i = 0; i < data.data.length; ++i) {
-	          if (i % 100) {
+	          if (i % 5) {
 	            points.push(data.data[i]);
 	          }
 	        }
-	        (0, _plot.plotData)(points, (0, _reactDom.findDOMNode)(_this3));
+	        (0, _plot.plotData)(points, (0, _reactDom.findDOMNode)(_this3.refs.plot));
+	      }, function (err) {
+	        alert('Stock not found.');
 	      });
 	    }
 	  }, {
@@ -139,9 +153,51 @@
 	        _react2.default.createElement(
 	          'h1',
 	          null,
-	          this.props.stock
+	          'Plotting stock \'',
+	          this.props.data.stock_name,
+	          '\' for ',
+	          this.props.data.company_name
 	        ),
-	        _react2.default.createElement('div', { id: 'data-dump', 'data-prices': '{{ data }}' })
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          this.props.data.company_meta
+	        ),
+	        _react2.default.createElement(
+	          'ul',
+	          null,
+	          _react2.default.createElement(
+	            'li',
+	            null,
+	            'Current_high: ',
+	            this.props.data.current_high
+	          ),
+	          _react2.default.createElement(
+	            'li',
+	            null,
+	            'Current_low: ',
+	            this.props.data.current_low
+	          ),
+	          _react2.default.createElement(
+	            'li',
+	            null,
+	            'Current_adjusted_close: ',
+	            this.props.data.current_adjusted_close
+	          ),
+	          _react2.default.createElement(
+	            'li',
+	            null,
+	            'Start_date: ',
+	            this.props.data.start_date
+	          ),
+	          _react2.default.createElement(
+	            'li',
+	            null,
+	            'End_date: ',
+	            this.props.data.end_date
+	          )
+	        ),
+	        _react2.default.createElement('div', { id: 'data-dump', ref: 'plot', 'data-prices': '{{ data }}' })
 	      );
 	    }
 	  }]);
@@ -149,423 +205,12 @@
 	  return StockView;
 	}(_react2.default.Component);
 	
-	var PortfolioCompareView = function (_React$Component3) {
-	  _inherits(PortfolioCompareView, _React$Component3);
-	
-	  function PortfolioCompareView(props) {
-	    _classCallCheck(this, PortfolioCompareView);
-	
-	    var _this4 = _possibleConstructorReturn(this, (PortfolioCompareView.__proto__ || Object.getPrototypeOf(PortfolioCompareView)).call(this, props));
-	
-	    _this4.state = {};
-	    // this.state.
-	    return _this4;
-	  }
-	
-	  _createClass(PortfolioCompareView, [{
-	    key: 'componentDidMount',
-	    value: function componentDidMount() {
-	      var _this5 = this;
-	
-	      $.getJSON("/predictor/api/get_portfolio_plot?name=aapl", function (data) {
-	        var points0 = [],
-	            points1 = [];
-	        var lastprice0 = 0,
-	            lastprice1 = 0;
-	        for (var i = 800; i < data.data.length; ++i) {
-	          if (i % 5 == 0) {
-	            lastprice0 += Math.random() - 0.5;
-	            lastprice1 += Math.random() - 0.5;
-	            points0.push({ date: data.data[i].date, close: lastprice0 });
-	            points1.push({ date: data.data[i].date, close: lastprice1 });
-	          }
-	        }
-	
-	        console.log(points0);
-	        console.log(points1);
-	        (0, _plot.plotMultipleData)(points0, points1, (0, _reactDom.findDOMNode)(_this5.refs.graph));
-	      });
-	    }
-	  }, {
-	    key: 'render',
-	    value: function render() {
-	      var _stockList0 = [{ name: "AAPL", amount: "300", price_now: "120", price: "96" }, { name: "YAHO", amount: "200", price_now: "40", price: "33" }, { name: "MSFT", amount: "100", price_now: "60", price: "71" }];
-	
-	      var stockList0 = _stockList0.map(function (el, i) {
-	        return _react2.default.createElement(
-	          'tr',
-	          null,
-	          _react2.default.createElement(
-	            'td',
-	            null,
-	            i + 1
-	          ),
-	          _react2.default.createElement(
-	            'td',
-	            null,
-	            el.name
-	          ),
-	          _react2.default.createElement(
-	            'td',
-	            null,
-	            el.amount
-	          ),
-	          _react2.default.createElement(
-	            'td',
-	            null,
-	            '$',
-	            el.price_now
-	          ),
-	          _react2.default.createElement(
-	            'td',
-	            null,
-	            '$',
-	            el.price
-	          )
-	        );
-	      });
-	
-	      var _stockList1 = [{ name: "YALE", amount: "300", price_now: "120", price: "96" }, { name: "MSFT", amount: "60", price_now: "60", price: "71" }];
-	
-	      var stockList1 = _stockList1.map(function (el, i) {
-	        return _react2.default.createElement(
-	          'tr',
-	          null,
-	          _react2.default.createElement(
-	            'td',
-	            null,
-	            i + 1
-	          ),
-	          _react2.default.createElement(
-	            'td',
-	            null,
-	            el.name
-	          ),
-	          _react2.default.createElement(
-	            'td',
-	            null,
-	            el.amount
-	          ),
-	          _react2.default.createElement(
-	            'td',
-	            null,
-	            '$',
-	            el.price_now
-	          ),
-	          _react2.default.createElement(
-	            'td',
-	            null,
-	            '$',
-	            el.price
-	          )
-	        );
-	      });
-	
-	      return _react2.default.createElement(
-	        'div',
-	        { className: 'StockView container' },
-	        _react2.default.createElement('br', null),
-	        _react2.default.createElement(
-	          'h1',
-	          null,
-	          'Compare ',
-	          _react2.default.createElement(
-	            'abbr',
-	            null,
-	            'portfolio #1'
-	          ),
-	          ' and ',
-	          _react2.default.createElement(
-	            'abbr',
-	            null,
-	            'portfolio #2'
-	          )
-	        ),
-	        _react2.default.createElement(
-	          'h1',
-	          null,
-	          this.props.stock
-	        ),
-	        _react2.default.createElement(
-	          'div',
-	          { className: 'row' },
-	          _react2.default.createElement(
-	            'div',
-	            { className: 'col-sm-6' },
-	            _react2.default.createElement(
-	              'table',
-	              { className: 'table table-striped' },
-	              _react2.default.createElement(
-	                'thead',
-	                null,
-	                _react2.default.createElement(
-	                  'tr',
-	                  null,
-	                  _react2.default.createElement(
-	                    'th',
-	                    null,
-	                    '#'
-	                  ),
-	                  _react2.default.createElement(
-	                    'th',
-	                    null,
-	                    'Name'
-	                  ),
-	                  _react2.default.createElement(
-	                    'th',
-	                    null,
-	                    'Amount'
-	                  ),
-	                  _react2.default.createElement(
-	                    'th',
-	                    null,
-	                    'Price'
-	                  ),
-	                  _react2.default.createElement(
-	                    'th',
-	                    null,
-	                    'Action'
-	                  )
-	                )
-	              ),
-	              _react2.default.createElement(
-	                'tbody',
-	                null,
-	                stockList0
-	              )
-	            )
-	          ),
-	          _react2.default.createElement(
-	            'div',
-	            { className: 'col-sm-6' },
-	            _react2.default.createElement(
-	              'table',
-	              { className: 'table table-striped' },
-	              _react2.default.createElement(
-	                'thead',
-	                null,
-	                _react2.default.createElement(
-	                  'tr',
-	                  null,
-	                  _react2.default.createElement(
-	                    'th',
-	                    null,
-	                    '#'
-	                  ),
-	                  _react2.default.createElement(
-	                    'th',
-	                    null,
-	                    'Name'
-	                  ),
-	                  _react2.default.createElement(
-	                    'th',
-	                    null,
-	                    'Amount'
-	                  ),
-	                  _react2.default.createElement(
-	                    'th',
-	                    null,
-	                    'Price'
-	                  ),
-	                  _react2.default.createElement(
-	                    'th',
-	                    null,
-	                    'Action'
-	                  )
-	                )
-	              ),
-	              _react2.default.createElement(
-	                'tbody',
-	                null,
-	                stockList1
-	              )
-	            )
-	          )
-	        ),
-	        _react2.default.createElement('div', { id: 'data-dump', ref: 'graph', 'data-prices': '{{ data }}' })
-	      );
-	    }
-	  }]);
-	
-	  return PortfolioCompareView;
-	}(_react2.default.Component);
-	
-	var PortfolioView = function (_React$Component4) {
-	  _inherits(PortfolioView, _React$Component4);
-	
-	  function PortfolioView(props) {
-	    _classCallCheck(this, PortfolioView);
-	
-	    var _this6 = _possibleConstructorReturn(this, (PortfolioView.__proto__ || Object.getPrototypeOf(PortfolioView)).call(this, props));
-	
-	    _this6.state = {};
-	    return _this6;
-	  }
-	
-	  _createClass(PortfolioView, [{
-	    key: 'componentDidMount',
-	    value: function componentDidMount() {
-	      var _this7 = this;
-	
-	      $.getJSON("/predictor/api/get_portfolio_plot?name=aapl", function (data) {
-	        var points = [];
-	        var lastprice = 36000;
-	        for (var i = 800; i < data.data.length; ++i) {
-	          if (i % 5 == 0) {
-	            lastprice += (Math.random() - 0.5) * 100;
-	            data.data[i].close = lastprice;
-	            points.push(data.data[i]);
-	          }
-	        }
-	        (0, _plot.plotData)(points, (0, _reactDom.findDOMNode)(_this7.refs.plot));
-	      });
-	    }
-	  }, {
-	    key: 'render',
-	    value: function render() {
-	      var _stockList = [{ name: "AAPL", amount: "300", price_now: "120", price: "96" }, { name: "YAHO", amount: "200", price_now: "40", price: "33" }, { name: "MSFT", amount: "100", price_now: "60", price: "71" }];
-	
-	      var stockList = _stockList.map(function (el, i) {
-	        return _react2.default.createElement(
-	          'tr',
-	          null,
-	          _react2.default.createElement(
-	            'td',
-	            null,
-	            i + 1
-	          ),
-	          _react2.default.createElement(
-	            'td',
-	            null,
-	            el.name
-	          ),
-	          _react2.default.createElement(
-	            'td',
-	            null,
-	            el.amount
-	          ),
-	          _react2.default.createElement(
-	            'td',
-	            null,
-	            '$',
-	            el.price_now
-	          ),
-	          _react2.default.createElement(
-	            'td',
-	            null,
-	            '$',
-	            el.price
-	          )
-	        );
-	      });
-	
-	      return _react2.default.createElement(
-	        'div',
-	        { className: 'StockView' },
-	        _react2.default.createElement(
-	          'h1',
-	          null,
-	          'Portfolio #4'
-	        ),
-	        _react2.default.createElement(
-	          'h6',
-	          null,
-	          'Created 3 days ago by Daniel Keller.'
-	        ),
-	        _react2.default.createElement(
-	          'div',
-	          { className: 'row' },
-	          _react2.default.createElement(
-	            'div',
-	            { className: 'col-sm-4' },
-	            _react2.default.createElement('hr', null),
-	            _react2.default.createElement(
-	              'pre',
-	              null,
-	              _react2.default.createElement(
-	                'code',
-	                null,
-	                'Diversity: .49',
-	                _react2.default.createElement('br', null),
-	                'Current Value: $66,321',
-	                _react2.default.createElement('br', null),
-	                'Original Value: $60,783'
-	              )
-	            ),
-	            _react2.default.createElement('hr', null)
-	          ),
-	          _react2.default.createElement(
-	            'div',
-	            { className: 'col-sm-8' },
-	            _react2.default.createElement('div', { ref: 'plot', id: 'data-dump', 'data-prices': '{{ data }}' })
-	          )
-	        ),
-	        _react2.default.createElement('hr', null),
-	        _react2.default.createElement(
-	          'div',
-	          null,
-	          _react2.default.createElement(
-	            'h2',
-	            null,
-	            'Stocks in this portfolio'
-	          ),
-	          _react2.default.createElement(
-	            'p',
-	            null,
-	            'Here are the stocks that belong to this portfolio.'
-	          ),
-	          _react2.default.createElement(
-	            'table',
-	            { className: 'table table-striped' },
-	            _react2.default.createElement(
-	              'thead',
-	              null,
-	              _react2.default.createElement(
-	                'tr',
-	                null,
-	                _react2.default.createElement(
-	                  'th',
-	                  null,
-	                  '#'
-	                ),
-	                _react2.default.createElement(
-	                  'th',
-	                  null,
-	                  'Name'
-	                ),
-	                _react2.default.createElement(
-	                  'th',
-	                  null,
-	                  'Amount'
-	                ),
-	                _react2.default.createElement(
-	                  'th',
-	                  null,
-	                  'Price'
-	                ),
-	                _react2.default.createElement(
-	                  'th',
-	                  null,
-	                  'Bought Price'
-	                )
-	              )
-	            ),
-	            _react2.default.createElement(
-	              'tbody',
-	              null,
-	              stockList
-	            )
-	          )
-	        )
-	      );
-	    }
-	  }]);
-	
-	  return PortfolioView;
-	}(_react2.default.Component);
+	window.startPortfolioCompareView = function () {
+	  (0, _reactDom.render)(_react2.default.createElement(_PortfolioCompare2.default, { data1: window.data.portfolio1, data2: window.data.portfolio2 }), document.getElementById('app'));
+	};
 	
 	window.startPortfolioView = function () {
-	  (0, _reactDom.render)(_react2.default.createElement(PortfolioView, { stock: window.data.stock }), document.getElementById('app'));
+	  (0, _reactDom.render)(_react2.default.createElement(_Portfolio2.default, { data: window.data.portfolio }), document.getElementById('app'));
 	};
 	
 	window.startHomeView = function () {
@@ -573,15 +218,11 @@
 	};
 	
 	window.startNewPortfolioView = function () {
-	  (0, _reactDom.render)(_react2.default.createElement(_NewPortfolio2.default, { stock: window.data.stock }), document.getElementById('app'));
+	  (0, _reactDom.render)(_react2.default.createElement(_NewPortfolio2.default, null), document.getElementById('app'));
 	};
 	
 	window.startStockView = function () {
-	  (0, _reactDom.render)(_react2.default.createElement(StockView, { stock: window.data.stock }), document.getElementById('app'));
-	};
-	
-	window.startPortfolioCompareView = function () {
-	  (0, _reactDom.render)(_react2.default.createElement(PortfolioCompareView, { stock: window.data.stock }), document.getElementById('app'));
+	  (0, _reactDom.render)(_react2.default.createElement(StockView, { data: window.data.stock }), document.getElementById('app'));
 	};
 
 /***/ },
@@ -22668,15 +22309,10 @@
 	
 		_createClass(PortfolioEditor, [{
 			key: 'resetStocks',
-			value: function resetStocks(rows) {
-				var stocks = [];
-				_lodash2.default.each(rows, function (el) {
-					stocks.push({
-						name: el[0].toUpperCase(),
-						amount: el[1],
-						price: el[2]
-					});
-				});
+			value: function resetStocks(stocks) {
+				if (stocks == undefined) {
+					stocks = [];
+				}
 				this.setState({ stocks: stocks });
 			}
 		}, {
@@ -22894,7 +22530,6 @@
 				var _this5 = this;
 	
 				var stocks = _lodash2.default.keyBy(_stocks, 'name');
-	
 				$.getJSON("/predictor/api/gen_portfolio_price_plot?stocks=" + encodeURIComponent(JSON.stringify(stocks)), function (data) {
 					if (!data) {
 						return;
@@ -22903,29 +22538,11 @@
 					var points = [];
 					for (var i = 0; i < data.data.length; ++i) {
 						var row = data.data[i];
-						// console.log(row);
-						// console.log(_.map(row, 'price'))
 						var sum = _lodash2.default.sumBy(row, function (el) {
-							// console.log(stocks[el.name].amount, el.price)
 							return stocks[el.name].amount * el.price;
 						});
-						points.push({
-							close: sum,
-							date: row[0].date
-						});
+						points.push({ close: sum, date: row[0].date });
 					}
-	
-					// var points = []
-					// var lastprice = 36000
-					// for (var i=800; i<data.data.length; ++i) {
-					// 	if (i%5 == 0) {
-					// 		lastprice += (Math.random()-0.5)*100
-					// 		data.data[i].close = lastprice
-					// 		points.push(data.data[i])
-					// 	}
-					// }
-	
-					$((0, _reactDom.findDOMNode)(_this5.refs.plot)).html('');
 	
 					(0, _plot.plotData)(points, (0, _reactDom.findDOMNode)(_this5.refs.plot));
 				});
@@ -22993,6 +22610,7 @@
 				var _this7 = this;
 	
 				this.refs.pmanager.resetStocks();
+	
 				var data = {
 					type: (0, _reactDom.findDOMNode)(this.refs.ftype).value,
 					total_spend: parseInt((0, _reactDom.findDOMNode)(this.refs.fbconst).value)
@@ -23004,13 +22622,20 @@
 						return;
 					}
 	
-					_this7.refs.pmanager.resetStocks(data.data);
+					var stocks = [];
+					_lodash2.default.each(data.data, function (el) {
+						stocks.push({
+							name: el[0].toUpperCase(),
+							amount: el[1],
+							price: el[2]
+						});
+					});
+	
+					_this7.setState({ stocks: stocks }, function () {
+						_this7.refs.pmanager.resetStocks(_this7.state.stocks);
+						_this7.refs.plot.updateStocks(_this7.state.stocks);
+					});
 				});
-			}
-		}, {
-			key: 'componentDidMount',
-			value: function componentDidMount() {
-				// this.refs.plot.updateStocks(this.state.stocks)
 			}
 		}, {
 			key: 'render',
@@ -40222,7 +39847,7 @@
   \*************************/
 /***/ function(module, exports) {
 
-	"use strict";
+	'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
@@ -40232,13 +39857,15 @@
 	function plotData(data, el) {
 	  // console.log('data', data)
 	  console.log('plotData');
+	  $(el).html('');
 	
 	  var margin = { top: 20, right: 50, bottom: 30, left: 50 },
 	      width = $(el).width() - margin.left - margin.right,
 	      height = $(el).width() / 2 - margin.top - margin.bottom;
 	
-	  var parseDate = d3.timeParse("%d-%b-%y"),
-	      bisectDate = d3.bisector(function (d) {
+	  var parseDate = d3.timeParse("%Y-%m-%d"),
+	      // %d-%b-%y"),
+	  bisectDate = d3.bisector(function (d) {
 	    return d.date;
 	  }).left,
 	      formatValue = d3.format(",.2f"),
@@ -40309,8 +39936,9 @@
 	      width = $(el).width() - margin.left - margin.right,
 	      height = $(el).width() / 2 - margin.top - margin.bottom;
 	
-	  var parseDate = d3.timeParse("%d-%b-%y"),
-	      bisectDate = d3.bisector(function (d) {
+	  var parseDate = d3.timeParse("%Y-%m-%d"),
+	      // %d-%b-%y"),
+	  bisectDate = d3.bisector(function (d) {
 	    return d.date;
 	  }).left,
 	      formatValue = d3.format(",.2f"),
@@ -40365,20 +39993,26 @@
 	
 	  svg.append("g").attr("class", "y axis").call(yAxis).append("text").attr("transform", "rotate(-90)").attr("y", 4).attr("dy", ".71em").style("text-anchor", "end").text("TSR");
 	
-	  var path2 = svg.append("path").datum(data2).attr("class", "line line2").attr("d", line2);
+	  var path2 = svg.append("path").datum(data2).attr("class", "line lgreen").attr("d", line2);
 	
 	  var path1 = svg.append("path").datum(data1).attr("class", "line").attr("d", line1);
 	
-	  var focus = svg.append("g").attr("class", "focus").style("display", "none");
+	  var focus1 = svg.append("g").attr("class", "focus").style("display", "none");
 	
-	  focus.append("circle").attr("r", 4.5);
+	  focus1.append("circle").attr("r", 4.5);
 	
-	  focus.append("text").attr("x", 9).attr("dy", ".35em");
+	  focus1.append("text").attr("x", 9).attr("dy", ".35em");
+	
+	  var focus2 = svg.append("g").attr("class", "focus").style("display", "none");
+	
+	  focus2.append("circle").attr("class", "lgreen").attr("r", 4.5);
+	
+	  focus2.append("text").attr("x", 9).attr("dy", ".35em");
 	
 	  svg.append("rect").attr("class", "overlay").attr("width", width).attr("height", height).on("mouseover", function () {
-	    focus.style("display", null);
+	    focus1.style("display", null);focus2.style("display", null);
 	  }).on("mouseout", function () {
-	    focus.style("display", "none");
+	    focus1.style("display", "none");
 	  }).on("mousemove", mousemove);
 	
 	  function mousemove() {
@@ -40387,8 +40021,18 @@
 	        d0 = data1[i - 1],
 	        d1 = data1[i],
 	        d = x0 - d0.date > d1.date - x0 ? d1 : d0;
-	    focus.attr("transform", "translate(" + x(d.date) + "," + y(d.close) + ")");
-	    focus.select("text").text(formatCurrency(d.close));
+	
+	    focus1.attr("transform", "translate(" + x(d.date) + "," + y(d.close) + ")");
+	    focus1.select("text").text(formatCurrency(d.close));
+	
+	    var x0 = x.invert(d3.mouse(this)[0]),
+	        i = bisectDate(data2, x0, 1),
+	        d0 = data2[i - 1],
+	        d1 = data2[i],
+	        d = x0 - d0.date > d1.date - x0 ? d1 : d0;
+	
+	    focus2.attr("transform", "translate(" + x(d.date) + "," + y(d.close) + ")");
+	    focus2.select("text").text(formatCurrency(d.close));
 	  }
 	}
 
@@ -40450,6 +40094,518 @@
 
 /***/ },
 /* 184 */
+/*!*********************************!*\
+  !*** ./app/pages/Portfolio.jsx ***!
+  \*********************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _react = __webpack_require__(/*! react */ 1);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(/*! react-dom */ 32);
+	
+	var _lodash = __webpack_require__(/*! lodash */ 180);
+	
+	var _lodash2 = _interopRequireDefault(_lodash);
+	
+	var _plot = __webpack_require__(/*! ../lib/plot */ 182);
+	
+	var _csrf = __webpack_require__(/*! ../lib/csrf.jsx */ 183);
+	
+	var _csrf2 = _interopRequireDefault(_csrf);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } // pages/Portfolio.jsx
+	
+	var PortfolioView = function (_React$Component) {
+	  _inherits(PortfolioView, _React$Component);
+	
+	  function PortfolioView(props) {
+	    _classCallCheck(this, PortfolioView);
+	
+	    var _this = _possibleConstructorReturn(this, (PortfolioView.__proto__ || Object.getPrototypeOf(PortfolioView)).call(this, props));
+	
+	    _this.state = {};
+	    return _this;
+	  }
+	
+	  _createClass(PortfolioView, [{
+	    key: 'componentDidMount',
+	    value: function componentDidMount() {
+	      var _this2 = this;
+	
+	      $.getJSON("/predictor/api/get_portfolio_plot?id=" + this.props.data.id, function (data) {
+	        if (data.error) {
+	          alert('Failed to plot portfolio.');
+	          return;
+	        }
+	        (0, _plot.plotData)(data.data, (0, _reactDom.findDOMNode)(_this2.refs.plot));
+	      });
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	
+	      var stockList = _lodash2.default.map(this.props.data.stocks, function (el, i) {
+	        return _react2.default.createElement(
+	          'tr',
+	          null,
+	          _react2.default.createElement(
+	            'td',
+	            null,
+	            i + 1
+	          ),
+	          _react2.default.createElement(
+	            'td',
+	            null,
+	            el.name
+	          ),
+	          _react2.default.createElement(
+	            'td',
+	            null,
+	            el.owned
+	          ),
+	          _react2.default.createElement(
+	            'td',
+	            null,
+	            '$',
+	            el.price
+	          ),
+	          _react2.default.createElement(
+	            'td',
+	            null,
+	            '$',
+	            el.price_then
+	          )
+	        );
+	      });
+	
+	      return _react2.default.createElement(
+	        'div',
+	        { className: 'StockView' },
+	        _react2.default.createElement(
+	          'h1',
+	          null,
+	          'Portfolio \'',
+	          this.props.data.portfolio_name,
+	          '\''
+	        ),
+	        _react2.default.createElement(
+	          'h6',
+	          null,
+	          'Created 3 days ago by Daniel Keller.'
+	        ),
+	        _react2.default.createElement(
+	          'div',
+	          { className: 'row' },
+	          _react2.default.createElement(
+	            'div',
+	            { className: 'col-sm-4' },
+	            _react2.default.createElement('hr', null),
+	            _react2.default.createElement(
+	              'pre',
+	              null,
+	              _react2.default.createElement(
+	                'code',
+	                null,
+	                'Diversity: ',
+	                this.props.data.current_diversity.toFixed(2),
+	                _react2.default.createElement('br', null),
+	                'Current Value: ',
+	                this.props.data.current_value.toFixed(2),
+	                _react2.default.createElement('br', null),
+	                'Total Invested: ',
+	                this.props.data.total_invested.toFixed(2)
+	              )
+	            ),
+	            _react2.default.createElement('hr', null)
+	          ),
+	          _react2.default.createElement(
+	            'div',
+	            { className: 'col-sm-8' },
+	            _react2.default.createElement('div', { ref: 'plot', id: 'data-dump', 'data-prices': '{{ data }}' })
+	          )
+	        ),
+	        _react2.default.createElement('hr', null),
+	        _react2.default.createElement(
+	          'div',
+	          null,
+	          _react2.default.createElement(
+	            'h2',
+	            null,
+	            'Stocks in this portfolio'
+	          ),
+	          _react2.default.createElement(
+	            'p',
+	            null,
+	            'Here are the stocks that belong to this portfolio.'
+	          ),
+	          _react2.default.createElement(
+	            'table',
+	            { className: 'table table-striped' },
+	            _react2.default.createElement(
+	              'thead',
+	              null,
+	              _react2.default.createElement(
+	                'tr',
+	                null,
+	                _react2.default.createElement(
+	                  'th',
+	                  null,
+	                  '#'
+	                ),
+	                _react2.default.createElement(
+	                  'th',
+	                  null,
+	                  'Name'
+	                ),
+	                _react2.default.createElement(
+	                  'th',
+	                  null,
+	                  'Amount'
+	                ),
+	                _react2.default.createElement(
+	                  'th',
+	                  null,
+	                  'Price'
+	                ),
+	                _react2.default.createElement(
+	                  'th',
+	                  null,
+	                  'Bought Price'
+	                )
+	              )
+	            ),
+	            _react2.default.createElement(
+	              'tbody',
+	              null,
+	              stockList
+	            )
+	          )
+	        )
+	      );
+	    }
+	  }]);
+	
+	  return PortfolioView;
+	}(_react2.default.Component);
+	
+	exports.default = PortfolioView;
+
+/***/ },
+/* 185 */
+/*!****************************************!*\
+  !*** ./app/pages/PortfolioCompare.jsx ***!
+  \****************************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	var _react = __webpack_require__(/*! react */ 1);
+	
+	var _react2 = _interopRequireDefault(_react);
+	
+	var _reactDom = __webpack_require__(/*! react-dom */ 32);
+	
+	var _lodash = __webpack_require__(/*! lodash */ 180);
+	
+	var _lodash2 = _interopRequireDefault(_lodash);
+	
+	var _plot = __webpack_require__(/*! ../lib/plot */ 182);
+	
+	var _csrf = __webpack_require__(/*! ../lib/csrf.jsx */ 183);
+	
+	var _csrf2 = _interopRequireDefault(_csrf);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } // pages/Portfolio.jsx
+	
+	var PortfolioCompareView = function (_React$Component) {
+	  _inherits(PortfolioCompareView, _React$Component);
+	
+	  function PortfolioCompareView(props) {
+	    _classCallCheck(this, PortfolioCompareView);
+	
+	    var _this = _possibleConstructorReturn(this, (PortfolioCompareView.__proto__ || Object.getPrototypeOf(PortfolioCompareView)).call(this, props));
+	
+	    _this.state = {};
+	    // this.state.
+	    return _this;
+	  }
+	
+	  _createClass(PortfolioCompareView, [{
+	    key: 'componentDidMount',
+	    value: function componentDidMount() {
+	      var _this2 = this;
+	
+	      $.getJSON("/predictor/api/get_portfolio_plot?id=" + this.props.data1.id, function (data) {
+	        var points1 = [];
+	        for (var i = 0; i < data.data.length; ++i) {
+	          if (i % 5 == 0) {
+	            points1.push(data.data[i]);
+	          }
+	        }
+	
+	        $.getJSON("/predictor/api/get_portfolio_plot?id=" + _this2.props.data2.id, function (data) {
+	          var points2 = [];
+	          for (var i = 0; i < data.data.length; ++i) {
+	            if (i % 5 == 0) {
+	              points2.push(data.data[i]);
+	            }
+	          }
+	
+	          (0, _plot.plotMultipleData)(points1, points2, (0, _reactDom.findDOMNode)(_this2.refs.plot));
+	        });
+	      });
+	    }
+	  }, {
+	    key: 'render',
+	    value: function render() {
+	
+	      var stockList1 = _lodash2.default.map(this.props.data1.stocks, function (el, i) {
+	        return _react2.default.createElement(
+	          'tr',
+	          null,
+	          _react2.default.createElement(
+	            'td',
+	            null,
+	            i + 1
+	          ),
+	          _react2.default.createElement(
+	            'td',
+	            null,
+	            el.name
+	          ),
+	          _react2.default.createElement(
+	            'td',
+	            null,
+	            el.owned
+	          ),
+	          _react2.default.createElement(
+	            'td',
+	            null,
+	            '$',
+	            el.price
+	          ),
+	          _react2.default.createElement(
+	            'td',
+	            null,
+	            '$',
+	            el.price_then
+	          )
+	        );
+	      });
+	
+	      var stockList2 = _lodash2.default.map(this.props.data2.stocks, function (el, i) {
+	        return _react2.default.createElement(
+	          'tr',
+	          null,
+	          _react2.default.createElement(
+	            'td',
+	            null,
+	            i + 1
+	          ),
+	          _react2.default.createElement(
+	            'td',
+	            null,
+	            el.name
+	          ),
+	          _react2.default.createElement(
+	            'td',
+	            null,
+	            el.owned
+	          ),
+	          _react2.default.createElement(
+	            'td',
+	            null,
+	            '$',
+	            el.price
+	          ),
+	          _react2.default.createElement(
+	            'td',
+	            null,
+	            '$',
+	            el.price_then
+	          )
+	        );
+	      });
+	
+	      return _react2.default.createElement(
+	        'div',
+	        { className: 'StockView container' },
+	        _react2.default.createElement(
+	          'h1',
+	          null,
+	          'Compare ',
+	          _react2.default.createElement(
+	            'abbr',
+	            null,
+	            'portfolio \'',
+	            this.props.data1.portfolio_name,
+	            '\''
+	          ),
+	          ' and ',
+	          _react2.default.createElement(
+	            'abbr',
+	            null,
+	            'portfolio \'',
+	            this.props.data2.portfolio_name,
+	            '\''
+	          )
+	        ),
+	        _react2.default.createElement(
+	          'h1',
+	          null,
+	          this.props.stock
+	        ),
+	        _react2.default.createElement(
+	          'div',
+	          { className: 'row' },
+	          _react2.default.createElement('div', { id: 'data-dump', ref: 'plot', 'data-prices': '{{ data }}' }),
+	          _react2.default.createElement('br', null)
+	        ),
+	        _react2.default.createElement(
+	          'div',
+	          { className: 'row' },
+	          _react2.default.createElement(
+	            'div',
+	            { className: 'col-sm-6' },
+	            _react2.default.createElement(
+	              'h2',
+	              { className: 'portfolio1' },
+	              this.props.data1.portfolio_name
+	            ),
+	            _react2.default.createElement(
+	              'table',
+	              { className: 'table table-striped' },
+	              _react2.default.createElement(
+	                'thead',
+	                null,
+	                _react2.default.createElement(
+	                  'tr',
+	                  null,
+	                  _react2.default.createElement(
+	                    'th',
+	                    null,
+	                    '#'
+	                  ),
+	                  _react2.default.createElement(
+	                    'th',
+	                    null,
+	                    'Name'
+	                  ),
+	                  _react2.default.createElement(
+	                    'th',
+	                    null,
+	                    'Amount'
+	                  ),
+	                  _react2.default.createElement(
+	                    'th',
+	                    null,
+	                    'Price'
+	                  ),
+	                  _react2.default.createElement(
+	                    'th',
+	                    null,
+	                    'Action'
+	                  )
+	                )
+	              ),
+	              _react2.default.createElement(
+	                'tbody',
+	                null,
+	                stockList1
+	              )
+	            )
+	          ),
+	          _react2.default.createElement(
+	            'div',
+	            { className: 'col-sm-6' },
+	            _react2.default.createElement(
+	              'h2',
+	              { className: 'portfolio2' },
+	              this.props.data2.portfolio_name
+	            ),
+	            _react2.default.createElement(
+	              'table',
+	              { className: 'table table-striped' },
+	              _react2.default.createElement(
+	                'thead',
+	                null,
+	                _react2.default.createElement(
+	                  'tr',
+	                  null,
+	                  _react2.default.createElement(
+	                    'th',
+	                    null,
+	                    '#'
+	                  ),
+	                  _react2.default.createElement(
+	                    'th',
+	                    null,
+	                    'Name'
+	                  ),
+	                  _react2.default.createElement(
+	                    'th',
+	                    null,
+	                    'Amount'
+	                  ),
+	                  _react2.default.createElement(
+	                    'th',
+	                    null,
+	                    'Price'
+	                  ),
+	                  _react2.default.createElement(
+	                    'th',
+	                    null,
+	                    'Action'
+	                  )
+	                )
+	              ),
+	              _react2.default.createElement(
+	                'tbody',
+	                null,
+	                stockList2
+	              )
+	            )
+	          )
+	        )
+	      );
+	    }
+	  }]);
+	
+	  return PortfolioCompareView;
+	}(_react2.default.Component);
+	
+	exports.default = PortfolioCompareView;
+
+/***/ },
+/* 186 */
 /*!****************************!*\
   !*** ./app/pages/Home.jsx ***!
   \****************************/
@@ -40510,10 +40666,15 @@
 					return _react2.default.createElement(
 						'div',
 						{ className: 'PortfolioListItem' },
-						el.portfolio_name,
+						_react2.default.createElement(
+							'h3',
+							null,
+							el.portfolio_name
+						),
+						'\xA0',
 						_react2.default.createElement(
 							'button',
-							{ onClick: access },
+							{ className: 'btn btn-info', onClick: access },
 							'See portfolio'
 						)
 					);

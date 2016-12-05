@@ -15,6 +15,30 @@ export default class PortfolioCompareView extends React.Component {
   }
 
   componentDidMount() {
+    $.getJSON("/predictor/api/get_portfolio_tsr_plot?id="+this.props.data1.id, (data) => {
+      var points1 = [], divpoints1 = []
+      for (var i=0; i<data.data.length; ++i) {
+        if (i%5 == 0) {
+          points1.push(data.data[i])
+          divpoints1.push({ close: data.data[i].diversity, date: data.data[i].date})
+        }
+      }
+
+			$.getJSON("/predictor/api/get_portfolio_tsr_plot?id="+this.props.data2.id, (data) => {
+	      var points2 = [], divpoints2 = []
+	      for (var i=0; i<data.data.length; ++i) {
+	        if (i%5 == 0) {
+	          points2.push(data.data[i])
+            divpoints2.push({ close: data.data[i].diversity, date: data.data[i].date})
+	        }
+	      }
+
+			  plotMultipleData(points1, points2, findDOMNode(this.refs.plotTSR), "TSR")
+
+        plotMultipleData(divpoints1, divpoints2, findDOMNode(this.refs.plotDiversity), "Diversity")
+			})
+    })
+
     $.getJSON("/predictor/api/get_portfolio_plot?id="+this.props.data1.id, (data) => {
       var points1 = []
       for (var i=0; i<data.data.length; ++i) {
@@ -23,17 +47,18 @@ export default class PortfolioCompareView extends React.Component {
         }
       }
 
-			$.getJSON("/predictor/api/get_portfolio_plot?id="+this.props.data2.id, (data) => {
-	      var points2 = []
-	      for (var i=0; i<data.data.length; ++i) {
-	        if (i%5 == 0) {
-	          points2.push(data.data[i])
-	        }
-	      }
+      $.getJSON("/predictor/api/get_portfolio_plot?id="+this.props.data2.id, (data) => {
+        var points2 = []
+        for (var i=0; i<data.data.length; ++i) {
+          if (i%5 == 0) {
+            points2.push(data.data[i])
+          }
+        }
 
-			  plotMultipleData(points1, points2, findDOMNode(this.refs.plot))
-			})
+        plotMultipleData(points1, points2, findDOMNode(this.refs.plotPrice), "price")
+      })
     })
+
   }
 
   render() {
@@ -68,9 +93,19 @@ export default class PortfolioCompareView extends React.Component {
         <h1>{this.props.stock}</h1>
 
         <div className="row">
-          <div id="data-dump" ref="plot" data-prices="{{ data }}"></div>
-          <br />
+          <div id="data-dump" ref="plotTSR" data-prices="{{ data }}"></div>
         </div>
+
+        <br />
+        <div className="row">
+          <div className="col-sm-6">
+            <div id="data-dump" ref="plotPrice" data-prices="{{ data }}"></div>
+          </div>
+          <div className="col-sm-6">
+            <div id="data-dump" ref="plotDiversity" data-prices="{{ data }}"></div>
+          </div>
+        </div>
+        <br />
 
         <div className="row">
           <div className="col-sm-6">

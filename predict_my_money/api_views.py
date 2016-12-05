@@ -33,7 +33,7 @@ def portfolio_detail(request, portfolio_id):
 	days = Portfolio_Day.objects.order_by('day').filter(portfolio=portfolio)
 	daysDict = {}
 	for day in days:
-		daysDict[day.day.__str__()] = {'value':day.value, 'diversity':day.diversity}
+		daysDict[day.day.__str__()] = {'value':day.value if day.day >= portfolio.start_date else None, 'diversity':day.diversity}
 	storage['investor'] = investor
 	storage['name'] = name
 	storage['diversity'] = diversity
@@ -41,7 +41,41 @@ def portfolio_detail(request, portfolio_id):
 	storage['days'] = daysDict
 	return HttpResponse(json.dumps(storage), content_type="application/json")
 
-#
+
+@require_GET
+def get_portfolio_tsr_plot(request):
+	pid = request.GET["id"]
+	portfolio = papi.getPortfolio(pid)
+
+	if not portfolio:
+		print("failed to find portfolio")
+		return JsonResponse({ "data": [], error: True }, status=404)
+
+	ownstocks = papi.getStocksOwned(pid)
+	if not ownstocks:
+		print("failed to find ownstocks")
+		return JsonResponse({ "data": [], error: True }, status=404)
+
+	alldays = {}
+	stocksbyname = {}
+
+	portfolio.start_date = (datetime.datetime.now() - datetime.timedelta(days=1000)).date()
+	portfolio.save()
+
+	print(portfolio.start_date)
+
+	sdays = Portfolio_Day.objects.filter(portfolio=portfolio)
+	
+	points = []
+	for pday in sdays:
+		# if pday.day < portfolio.start_date:
+		points.append({
+			"date": pday.day.strftime("%Y-%m-%d"),
+			"close": pday.value if pday.day >= portfolio.start_date else None,
+			"diversity": pday.diversity
+		})
+
+	return JsonResponse({ "data": points })
 
 
 @require_GET
@@ -69,7 +103,7 @@ def get_portfolio_plot(request):
 			alldays[key] += stockday.adjustedClose*ostock.amount_owned
 
 	result = []
-	keylist = alldays.keys()
+	keylist = list(alldays.keys())
 	keylist.sort()
 	for key in keylist:
 		date = datetime.datetime.utcfromtimestamp(key).strftime("%Y-%m-%d")
@@ -149,7 +183,7 @@ def gen_portfolio_price_plot(request):
 
 	return JsonResponse({ "data": result })
 
-@require_GET
+
 def get_recommendation(request):
 	totalspend = float(request.GET['total_spend'])
 	kwargs = { 'budget': totalspend }
@@ -159,7 +193,10 @@ def get_recommendation(request):
 	else:
 		rtype = "high_return"
 
-	a = recommend_interfacer(recommend_type=rtype, budget=totalspend)
+	timehorizon = int(request.GET['timehorizon'])
+	maxinvest = float(request.GET['maxinvest'])
+
+	a = recommend_interfacer(recommend_type=rtype, budget=totalspend, time_horizon=timehorizon, max_investment=maxinvest)
 	print(a)
 	ret = []
 	for m in a:
@@ -189,7 +226,7 @@ def portfolios(request):
 		portfolio = Portfolio()
 		portfolio.portfolio_name = request.POST['name']
 		portfolio.start_date = datetime.datetime.today()
-		portfolio.end_date = datetime.datetime.today() - datetime.timedelta(days=100000)
+		portfolio.end_date = datetime.datetime.today()
 		portfolio.investor = Investor.objects.get(user=request.user)
 		portfolio.save()
 

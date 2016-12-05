@@ -8,9 +8,9 @@ window.data = {};
 window.data.portfolio = {
     id: {{ portfolio.id|escapejs }},
     portfolio_name: '{{ portfolio.portfolio_name|escapejs }}',
-    current_diversity: {{ portfolio.current_diversity|escapejs }},
-    current_value: {{ portfolio.current_value|escapejs }},
-    total_invested: {{ portfolio.total_invested|escapejs }},
+    current_diversity: {{ portfolio.current_diversity }},
+    current_value: {{ portfolio.current_value }},
+    total_invested: {{ portfolio.total_invested }},
     start_date: '{{ portfolio.start_date|escapejs }}',
     end_date: '{{ portfolio.end_date|escapejs }}',
 }

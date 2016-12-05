@@ -152,7 +152,7 @@ class Plot extends React.Component {
 				points.push({ close: sum, date: row[0].date });
 			}
 
-			plotData(points, findDOMNode(this.refs.plot))
+			plotData(points, findDOMNode(this.refs.plot), "Price ($)")
 		})
 
 	}
@@ -206,7 +206,9 @@ export default class NewPortfolioView extends React.Component {
 
 		let data = {
 			type: findDOMNode(this.refs.ftype).value,
-			total_spend: parseInt(findDOMNode(this.refs.fbconst).value)
+			total_spend: parseInt(findDOMNode(this.refs.fbconst).value),
+			timehorizon: findDOMNode(this.refs.f_timehorizon).value,
+			maxinvest: findDOMNode(this.refs.f_maxinvest).value,
 		}
 
 		$.getJSON("/predictor/api/get_recommendation", data, (data) => {
@@ -256,10 +258,20 @@ export default class NewPortfolioView extends React.Component {
 							<label htmlFor="exampleInputName2">of type</label>
 
 							<select className="form-control" ref='ftype' id="exampleSelect1">
-								<option value='random'>Control</option>
-								<option value='high_return'>Best Expected Return</option>
-								<option value='diverse'>Best Expected Return + Diversity</option>
+								<option value='random'>Random</option>
+								<option value='high_return'>Highest Return</option>
+								<option value='diverse'>Diverse Option</option>
 							</select>
+						</div>
+
+						<div className="form-group">
+							<label htmlFor="exampleInputName2">and time horizon</label>
+							<input type="text" className="form-control" ref="f_timehorizon" id="" placeholder="Integer" />
+						</div>
+
+						<div className="form-group">
+							<label htmlFor="exampleInputName2">with Max investment</label>
+							<input type="text" className="form-control" ref="f_maxinvest" id="" placeholder="Float" />
 						</div>
 
 						<div className="form-group">

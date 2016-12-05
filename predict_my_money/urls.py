@@ -42,4 +42,5 @@ urlpatterns = [
     url(r'^api/get_stock$', api_views.get_stock, name='get_stock'),
 
     url(r'^api/get_portfolio_plot', api_views.get_portfolio_plot, name='get_portfolio_plot'),
+    url(r'^api/get_portfolio_tsr_plot', api_views.get_portfolio_tsr_plot, name='get_portfolio_tsr_plot'),
 ]

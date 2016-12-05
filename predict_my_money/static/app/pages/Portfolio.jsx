@@ -19,7 +19,7 @@ export default class PortfolioView extends React.Component {
         alert('Failed to plot portfolio.')
         return
       }
-      plotData(data.data, findDOMNode(this.refs.plot))
+      plotData(data.data, findDOMNode(this.refs.plot), "Price ($)")
     })
   }
 

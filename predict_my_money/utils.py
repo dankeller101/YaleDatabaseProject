@@ -152,7 +152,16 @@ class portfolioAPI():
             if not portfolio:
                 return None
             current_date = datetime.date.today()
-            if portfolio.end_date < current_date - datetime.timedelta(days=3):
+            if portfolio.first_update == 0:
+                recentDay = self.fixPortfolioDays(portfolio_id)
+                if not recentDay:
+                    return portfolio
+                portfolio.first_update = 1
+                portfolio.end_date = recentDay.day
+                portfolio.current_diversity = recentDay.diversity
+                portfolio.current_value = recentDay.value
+                portfolio.save()
+            elif portfolio.end_date < current_date - datetime.timedelta(days=3):
                 recentDay = self.fixPortfolioDays(portfolio_id, portfolio.end_date)
                 if not recentDay:
                     return portfolio
@@ -163,8 +172,6 @@ class portfolioAPI():
             return portfolio
 
     def fixPortfolioDays(self, portfolio_id, earliest_day=None):
-        if not earliest_day:
-            earliest_day = datetime.datetime.strptime('01-01-2012', '%m-%d-%Y') + datetime.timedelta(days=60)
 
         today = datetime.date.today()
         portfolio = Portfolio.objects.get(pk=portfolio_id)
@@ -189,7 +196,14 @@ class portfolioAPI():
             stock = stockapi.getStock(stock.stock_name)
             stocksObjects.append(stock)
 
-        creationDateWithBuffer = portfolio.end_date - datetime.timedelta(days=70)
+        if not earliest_day:
+            earliest_day = portfolio.start_date - datetime.timedelta(days=2000)
+            update = False
+        else:
+            earliest_day = earliest_day - datetime.timedelta(days=70)
+            update = True
+
+        creationDateWithBuffer = earliest_day
 
         cleanedArray, stocks_in, days_in = get_stock_price_array(stocksObjects, creationDateWithBuffer, today)
 
@@ -200,7 +214,13 @@ class portfolioAPI():
         stock_amounts = np.array([stock.amount_owned for stock in stocks])
 
         #find first index
-        endFrame = portfolio.end_date + datetime.timedelta(days=1)
+        if update:
+            endFrame = portfolio.end_date + datetime.timedelta(days=1)
+        else:
+            endFrame = portfolio.start_date - datetime.timedelta(days=1000)
+
+
+
         if endFrame < datetime.date.today() - datetime.timedelta(days=4000):
             endFrame = days_in[0] + datetime.timedelta(days=60)
         startFrame = endFrame - datetime.timedelta(days=60)
@@ -241,7 +261,9 @@ class portfolioAPI():
             startFrame = startFrame + datetime.timedelta(days=1)
             if days_in[startIndex + 1] <= startFrame:
                 startIndex += 1
-            if days_in[endIndex + 1] <= endFrame:
+            if endIndex >= number_days - 1:
+                break
+            elif days_in[endIndex + 1] <= endFrame:
                 endIndex += 1
 
         return mostRecentDay

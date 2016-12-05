@@ -139,7 +139,7 @@
 	            points.push(data.data[i]);
 	          }
 	        }
-	        (0, _plot.plotData)(points, (0, _reactDom.findDOMNode)(_this3.refs.plot));
+	        (0, _plot.plotData)(points, (0, _reactDom.findDOMNode)(_this3.refs.plot), "Price ($)");
 	      }, function (err) {
 	        alert('Stock not found.');
 	      });
@@ -22544,7 +22544,7 @@
 						points.push({ close: sum, date: row[0].date });
 					}
 	
-					(0, _plot.plotData)(points, (0, _reactDom.findDOMNode)(_this5.refs.plot));
+					(0, _plot.plotData)(points, (0, _reactDom.findDOMNode)(_this5.refs.plot), "Price ($)");
 				});
 			}
 		}, {
@@ -22613,7 +22613,9 @@
 	
 				var data = {
 					type: (0, _reactDom.findDOMNode)(this.refs.ftype).value,
-					total_spend: parseInt((0, _reactDom.findDOMNode)(this.refs.fbconst).value)
+					total_spend: parseInt((0, _reactDom.findDOMNode)(this.refs.fbconst).value),
+					timehorizon: (0, _reactDom.findDOMNode)(this.refs.f_timehorizon).value,
+					maxinvest: (0, _reactDom.findDOMNode)(this.refs.f_maxinvest).value
 				};
 	
 				$.getJSON("/predictor/api/get_recommendation", data, function (data) {
@@ -22695,19 +22697,39 @@
 									_react2.default.createElement(
 										'option',
 										{ value: 'random' },
-										'Control'
+										'Random'
 									),
 									_react2.default.createElement(
 										'option',
 										{ value: 'high_return' },
-										'Best Expected Return'
+										'Highest Return'
 									),
 									_react2.default.createElement(
 										'option',
 										{ value: 'diverse' },
-										'Best Expected Return + Diversity'
+										'Diverse Option'
 									)
 								)
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'form-group' },
+								_react2.default.createElement(
+									'label',
+									{ htmlFor: 'exampleInputName2' },
+									'and time horizon'
+								),
+								_react2.default.createElement('input', { type: 'text', className: 'form-control', ref: 'f_timehorizon', id: '', placeholder: 'Integer' })
+							),
+							_react2.default.createElement(
+								'div',
+								{ className: 'form-group' },
+								_react2.default.createElement(
+									'label',
+									{ htmlFor: 'exampleInputName2' },
+									'with Max investment'
+								),
+								_react2.default.createElement('input', { type: 'text', className: 'form-control', ref: 'f_maxinvest', id: '', placeholder: 'Float' })
 							),
 							_react2.default.createElement(
 								'div',
@@ -39854,7 +39876,7 @@
 	});
 	exports.plotData = plotData;
 	exports.plotMultipleData = plotMultipleData;
-	function plotData(data, el) {
+	function plotData(data, el, label) {
 	  // console.log('data', data)
 	  console.log('plotData');
 	  $(el).html('');
@@ -39903,7 +39925,7 @@
 	
 	  svg.append("g").attr("class", "x axis").attr("transform", "translate(0," + height + ")").call(xAxis);
 	
-	  svg.append("g").attr("class", "y axis").call(yAxis).append("text").attr("transform", "rotate(-90)").attr("y", 4).attr("dy", ".71em").style("text-anchor", "end").text("Price ($)");
+	  svg.append("g").attr("class", "y axis").call(yAxis).append("text").attr("transform", "rotate(-90)").attr("y", 4).attr("dy", ".71em").style("text-anchor", "end").text(label);
 	
 	  var path = svg.append("path").datum(data).attr("class", "line").attr("d", line);
 	
@@ -39930,7 +39952,7 @@
 	  }
 	}
 	
-	function plotMultipleData(data1, data2, el) {
+	function plotMultipleData(data1, data2, el, label) {
 	
 	  var margin = { top: 20, right: 50, bottom: 30, left: 50 },
 	      width = $(el).width() - margin.left - margin.right,
@@ -39991,7 +40013,7 @@
 	
 	  svg.append("g").attr("class", "x axis").attr("transform", "translate(0," + height + ")").call(xAxis);
 	
-	  svg.append("g").attr("class", "y axis").call(yAxis).append("text").attr("transform", "rotate(-90)").attr("y", 4).attr("dy", ".71em").style("text-anchor", "end").text("TSR");
+	  svg.append("g").attr("class", "y axis").call(yAxis).append("text").attr("transform", "rotate(-90)").attr("y", 4).attr("dy", ".71em").style("text-anchor", "end").text(label);
 	
 	  var path2 = svg.append("path").datum(data2).attr("class", "line lgreen").attr("d", line2);
 	
@@ -40153,7 +40175,7 @@
 	          alert('Failed to plot portfolio.');
 	          return;
 	        }
-	        (0, _plot.plotData)(data.data, (0, _reactDom.findDOMNode)(_this2.refs.plot));
+	        (0, _plot.plotData)(data.data, (0, _reactDom.findDOMNode)(_this2.refs.plot), "Price ($)");
 	      });
 	    }
 	  }, {
@@ -40363,6 +40385,32 @@
 	    value: function componentDidMount() {
 	      var _this2 = this;
 	
+	      $.getJSON("/predictor/api/get_portfolio_tsr_plot?id=" + this.props.data1.id, function (data) {
+	        var points1 = [],
+	            divpoints1 = [];
+	        for (var i = 0; i < data.data.length; ++i) {
+	          if (i % 5 == 0) {
+	            points1.push(data.data[i]);
+	            divpoints1.push({ close: data.data[i].diversity, date: data.data[i].date });
+	          }
+	        }
+	
+	        $.getJSON("/predictor/api/get_portfolio_tsr_plot?id=" + _this2.props.data2.id, function (data) {
+	          var points2 = [],
+	              divpoints2 = [];
+	          for (var i = 0; i < data.data.length; ++i) {
+	            if (i % 5 == 0) {
+	              points2.push(data.data[i]);
+	              divpoints2.push({ close: data.data[i].diversity, date: data.data[i].date });
+	            }
+	          }
+	
+	          (0, _plot.plotMultipleData)(points1, points2, (0, _reactDom.findDOMNode)(_this2.refs.plotTSR), "TSR");
+	
+	          (0, _plot.plotMultipleData)(divpoints1, divpoints2, (0, _reactDom.findDOMNode)(_this2.refs.plotDiversity), "Diversity");
+	        });
+	      });
+	
 	      $.getJSON("/predictor/api/get_portfolio_plot?id=" + this.props.data1.id, function (data) {
 	        var points1 = [];
 	        for (var i = 0; i < data.data.length; ++i) {
@@ -40379,7 +40427,7 @@
 	            }
 	          }
 	
-	          (0, _plot.plotMultipleData)(points1, points2, (0, _reactDom.findDOMNode)(_this2.refs.plot));
+	          (0, _plot.plotMultipleData)(points1, points2, (0, _reactDom.findDOMNode)(_this2.refs.plotPrice), "price");
 	        });
 	      });
 	    }
@@ -40486,9 +40534,24 @@
 	        _react2.default.createElement(
 	          'div',
 	          { className: 'row' },
-	          _react2.default.createElement('div', { id: 'data-dump', ref: 'plot', 'data-prices': '{{ data }}' }),
-	          _react2.default.createElement('br', null)
+	          _react2.default.createElement('div', { id: 'data-dump', ref: 'plotTSR', 'data-prices': '{{ data }}' })
 	        ),
+	        _react2.default.createElement('br', null),
+	        _react2.default.createElement(
+	          'div',
+	          { className: 'row' },
+	          _react2.default.createElement(
+	            'div',
+	            { className: 'col-sm-6' },
+	            _react2.default.createElement('div', { id: 'data-dump', ref: 'plotPrice', 'data-prices': '{{ data }}' })
+	          ),
+	          _react2.default.createElement(
+	            'div',
+	            { className: 'col-sm-6' },
+	            _react2.default.createElement('div', { id: 'data-dump', ref: 'plotDiversity', 'data-prices': '{{ data }}' })
+	          )
+	        ),
+	        _react2.default.createElement('br', null),
 	        _react2.default.createElement(
 	          'div',
 	          { className: 'row' },
@@ -40657,6 +40720,13 @@
 			key: 'componentDidMount',
 			value: function componentDidMount() {}
 		}, {
+			key: '_onClickCompare',
+			value: function _onClickCompare() {
+				var opt1 = (0, _reactDom.findDOMNode)(this.refs.compare1).value;
+				var opt2 = (0, _reactDom.findDOMNode)(this.refs.compare2).value;
+				location.href = '/predictor/portfolios/compare/' + opt1 + '/' + opt2;
+			}
+		}, {
 			key: 'render',
 			value: function render() {
 				var _list = this.props.items.map(function (el, i) {
@@ -40664,25 +40734,96 @@
 						location.href = "/predictor/portfolios/" + el.id;
 					};
 					return _react2.default.createElement(
-						'div',
+						'tr',
 						{ className: 'PortfolioListItem' },
 						_react2.default.createElement(
-							'h3',
+							'td',
+							null,
+							i + 1
+						),
+						_react2.default.createElement(
+							'td',
 							null,
 							el.portfolio_name
+						),
+						_react2.default.createElement(
+							'td',
+							null,
+							_react2.default.createElement(
+								'button',
+								{ className: 'btn btn-info', onClick: access },
+								'See portfolio'
+							)
+						)
+					);
+				});
+	
+				var portOptions = this.props.items.map(function (el, i) {
+					return _react2.default.createElement(
+						'option',
+						{ value: el.id },
+						el.portfolio_name
+					);
+				});
+	
+				return _react2.default.createElement(
+					'div',
+					{ className: 'PortfoliosList' },
+					_react2.default.createElement(
+						'table',
+						{ className: 'table table-striped' },
+						_react2.default.createElement(
+							'thead',
+							null,
+							_react2.default.createElement(
+								'th',
+								null,
+								'#'
+							),
+							_react2.default.createElement(
+								'th',
+								null,
+								'Name'
+							),
+							_react2.default.createElement(
+								'th',
+								null,
+								'Control'
+							)
+						),
+						_react2.default.createElement(
+							'tbody',
+							null,
+							_list
+						)
+					),
+					_react2.default.createElement('br', null),
+					_react2.default.createElement(
+						'h2',
+						null,
+						'Compare portfolios'
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'form form-inline', onSubmit: this._onClickCompare.bind(this) },
+						_react2.default.createElement(
+							'select',
+							{ className: 'form-control', ref: 'compare1' },
+							portOptions
+						),
+						' with',
+						_react2.default.createElement(
+							'select',
+							{ className: 'form-control', ref: 'compare2' },
+							portOptions
 						),
 						'\xA0',
 						_react2.default.createElement(
 							'button',
-							{ className: 'btn btn-info', onClick: access },
-							'See portfolio'
+							{ className: 'btn btn-info', onClick: this._onClickCompare.bind(this) },
+							'Compare'
 						)
-					);
-				});
-				return _react2.default.createElement(
-					'div',
-					{ className: 'PortfoliosList' },
-					_list
+					)
 				);
 			}
 		}]);
@@ -40690,29 +40831,22 @@
 		return PortfoliosList;
 	}(_react2.default.Component);
 	
-	var NewPortfolioView = function (_React$Component2) {
-		_inherits(NewPortfolioView, _React$Component2);
+	var HomeView = function (_React$Component2) {
+		_inherits(HomeView, _React$Component2);
 	
-		function NewPortfolioView(props) {
-			_classCallCheck(this, NewPortfolioView);
+		function HomeView(props) {
+			_classCallCheck(this, HomeView);
 	
-			var _this2 = _possibleConstructorReturn(this, (NewPortfolioView.__proto__ || Object.getPrototypeOf(NewPortfolioView)).call(this, props));
-	
-			_this2.state = { stocks: [] };
-			return _this2;
+			return _possibleConstructorReturn(this, (HomeView.__proto__ || Object.getPrototypeOf(HomeView)).call(this, props));
 		}
 	
-		_createClass(NewPortfolioView, [{
-			key: 'componentDidMount',
-			value: function componentDidMount() {}
-		}, {
+		_createClass(HomeView, [{
 			key: 'render',
 			value: function render() {
 	
 				return _react2.default.createElement(
 					'div',
 					{ className: 'container' },
-					_react2.default.createElement('br', null),
 					_react2.default.createElement(
 						'h1',
 						null,
@@ -40723,10 +40857,10 @@
 			}
 		}]);
 	
-		return NewPortfolioView;
+		return HomeView;
 	}(_react2.default.Component);
 	
-	exports.default = NewPortfolioView;
+	exports.default = HomeView;
 
 /***/ }
 /******/ ]);

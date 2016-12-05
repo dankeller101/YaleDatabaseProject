@@ -16,7 +16,7 @@ import random
 from statsmodels.tsa.arima_model import ARIMA
 from statsmodels.tsa.vector_ar import var_model
 
-def recommend_random_portfolio(stock_ids, stock_prices, budget, max_investment=None):
+def recommend_random_portfolio(stock_ids, stock_prices, budget, max_investment=None, **kwargs):
 
     """
     Recommends a portfolio by randomly selecting stocks, and then number of shares.

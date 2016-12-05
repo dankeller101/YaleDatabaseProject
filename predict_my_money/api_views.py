@@ -181,7 +181,7 @@ def gen_portfolio_price_plot(request):
 
 	return JsonResponse({ "data": result })
 
-@require_GET
+
 def get_recommendation(request):
 	totalspend = float(request.GET['total_spend'])
 	kwargs = { 'budget': totalspend }
@@ -224,7 +224,7 @@ def portfolios(request):
 		portfolio = Portfolio()
 		portfolio.portfolio_name = request.POST['name']
 		portfolio.start_date = datetime.datetime.today()
-		portfolio.end_date = datetime.datetime.today() - datetime.timedelta(days=100000)
+		portfolio.end_date = datetime.datetime.today()
 		portfolio.investor = Investor.objects.get(user=request.user)
 		portfolio.save()
 

@@ -1,5 +1,5 @@
 
-export function plotData(data, el) {
+export function plotData(data, el, label) {
   // console.log('data', data)
   console.log('plotData')
   $(el).html('');
@@ -55,7 +55,7 @@ export function plotData(data, el) {
     .attr("y", 4)
     .attr("dy", ".71em")
     .style("text-anchor", "end")
-    .text("Price ($)");
+    .text(label);
 
   var path = svg.append("path")
     .datum(data)
@@ -93,7 +93,7 @@ export function plotData(data, el) {
 }
 
 
-export function plotMultipleData(data1, data2, el) {
+export function plotMultipleData(data1, data2, el, label) {
 
   var margin = {top: 20, right: 50, bottom: 30, left: 50},
     width = $(el).width() - margin.left - margin.right,
@@ -161,7 +161,7 @@ export function plotMultipleData(data1, data2, el) {
     .attr("y", 4)
     .attr("dy", ".71em")
     .style("text-anchor", "end")
-    .text("TSR");
+    .text(label);
 
   var path2 = svg.append("path")
     .datum(data2)

@@ -152,7 +152,7 @@ class Plot extends React.Component {
 				points.push({ close: sum, date: row[0].date });
 			}
 
-			plotData(points, findDOMNode(this.refs.plot))
+			plotData(points, findDOMNode(this.refs.plot), "Price ($)")
 		})
 
 	}

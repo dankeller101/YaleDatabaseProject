@@ -139,7 +139,7 @@
 	            points.push(data.data[i]);
 	          }
 	        }
-	        (0, _plot.plotData)(points, (0, _reactDom.findDOMNode)(_this3.refs.plot));
+	        (0, _plot.plotData)(points, (0, _reactDom.findDOMNode)(_this3.refs.plot), "Price ($)");
 	      }, function (err) {
 	        alert('Stock not found.');
 	      });
@@ -22544,7 +22544,7 @@
 						points.push({ close: sum, date: row[0].date });
 					}
 	
-					(0, _plot.plotData)(points, (0, _reactDom.findDOMNode)(_this5.refs.plot));
+					(0, _plot.plotData)(points, (0, _reactDom.findDOMNode)(_this5.refs.plot), "Price ($)");
 				});
 			}
 		}, {
@@ -39876,7 +39876,7 @@
 	});
 	exports.plotData = plotData;
 	exports.plotMultipleData = plotMultipleData;
-	function plotData(data, el) {
+	function plotData(data, el, label) {
 	  // console.log('data', data)
 	  console.log('plotData');
 	  $(el).html('');
@@ -39925,7 +39925,7 @@
 	
 	  svg.append("g").attr("class", "x axis").attr("transform", "translate(0," + height + ")").call(xAxis);
 	
-	  svg.append("g").attr("class", "y axis").call(yAxis).append("text").attr("transform", "rotate(-90)").attr("y", 4).attr("dy", ".71em").style("text-anchor", "end").text("Price ($)");
+	  svg.append("g").attr("class", "y axis").call(yAxis).append("text").attr("transform", "rotate(-90)").attr("y", 4).attr("dy", ".71em").style("text-anchor", "end").text(label);
 	
 	  var path = svg.append("path").datum(data).attr("class", "line").attr("d", line);
 	
@@ -39952,7 +39952,7 @@
 	  }
 	}
 	
-	function plotMultipleData(data1, data2, el) {
+	function plotMultipleData(data1, data2, el, label) {
 	
 	  var margin = { top: 20, right: 50, bottom: 30, left: 50 },
 	      width = $(el).width() - margin.left - margin.right,
@@ -40013,7 +40013,7 @@
 	
 	  svg.append("g").attr("class", "x axis").attr("transform", "translate(0," + height + ")").call(xAxis);
 	
-	  svg.append("g").attr("class", "y axis").call(yAxis).append("text").attr("transform", "rotate(-90)").attr("y", 4).attr("dy", ".71em").style("text-anchor", "end").text("TSR");
+	  svg.append("g").attr("class", "y axis").call(yAxis).append("text").attr("transform", "rotate(-90)").attr("y", 4).attr("dy", ".71em").style("text-anchor", "end").text(label);
 	
 	  var path2 = svg.append("path").datum(data2).attr("class", "line lgreen").attr("d", line2);
 	
@@ -40175,7 +40175,7 @@
 	          alert('Failed to plot portfolio.');
 	          return;
 	        }
-	        (0, _plot.plotData)(data.data, (0, _reactDom.findDOMNode)(_this2.refs.plot));
+	        (0, _plot.plotData)(data.data, (0, _reactDom.findDOMNode)(_this2.refs.plot), "Price ($)");
 	      });
 	    }
 	  }, {
@@ -40386,6 +40386,32 @@
 	      var _this2 = this;
 	
 	      $.getJSON("/predictor/api/get_portfolio_tsr_plot?id=" + this.props.data1.id, function (data) {
+	        var points1 = [],
+	            divpoints1 = [];
+	        for (var i = 0; i < data.data.length; ++i) {
+	          if (i % 5 == 0) {
+	            points1.push(data.data[i]);
+	            divpoints1.push({ close: data.data[i].diversity, date: data.data[i].date });
+	          }
+	        }
+	
+	        $.getJSON("/predictor/api/get_portfolio_tsr_plot?id=" + _this2.props.data2.id, function (data) {
+	          var points2 = [],
+	              divpoints2 = [];
+	          for (var i = 0; i < data.data.length; ++i) {
+	            if (i % 5 == 0) {
+	              points2.push(data.data[i]);
+	              divpoints2.push({ close: data.data[i].diversity, date: data.data[i].date });
+	            }
+	          }
+	
+	          (0, _plot.plotMultipleData)(points1, points2, (0, _reactDom.findDOMNode)(_this2.refs.plotTSR), "TSR");
+	
+	          (0, _plot.plotMultipleData)(divpoints1, divpoints2, (0, _reactDom.findDOMNode)(_this2.refs.plotDiversity), "Diversity");
+	        });
+	      });
+	
+	      $.getJSON("/predictor/api/get_portfolio_plot?id=" + this.props.data1.id, function (data) {
 	        var points1 = [];
 	        for (var i = 0; i < data.data.length; ++i) {
 	          if (i % 5 == 0) {
@@ -40393,7 +40419,7 @@
 	          }
 	        }
 	
-	        $.getJSON("/predictor/api/get_portfolio_tsr_plot?id=" + _this2.props.data2.id, function (data) {
+	        $.getJSON("/predictor/api/get_portfolio_plot?id=" + _this2.props.data2.id, function (data) {
 	          var points2 = [];
 	          for (var i = 0; i < data.data.length; ++i) {
 	            if (i % 5 == 0) {
@@ -40401,7 +40427,7 @@
 	            }
 	          }
 	
-	          (0, _plot.plotMultipleData)(points1, points2, (0, _reactDom.findDOMNode)(_this2.refs.plot));
+	          (0, _plot.plotMultipleData)(points1, points2, (0, _reactDom.findDOMNode)(_this2.refs.plotPrice), "price");
 	        });
 	      });
 	    }
@@ -40508,9 +40534,24 @@
 	        _react2.default.createElement(
 	          'div',
 	          { className: 'row' },
-	          _react2.default.createElement('div', { id: 'data-dump', ref: 'plot', 'data-prices': '{{ data }}' }),
-	          _react2.default.createElement('br', null)
+	          _react2.default.createElement('div', { id: 'data-dump', ref: 'plotTSR', 'data-prices': '{{ data }}' })
 	        ),
+	        _react2.default.createElement('br', null),
+	        _react2.default.createElement(
+	          'div',
+	          { className: 'row' },
+	          _react2.default.createElement(
+	            'div',
+	            { className: 'col-sm-6' },
+	            _react2.default.createElement('div', { id: 'data-dump', ref: 'plotPrice', 'data-prices': '{{ data }}' })
+	          ),
+	          _react2.default.createElement(
+	            'div',
+	            { className: 'col-sm-6' },
+	            _react2.default.createElement('div', { id: 'data-dump', ref: 'plotDiversity', 'data-prices': '{{ data }}' })
+	          )
+	        ),
+	        _react2.default.createElement('br', null),
 	        _react2.default.createElement(
 	          'div',
 	          { className: 'row' },

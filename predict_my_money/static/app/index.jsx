@@ -36,7 +36,7 @@ class StockView extends React.Component {
           points.push(data.data[i])
         }
       }
-      plotData(points, findDOMNode(this.refs.plot))
+      plotData(points, findDOMNode(this.refs.plot), "Price ($)")
     }, (err) => {
       alert('Stock not found.')
     })

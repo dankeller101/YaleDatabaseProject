@@ -41,7 +41,6 @@ def portfolio_detail(request, portfolio_id):
 	storage['days'] = daysDict
 	return HttpResponse(json.dumps(storage), content_type="application/json")
 
-#
 
 @require_GET
 def get_portfolio_tsr_plot(request):
@@ -58,32 +57,43 @@ def get_portfolio_tsr_plot(request):
 	alldays = {}
 	stocksbyname = {}
 
-	portfolio.start_date = datetime.datetime.now() - datetime.timedelta(days=100)
+	portfolio.start_date = (datetime.datetime.now() - datetime.timedelta(days=100)).date()
 	portfolio.save()
 
 	start = int(time.mktime(portfolio.start_date.timetuple()))
 
-	for ostock in ownstocks:
-		stocksbyname[ostock.stock.stock_name] = ostock.amount_owned
-		for stockday in stockDayInterface.getAllDaysOrdered(ostock.stock):
+	sdays = Portfolio_Day.objects.filter(portfolio=portfolio)
+	
+	points = []
+	for pday in sdays:
+		# if pday.day < portfolio.start_date:
+		points.append({
+			"date": pday.day.strftime("%Y-%m-%d"),
+			"close": pday.value,
+			"diversity": pday.diversity
+		})
 
-			if stockday.day < portfolio.start_date:
-				continue
+	# for ostock in ownstocks:
+	# 	stocksbyname[ostock.stock.stock_name] = ostock.amount_owned
+	# 	for stockday in stockDayInterface.getAllDaysOrdered(ostock.stock):
 
-			key = int(time.mktime(stockday.day.timetuple()))
+	# 		if stockday.day < portfolio.start_date:
+	# 			continue
 
-			if not key in alldays:
-				alldays[key] = 0
-			alldays[key] += stockday.adjustedClose*ostock.amount_owned
+	# 		key = int(time.mktime(stockday.day.timetuple()))
 
-	result = []
-	keylist = alldays.keys()
-	keylist.sort()
-	for key in keylist:
-		date = datetime.datetime.utcfromtimestamp(key).strftime("%Y-%m-%d")
-		result.append({ "date": date, "close": alldays[key] })
+	# 		if not key in alldays:
+	# 			alldays[key] = 0
+	# 		alldays[key] += stockday.adjustedClose*ostock.amount_owned
 
-	return JsonResponse({ "data": result })
+	# result = []
+	# keylist = alldays.keys()
+	# keylist.sort()
+	# for key in keylist:
+	# 	date = datetime.datetime.utcfromtimestamp(key).strftime("%Y-%m-%d")
+	# 	result.append({ "date": date, "close": alldays[key] })
+
+	return JsonResponse({ "data": points })
 
 
 @require_GET
@@ -190,20 +200,6 @@ def gen_portfolio_price_plot(request):
 	    # print "%s: %s" % (key, alldays[key])
 
 	return JsonResponse({ "data": result })
-
-@require_GET
-def get_portfolio_values(request):
-	try:
-		portfolio = Portfolio.objects.get(pk=request.GET['portfolio'])
-	except Portfolio.DoesNotExist:
-		return JsonResponse({'success':False})
-	else:
-		days = Portfolio_Day.objects.filter(portfolio=portfolio)
-		daysDict = {}
-		for day in days:
-			daysDict[day.day.__str__()] = [day.value, day.diversity]
-		daysDict['success'] = True
-		return JsonResponse({daysDict})
 
 @require_GET
 def get_recommendation(request):

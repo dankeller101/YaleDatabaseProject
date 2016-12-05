@@ -241,7 +241,9 @@ class portfolioAPI():
             startFrame = startFrame + datetime.timedelta(days=1)
             if days_in[startIndex + 1] <= startFrame:
                 startIndex += 1
-            if days_in[endIndex + 1] <= endFrame:
+            if endIndex >= number_days - 1:
+                break
+            elif days_in[endIndex + 1] <= endFrame:
                 endIndex += 1
 
         return mostRecentDay

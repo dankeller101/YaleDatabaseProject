@@ -159,7 +159,8 @@ def get_portfolio_values(request):
 		days = Portfolio_Day.objects.filter(portfolio=portfolio)
 		daysDict = {}
 		for day in days:
-			daysDict[day.day.__str__()] = [day.value, day.diversity]
+			if day.day >= portfolio.start_date:
+				daysDict[day.day.__str__()] = [day.value, day.diversity]
 		daysDict['success'] = True
 		return JsonResponse({daysDict})
 

@@ -68,6 +68,9 @@ def compute_diversity(stock_prices, num_shares):
 
     n, p = stock_prices.shape
 
+    # try adding small ammounts of random noise to avoid zero correlation coefficient
+    stock_prices = stock_prices + 0.01 * np.random.rand(stock_prices.shape[0], stock_prices.shape[1])
+
     # get the matrix of correlation coefficients
     cor_mat = np.abs(np.corrcoef(x=stock_prices))
     cor_vec = cor_mat[np.triu_indices(n, k=1)]

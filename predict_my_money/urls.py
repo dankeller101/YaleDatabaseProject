@@ -20,7 +20,7 @@ urlpatterns = [
     url(r'^portfolios/compare/(?P<pid0>[0-9]+)/(?P<pid1>[0-9]+)', views.portfolio_compare, name='portfolio_compare'),
 
     #example /stock/view/GOOGL
-    url(r'^stocks/(?P<stock_ticker>[\w]+)', views.stock_detail, name='stock_detail'),
+    url(r'^stocks/(?P<ticker>[\w]+)', views.stock_detail, name='stock_detail'),
     #example /portfolio/create
     url(r'^portfolios/create', views.create_portfolio, name='create_portfolio'),
     #example /portfolio/view/1

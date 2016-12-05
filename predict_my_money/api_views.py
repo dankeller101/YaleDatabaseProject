@@ -141,7 +141,7 @@ def gen_portfolio_price_plot(request):
 			alldays[key].append(obj)
 
 	result = []
-	keylist = alldays.keys()
+	keylist = list(alldays.keys())
 	keylist.sort()
 	for key in keylist:
 		result.append(alldays[key])

@@ -115,7 +115,6 @@ export function plotMultipleData(data1, data2, el) {
     .y(function(d) { return y(d.close); })
     .curve(d3.curveBasis);
 
-
   var line2 = d3.line()
     .x(function(d) { return x(d.date); })
     .y(function(d) { return y(d.close); })
@@ -166,7 +165,7 @@ export function plotMultipleData(data1, data2, el) {
 
   var path2 = svg.append("path")
     .datum(data2)
-    .attr("class", "line line2")
+    .attr("class", "line lgreen")
     .attr("d", line2);
 
   var path1 = svg.append("path")
@@ -174,23 +173,36 @@ export function plotMultipleData(data1, data2, el) {
     .attr("class", "line")
     .attr("d", line1);
 
-  var focus = svg.append("g")
+  var focus1 = svg.append("g")
     .attr("class", "focus")
     .style("display", "none");
 
-  focus.append("circle")
+  focus1.append("circle")
     .attr("r", 4.5);
 
-  focus.append("text")
+  focus1.append("text")
     .attr("x", 9)
     .attr("dy", ".35em");
+
+  var focus2 = svg.append("g")
+    .attr("class", "focus")
+    .style("display", "none");
+
+  focus2.append("circle")
+    .attr("class", "lgreen")
+    .attr("r", 4.5);
+
+  focus2.append("text")
+    .attr("x", 9)
+    .attr("dy", ".35em");
+
 
   svg.append("rect")
     .attr("class", "overlay")
     .attr("width", width)
     .attr("height", height)
-    .on("mouseover", function() { focus.style("display", null); })
-    .on("mouseout", function() { focus.style("display", "none"); })
+    .on("mouseover", function() { focus1.style("display", null); focus2.style("display", null); })
+    .on("mouseout", function() { focus1.style("display", "none"); })
     .on("mousemove", mousemove);
 
   function mousemove() {
@@ -199,7 +211,17 @@ export function plotMultipleData(data1, data2, el) {
         d0 = data1[i - 1],
         d1 = data1[i],
         d = x0 - d0.date > d1.date - x0 ? d1 : d0;
-    focus.attr("transform", "translate(" + x(d.date) + "," + y(d.close) + ")");
-    focus.select("text").text(formatCurrency(d.close));
+
+    focus1.attr("transform", "translate(" + x(d.date) + "," + y(d.close) + ")");
+    focus1.select("text").text(formatCurrency(d.close));
+
+    var x0 = x.invert(d3.mouse(this)[0]),
+        i = bisectDate(data2, x0, 1),
+        d0 = data2[i - 1],
+        d1 = data2[i],
+        d = x0 - d0.date > d1.date - x0 ? d1 : d0;
+
+    focus2.attr("transform", "translate(" + x(d.date) + "," + y(d.close) + ")");
+    focus2.select("text").text(formatCurrency(d.close));
   }
 }

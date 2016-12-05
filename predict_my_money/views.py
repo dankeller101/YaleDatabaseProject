@@ -88,9 +88,15 @@ def portfolio_compare(request, pid0, pid1):
 	})
 
 @require_GET
-def stock_detail(request, stock_ticker):
+def stock_detail(request, ticker):
+	stock = sapi.getStock(ticker)
+	if not stock:
+		return render(request, 'predictor/error.html', {
+			'error_message': "Stock doesn't exist."
+		})
+
 	return render(request, 'predictor/stock.html', {
-		'stock_ticker': stock_ticker,
+		'stock': stock,
 	})
 
 @require_GET

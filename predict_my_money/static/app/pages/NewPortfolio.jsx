@@ -224,17 +224,11 @@ export default class NewPortfolioView extends React.Component {
 				})
 			})
 
-			console.log(stocks)
-
 			this.setState({ stocks: stocks }, () => {
 				this.refs.pmanager.resetStocks(this.state.stocks)
 				this.refs.plot.updateStocks(this.state.stocks)
 			})
 		})
-	}
-
-	componentDidMount() {
-		// this.refs.plot.updateStocks(this.state.stocks)
 	}
 
 	render() {

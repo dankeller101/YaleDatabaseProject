@@ -25,8 +25,8 @@ class StockView extends React.Component {
   }
 
 	componentDidMount() {
-		$.getJSON("/predictor/api/get_stock_plot?name="+this.props.stock.name, (data) => {
-      if (data.error) {
+		$.getJSON("/predictor/api/get_stock_plot?name="+this.props.data.stock_name, (data) => {
+      if (!data.data || data.error) {
         alert('Stock not found.')
         return;
       }
@@ -37,13 +37,24 @@ class StockView extends React.Component {
         }
       }
       plotData(points, findDOMNode(this.refs.plot))
+    }, (err) => {
+      alert('Stock not found.')
     })
 	}
 
 	render() {
 		return (
 			<div className="StockView">
-				<h1>Plotting stock '{this.props.stock.name}'</h1>
+				<h1>Plotting stock '{this.props.data.stock_name}' for {this.props.data.company_name}</h1>
+        <p>{this.props.data.company_meta}</p>
+
+        <ul>
+          <li>Current_high: {this.props.data.current_high}</li>
+          <li>Current_low: {this.props.data.current_low}</li>
+          <li>Current_adjusted_close: {this.props.data.current_adjusted_close}</li>
+          <li>Start_date: {this.props.data.start_date}</li>
+          <li>End_date: {this.props.data.end_date}</li>
+        </ul>
 
 				<div id="data-dump" ref='plot' data-prices="{{ data }}"></div>
 			</div>
@@ -71,5 +82,5 @@ window.startNewPortfolioView = function() {
 }
 
 window.startStockView = function() {
-  render(<StockView stock={window.data.stock} />, document.getElementById('app'));
+  render(<StockView data={window.data.stock} />, document.getElementById('app'));
 }

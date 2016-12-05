@@ -61,15 +61,15 @@
 	
 	var _NewPortfolio2 = _interopRequireDefault(_NewPortfolio);
 	
-	var _Portfolio = __webpack_require__(/*! ./pages/Portfolio.jsx */ 185);
+	var _Portfolio = __webpack_require__(/*! ./pages/Portfolio.jsx */ 184);
 	
 	var _Portfolio2 = _interopRequireDefault(_Portfolio);
 	
-	var _PortfolioCompare = __webpack_require__(/*! ./pages/PortfolioCompare.jsx */ 186);
+	var _PortfolioCompare = __webpack_require__(/*! ./pages/PortfolioCompare.jsx */ 185);
 	
 	var _PortfolioCompare2 = _interopRequireDefault(_PortfolioCompare);
 	
-	var _Home = __webpack_require__(/*! ./pages/Home.jsx */ 184);
+	var _Home = __webpack_require__(/*! ./pages/Home.jsx */ 186);
 	
 	var _Home2 = _interopRequireDefault(_Home);
 	
@@ -128,8 +128,8 @@
 	    value: function componentDidMount() {
 	      var _this3 = this;
 	
-	      $.getJSON("/predictor/api/get_stock_plot?name=" + this.props.stock.name, function (data) {
-	        if (data.error) {
+	      $.getJSON("/predictor/api/get_stock_plot?name=" + this.props.data.stock_name, function (data) {
+	        if (!data.data || data.error) {
 	          alert('Stock not found.');
 	          return;
 	        }
@@ -140,6 +140,8 @@
 	          }
 	        }
 	        (0, _plot.plotData)(points, (0, _reactDom.findDOMNode)(_this3.refs.plot));
+	      }, function (err) {
+	        alert('Stock not found.');
 	      });
 	    }
 	  }, {
@@ -152,8 +154,48 @@
 	          'h1',
 	          null,
 	          'Plotting stock \'',
-	          this.props.stock.name,
-	          '\''
+	          this.props.data.stock_name,
+	          '\' for ',
+	          this.props.data.company_name
+	        ),
+	        _react2.default.createElement(
+	          'p',
+	          null,
+	          this.props.data.company_meta
+	        ),
+	        _react2.default.createElement(
+	          'ul',
+	          null,
+	          _react2.default.createElement(
+	            'li',
+	            null,
+	            'Current_high: ',
+	            this.props.data.current_high
+	          ),
+	          _react2.default.createElement(
+	            'li',
+	            null,
+	            'Current_low: ',
+	            this.props.data.current_low
+	          ),
+	          _react2.default.createElement(
+	            'li',
+	            null,
+	            'Current_adjusted_close: ',
+	            this.props.data.current_adjusted_close
+	          ),
+	          _react2.default.createElement(
+	            'li',
+	            null,
+	            'Start_date: ',
+	            this.props.data.start_date
+	          ),
+	          _react2.default.createElement(
+	            'li',
+	            null,
+	            'End_date: ',
+	            this.props.data.end_date
+	          )
 	        ),
 	        _react2.default.createElement('div', { id: 'data-dump', ref: 'plot', 'data-prices': '{{ data }}' })
 	      );
@@ -180,7 +222,7 @@
 	};
 	
 	window.startStockView = function () {
-	  (0, _reactDom.render)(_react2.default.createElement(StockView, { stock: window.data.stock }), document.getElementById('app'));
+	  (0, _reactDom.render)(_react2.default.createElement(StockView, { data: window.data.stock }), document.getElementById('app'));
 	};
 
 /***/ },
@@ -22589,18 +22631,11 @@
 						});
 					});
 	
-					console.log(stocks);
-	
 					_this7.setState({ stocks: stocks }, function () {
 						_this7.refs.pmanager.resetStocks(_this7.state.stocks);
 						_this7.refs.plot.updateStocks(_this7.state.stocks);
 					});
 				});
-			}
-		}, {
-			key: 'componentDidMount',
-			value: function componentDidMount() {
-				// this.refs.plot.updateStocks(this.state.stocks)
 			}
 		}, {
 			key: 'render',
@@ -39958,20 +39993,26 @@
 	
 	  svg.append("g").attr("class", "y axis").call(yAxis).append("text").attr("transform", "rotate(-90)").attr("y", 4).attr("dy", ".71em").style("text-anchor", "end").text("TSR");
 	
-	  var path2 = svg.append("path").datum(data2).attr("class", "line line2").attr("d", line2);
+	  var path2 = svg.append("path").datum(data2).attr("class", "line lgreen").attr("d", line2);
 	
 	  var path1 = svg.append("path").datum(data1).attr("class", "line").attr("d", line1);
 	
-	  var focus = svg.append("g").attr("class", "focus").style("display", "none");
+	  var focus1 = svg.append("g").attr("class", "focus").style("display", "none");
 	
-	  focus.append("circle").attr("r", 4.5);
+	  focus1.append("circle").attr("r", 4.5);
 	
-	  focus.append("text").attr("x", 9).attr("dy", ".35em");
+	  focus1.append("text").attr("x", 9).attr("dy", ".35em");
+	
+	  var focus2 = svg.append("g").attr("class", "focus").style("display", "none");
+	
+	  focus2.append("circle").attr("class", "lgreen").attr("r", 4.5);
+	
+	  focus2.append("text").attr("x", 9).attr("dy", ".35em");
 	
 	  svg.append("rect").attr("class", "overlay").attr("width", width).attr("height", height).on("mouseover", function () {
-	    focus.style("display", null);
+	    focus1.style("display", null);focus2.style("display", null);
 	  }).on("mouseout", function () {
-	    focus.style("display", "none");
+	    focus1.style("display", "none");
 	  }).on("mousemove", mousemove);
 	
 	  function mousemove() {
@@ -39980,8 +40021,18 @@
 	        d0 = data1[i - 1],
 	        d1 = data1[i],
 	        d = x0 - d0.date > d1.date - x0 ? d1 : d0;
-	    focus.attr("transform", "translate(" + x(d.date) + "," + y(d.close) + ")");
-	    focus.select("text").text(formatCurrency(d.close));
+	
+	    focus1.attr("transform", "translate(" + x(d.date) + "," + y(d.close) + ")");
+	    focus1.select("text").text(formatCurrency(d.close));
+	
+	    var x0 = x.invert(d3.mouse(this)[0]),
+	        i = bisectDate(data2, x0, 1),
+	        d0 = data2[i - 1],
+	        d1 = data2[i],
+	        d = x0 - d0.date > d1.date - x0 ? d1 : d0;
+	
+	    focus2.attr("transform", "translate(" + x(d.date) + "," + y(d.close) + ")");
+	    focus2.select("text").text(formatCurrency(d.close));
 	  }
 	}
 
@@ -40043,130 +40094,6 @@
 
 /***/ },
 /* 184 */
-/*!****************************!*\
-  !*** ./app/pages/Home.jsx ***!
-  \****************************/
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	Object.defineProperty(exports, "__esModule", {
-		value: true
-	});
-	
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-	
-	var _react = __webpack_require__(/*! react */ 1);
-	
-	var _react2 = _interopRequireDefault(_react);
-	
-	var _reactDom = __webpack_require__(/*! react-dom */ 32);
-	
-	var _lodash = __webpack_require__(/*! lodash */ 180);
-	
-	var _lodash2 = _interopRequireDefault(_lodash);
-	
-	var _csrf = __webpack_require__(/*! ../lib/csrf.jsx */ 183);
-	
-	var _csrf2 = _interopRequireDefault(_csrf);
-	
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-	
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-	
-	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-	
-	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } // pages/Home.jsx
-	
-	var PortfoliosList = function (_React$Component) {
-		_inherits(PortfoliosList, _React$Component);
-	
-		function PortfoliosList(props) {
-			_classCallCheck(this, PortfoliosList);
-	
-			var _this = _possibleConstructorReturn(this, (PortfoliosList.__proto__ || Object.getPrototypeOf(PortfoliosList)).call(this, props));
-	
-			_this.state = { stocks: [] };
-			return _this;
-		}
-	
-		_createClass(PortfoliosList, [{
-			key: 'componentDidMount',
-			value: function componentDidMount() {}
-		}, {
-			key: 'render',
-			value: function render() {
-				var _list = this.props.items.map(function (el, i) {
-					var access = function access() {
-						location.href = "/predictor/portfolios/" + el.id;
-					};
-					return _react2.default.createElement(
-						'div',
-						{ className: 'PortfolioListItem' },
-						_react2.default.createElement(
-							'h3',
-							null,
-							el.portfolio_name
-						),
-						'\xA0',
-						_react2.default.createElement(
-							'button',
-							{ className: 'btn btn-info', onClick: access },
-							'See portfolio'
-						)
-					);
-				});
-				return _react2.default.createElement(
-					'div',
-					{ className: 'PortfoliosList' },
-					_list
-				);
-			}
-		}]);
-	
-		return PortfoliosList;
-	}(_react2.default.Component);
-	
-	var NewPortfolioView = function (_React$Component2) {
-		_inherits(NewPortfolioView, _React$Component2);
-	
-		function NewPortfolioView(props) {
-			_classCallCheck(this, NewPortfolioView);
-	
-			var _this2 = _possibleConstructorReturn(this, (NewPortfolioView.__proto__ || Object.getPrototypeOf(NewPortfolioView)).call(this, props));
-	
-			_this2.state = { stocks: [] };
-			return _this2;
-		}
-	
-		_createClass(NewPortfolioView, [{
-			key: 'componentDidMount',
-			value: function componentDidMount() {}
-		}, {
-			key: 'render',
-			value: function render() {
-	
-				return _react2.default.createElement(
-					'div',
-					{ className: 'container' },
-					_react2.default.createElement('br', null),
-					_react2.default.createElement(
-						'h1',
-						null,
-						'Home'
-					),
-					_react2.default.createElement(PortfoliosList, { items: window.portfolios })
-				);
-			}
-		}]);
-	
-		return NewPortfolioView;
-	}(_react2.default.Component);
-	
-	exports.default = NewPortfolioView;
-
-/***/ },
-/* 185 */
 /*!*********************************!*\
   !*** ./app/pages/Portfolio.jsx ***!
   \*********************************/
@@ -40380,7 +40307,7 @@
 	exports.default = PortfolioView;
 
 /***/ },
-/* 186 */
+/* 185 */
 /*!****************************************!*\
   !*** ./app/pages/PortfolioCompare.jsx ***!
   \****************************************/
@@ -40391,7 +40318,6 @@
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.PortfolioView = undefined;
 	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
@@ -40532,7 +40458,6 @@
 	      return _react2.default.createElement(
 	        'div',
 	        { className: 'StockView container' },
-	        _react2.default.createElement('br', null),
 	        _react2.default.createElement(
 	          'h1',
 	          null,
@@ -40561,9 +40486,20 @@
 	        _react2.default.createElement(
 	          'div',
 	          { className: 'row' },
+	          _react2.default.createElement('div', { id: 'data-dump', ref: 'plot', 'data-prices': '{{ data }}' }),
+	          _react2.default.createElement('br', null)
+	        ),
+	        _react2.default.createElement(
+	          'div',
+	          { className: 'row' },
 	          _react2.default.createElement(
 	            'div',
 	            { className: 'col-sm-6' },
+	            _react2.default.createElement(
+	              'h2',
+	              { className: 'portfolio1' },
+	              this.props.data1.portfolio_name
+	            ),
 	            _react2.default.createElement(
 	              'table',
 	              { className: 'table table-striped' },
@@ -40611,6 +40547,11 @@
 	            'div',
 	            { className: 'col-sm-6' },
 	            _react2.default.createElement(
+	              'h2',
+	              { className: 'portfolio2' },
+	              this.props.data2.portfolio_name
+	            ),
+	            _react2.default.createElement(
 	              'table',
 	              { className: 'table table-striped' },
 	              _react2.default.createElement(
@@ -40653,8 +40594,7 @@
 	              )
 	            )
 	          )
-	        ),
-	        _react2.default.createElement('div', { id: 'data-dump', ref: 'plot', 'data-prices': '{{ data }}' })
+	        )
 	      );
 	    }
 	  }]);
@@ -40663,175 +40603,130 @@
 	}(_react2.default.Component);
 	
 	exports.default = PortfolioCompareView;
+
+/***/ },
+/* 186 */
+/*!****************************!*\
+  !*** ./app/pages/Home.jsx ***!
+  \****************************/
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
 	
-	var PortfolioView = exports.PortfolioView = function (_React$Component2) {
-	  _inherits(PortfolioView, _React$Component2);
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
 	
-	  function PortfolioView(props) {
-	    _classCallCheck(this, PortfolioView);
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
-	    var _this3 = _possibleConstructorReturn(this, (PortfolioView.__proto__ || Object.getPrototypeOf(PortfolioView)).call(this, props));
+	var _react = __webpack_require__(/*! react */ 1);
 	
-	    _this3.state = {};
-	    return _this3;
-	  }
+	var _react2 = _interopRequireDefault(_react);
 	
-	  _createClass(PortfolioView, [{
-	    key: 'componentDidMount',
-	    value: function componentDidMount() {
-	      var _this4 = this;
+	var _reactDom = __webpack_require__(/*! react-dom */ 32);
 	
-	      $.getJSON("/predictor/api/get_portfolio_plot?id=" + this.props.data.id, function (data) {
-	        (0, _plot.plotData)(data.data, (0, _reactDom.findDOMNode)(_this4.refs.plot));
-	      });
-	    }
-	  }, {
-	    key: 'render',
-	    value: function render() {
+	var _lodash = __webpack_require__(/*! lodash */ 180);
 	
-	      var stockList = _lodash2.default.map(this.props.data.stocks, function (el, i) {
-	        return _react2.default.createElement(
-	          'tr',
-	          null,
-	          _react2.default.createElement(
-	            'td',
-	            null,
-	            i + 1
-	          ),
-	          _react2.default.createElement(
-	            'td',
-	            null,
-	            el.name
-	          ),
-	          _react2.default.createElement(
-	            'td',
-	            null,
-	            el.owned
-	          ),
-	          _react2.default.createElement(
-	            'td',
-	            null,
-	            '$',
-	            el.price
-	          ),
-	          _react2.default.createElement(
-	            'td',
-	            null,
-	            '$',
-	            el.price_then
-	          )
-	        );
-	      });
+	var _lodash2 = _interopRequireDefault(_lodash);
 	
-	      return _react2.default.createElement(
-	        'div',
-	        { className: 'StockView' },
-	        _react2.default.createElement(
-	          'h1',
-	          null,
-	          'Portfolio \'',
-	          this.props.data.portfolio_name,
-	          '\''
-	        ),
-	        _react2.default.createElement(
-	          'h6',
-	          null,
-	          'Created 3 days ago by Daniel Keller.'
-	        ),
-	        _react2.default.createElement(
-	          'div',
-	          { className: 'row' },
-	          _react2.default.createElement(
-	            'div',
-	            { className: 'col-sm-4' },
-	            _react2.default.createElement('hr', null),
-	            _react2.default.createElement(
-	              'pre',
-	              null,
-	              _react2.default.createElement(
-	                'code',
-	                null,
-	                'Diversity: ',
-	                this.props.data.current_diversity.toFixed(2),
-	                _react2.default.createElement('br', null),
-	                'Current Value: ',
-	                this.props.data.current_value.toFixed(2),
-	                _react2.default.createElement('br', null),
-	                'Total Invested: ',
-	                this.props.data.total_invested.toFixed(2)
-	              )
-	            ),
-	            _react2.default.createElement('hr', null)
-	          ),
-	          _react2.default.createElement(
-	            'div',
-	            { className: 'col-sm-8' },
-	            _react2.default.createElement('div', { ref: 'plot', id: 'data-dump', 'data-prices': '{{ data }}' })
-	          )
-	        ),
-	        _react2.default.createElement('hr', null),
-	        _react2.default.createElement(
-	          'div',
-	          null,
-	          _react2.default.createElement(
-	            'h2',
-	            null,
-	            'Stocks in this portfolio'
-	          ),
-	          _react2.default.createElement(
-	            'p',
-	            null,
-	            'Here are the stocks that belong to this portfolio.'
-	          ),
-	          _react2.default.createElement(
-	            'table',
-	            { className: 'table table-striped' },
-	            _react2.default.createElement(
-	              'thead',
-	              null,
-	              _react2.default.createElement(
-	                'tr',
-	                null,
-	                _react2.default.createElement(
-	                  'th',
-	                  null,
-	                  '#'
-	                ),
-	                _react2.default.createElement(
-	                  'th',
-	                  null,
-	                  'Name'
-	                ),
-	                _react2.default.createElement(
-	                  'th',
-	                  null,
-	                  'Amount'
-	                ),
-	                _react2.default.createElement(
-	                  'th',
-	                  null,
-	                  'Price'
-	                ),
-	                _react2.default.createElement(
-	                  'th',
-	                  null,
-	                  'Bought Price'
-	                )
-	              )
-	            ),
-	            _react2.default.createElement(
-	              'tbody',
-	              null,
-	              stockList
-	            )
-	          )
-	        )
-	      );
-	    }
-	  }]);
+	var _csrf = __webpack_require__(/*! ../lib/csrf.jsx */ 183);
 	
-	  return PortfolioView;
+	var _csrf2 = _interopRequireDefault(_csrf);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+	
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; } // pages/Home.jsx
+	
+	var PortfoliosList = function (_React$Component) {
+		_inherits(PortfoliosList, _React$Component);
+	
+		function PortfoliosList(props) {
+			_classCallCheck(this, PortfoliosList);
+	
+			var _this = _possibleConstructorReturn(this, (PortfoliosList.__proto__ || Object.getPrototypeOf(PortfoliosList)).call(this, props));
+	
+			_this.state = { stocks: [] };
+			return _this;
+		}
+	
+		_createClass(PortfoliosList, [{
+			key: 'componentDidMount',
+			value: function componentDidMount() {}
+		}, {
+			key: 'render',
+			value: function render() {
+				var _list = this.props.items.map(function (el, i) {
+					var access = function access() {
+						location.href = "/predictor/portfolios/" + el.id;
+					};
+					return _react2.default.createElement(
+						'div',
+						{ className: 'PortfolioListItem' },
+						_react2.default.createElement(
+							'h3',
+							null,
+							el.portfolio_name
+						),
+						'\xA0',
+						_react2.default.createElement(
+							'button',
+							{ className: 'btn btn-info', onClick: access },
+							'See portfolio'
+						)
+					);
+				});
+				return _react2.default.createElement(
+					'div',
+					{ className: 'PortfoliosList' },
+					_list
+				);
+			}
+		}]);
+	
+		return PortfoliosList;
 	}(_react2.default.Component);
+	
+	var NewPortfolioView = function (_React$Component2) {
+		_inherits(NewPortfolioView, _React$Component2);
+	
+		function NewPortfolioView(props) {
+			_classCallCheck(this, NewPortfolioView);
+	
+			var _this2 = _possibleConstructorReturn(this, (NewPortfolioView.__proto__ || Object.getPrototypeOf(NewPortfolioView)).call(this, props));
+	
+			_this2.state = { stocks: [] };
+			return _this2;
+		}
+	
+		_createClass(NewPortfolioView, [{
+			key: 'componentDidMount',
+			value: function componentDidMount() {}
+		}, {
+			key: 'render',
+			value: function render() {
+	
+				return _react2.default.createElement(
+					'div',
+					{ className: 'container' },
+					_react2.default.createElement('br', null),
+					_react2.default.createElement(
+						'h1',
+						null,
+						'Home'
+					),
+					_react2.default.createElement(PortfoliosList, { items: window.portfolios })
+				);
+			}
+		}]);
+	
+		return NewPortfolioView;
+	}(_react2.default.Component);
+	
+	exports.default = NewPortfolioView;
 
 /***/ }
 /******/ ]);

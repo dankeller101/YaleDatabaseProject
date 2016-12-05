@@ -48,19 +48,21 @@ def get_portfolio_tsr_plot(request):
 	portfolio = papi.getPortfolio(pid)
 
 	if not portfolio:
+		print("failed to find portfolio")
 		return JsonResponse({ "data": [], error: True }, status=404)
 
 	ownstocks = papi.getStocksOwned(pid)
 	if not ownstocks:
+		print("failed to find ownstocks")
 		return JsonResponse({ "data": [], error: True }, status=404)
 
 	alldays = {}
 	stocksbyname = {}
 
-	portfolio.start_date = (datetime.datetime.now() - datetime.timedelta(days=100)).date()
+	portfolio.start_date = (datetime.datetime.now() - datetime.timedelta(days=1000)).date()
 	portfolio.save()
 
-	start = int(time.mktime(portfolio.start_date.timetuple()))
+	print(portfolio.start_date)
 
 	sdays = Portfolio_Day.objects.filter(portfolio=portfolio)
 	

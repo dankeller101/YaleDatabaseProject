@@ -40720,6 +40720,13 @@
 			key: 'componentDidMount',
 			value: function componentDidMount() {}
 		}, {
+			key: '_onClickCompare',
+			value: function _onClickCompare() {
+				var opt1 = (0, _reactDom.findDOMNode)(this.refs.compare1).value;
+				var opt2 = (0, _reactDom.findDOMNode)(this.refs.compare2).value;
+				location.href = '/predictor/portfolios/compare/' + opt1 + '/' + opt2;
+			}
+		}, {
 			key: 'render',
 			value: function render() {
 				var _list = this.props.items.map(function (el, i) {
@@ -40727,25 +40734,96 @@
 						location.href = "/predictor/portfolios/" + el.id;
 					};
 					return _react2.default.createElement(
-						'div',
+						'tr',
 						{ className: 'PortfolioListItem' },
 						_react2.default.createElement(
-							'h3',
+							'td',
+							null,
+							i + 1
+						),
+						_react2.default.createElement(
+							'td',
 							null,
 							el.portfolio_name
+						),
+						_react2.default.createElement(
+							'td',
+							null,
+							_react2.default.createElement(
+								'button',
+								{ className: 'btn btn-info', onClick: access },
+								'See portfolio'
+							)
+						)
+					);
+				});
+	
+				var portOptions = this.props.items.map(function (el, i) {
+					return _react2.default.createElement(
+						'option',
+						{ value: el.id },
+						el.portfolio_name
+					);
+				});
+	
+				return _react2.default.createElement(
+					'div',
+					{ className: 'PortfoliosList' },
+					_react2.default.createElement(
+						'table',
+						{ className: 'table table-striped' },
+						_react2.default.createElement(
+							'thead',
+							null,
+							_react2.default.createElement(
+								'th',
+								null,
+								'#'
+							),
+							_react2.default.createElement(
+								'th',
+								null,
+								'Name'
+							),
+							_react2.default.createElement(
+								'th',
+								null,
+								'Control'
+							)
+						),
+						_react2.default.createElement(
+							'tbody',
+							null,
+							_list
+						)
+					),
+					_react2.default.createElement('br', null),
+					_react2.default.createElement(
+						'h2',
+						null,
+						'Compare portfolios'
+					),
+					_react2.default.createElement(
+						'div',
+						{ className: 'form form-inline', onSubmit: this._onClickCompare.bind(this) },
+						_react2.default.createElement(
+							'select',
+							{ className: 'form-control', ref: 'compare1' },
+							portOptions
+						),
+						' with',
+						_react2.default.createElement(
+							'select',
+							{ className: 'form-control', ref: 'compare2' },
+							portOptions
 						),
 						'\xA0',
 						_react2.default.createElement(
 							'button',
-							{ className: 'btn btn-info', onClick: access },
-							'See portfolio'
+							{ className: 'btn btn-info', onClick: this._onClickCompare.bind(this) },
+							'Compare'
 						)
-					);
-				});
-				return _react2.default.createElement(
-					'div',
-					{ className: 'PortfoliosList' },
-					_list
+					)
 				);
 			}
 		}]);
@@ -40753,29 +40831,22 @@
 		return PortfoliosList;
 	}(_react2.default.Component);
 	
-	var NewPortfolioView = function (_React$Component2) {
-		_inherits(NewPortfolioView, _React$Component2);
+	var HomeView = function (_React$Component2) {
+		_inherits(HomeView, _React$Component2);
 	
-		function NewPortfolioView(props) {
-			_classCallCheck(this, NewPortfolioView);
+		function HomeView(props) {
+			_classCallCheck(this, HomeView);
 	
-			var _this2 = _possibleConstructorReturn(this, (NewPortfolioView.__proto__ || Object.getPrototypeOf(NewPortfolioView)).call(this, props));
-	
-			_this2.state = { stocks: [] };
-			return _this2;
+			return _possibleConstructorReturn(this, (HomeView.__proto__ || Object.getPrototypeOf(HomeView)).call(this, props));
 		}
 	
-		_createClass(NewPortfolioView, [{
-			key: 'componentDidMount',
-			value: function componentDidMount() {}
-		}, {
+		_createClass(HomeView, [{
 			key: 'render',
 			value: function render() {
 	
 				return _react2.default.createElement(
 					'div',
 					{ className: 'container' },
-					_react2.default.createElement('br', null),
 					_react2.default.createElement(
 						'h1',
 						null,
@@ -40786,10 +40857,10 @@
 			}
 		}]);
 	
-		return NewPortfolioView;
+		return HomeView;
 	}(_react2.default.Component);
 	
-	exports.default = NewPortfolioView;
+	exports.default = HomeView;
 
 /***/ }
 /******/ ]);

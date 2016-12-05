@@ -39,8 +39,6 @@
 \lhead{Harshaw, Keller, Pires}
 \rfoot{\thepage}
 
-
-
 \section{Introduction}
 Trading stock can be exciting and rewarding activity, both intellectually and monetarily. However, there is a significant barrier to entry as trading stocks requires a large investment. A solution to this problem is \emph{paper-trading}, simulated trading to practice buying and selling securities without actual money being involved. This allows novice investors to compare different buying and selling techniques without the risk of losing money. This practice is informative and worthwhile.
 
@@ -57,6 +55,7 @@ The Portfolio Playground has three main functionalities:
 \end{enumerate}
 In the remainder of this section, we provide a walkthrough tutorial on how to explore the application's functionality. Before we continue, however, we provide a brief introduction to the portfolio metrics that are used in the application.
 
+\subsection{Portfolio Metrics}
 Suppose we have a portfolio $P$ consisting of stocks $P = \{s_1\dots s_N\}$, where $x_i$ is the number of shares of stock $s_i$, $D_i$ is the dividends for stock $s_i$, and $P^{t}_{i}$ is the price of a single share of stock $s_i$ at time $t$. Then we can define the \emph{total stock return} (TSR) from a stock creation time $t_0$ to a later time $t_f$ as 
 
 $$TSR = \sum_{i=1}^N x_i \left( \frac{P^{t_f}_{i} - P^{t_0}_{i} + D_i}{P^{t_0}_{i}} \right) $$
@@ -67,6 +66,49 @@ $$Div = 1 - \frac{1}{Z} \sum_{i<j}^N x_i x_j Cor(P_i,P_j) \in \left[ 0,1 \right]
 
 where $Z$ is a normalization term $Z = \sum_{i<j}^N x_i x_j$. Intuitively, the diversity of a portfolio is a weighted correlation score, where the weightings are derived from the number of shares owned in a particular stock. These two metrics are used frequently in our portfolio analysis and comparison. We now provide a brief walk-through tutorial of Portfolio Playground.
 
+\subsection{Walkthrough Tutorial}
+
+\subsubsection{Installing Required Software and Configuration}
+Our project runs on Python and Django. It is important that the user has downloaded Django and Python 3, with the \texttt{numpy}, \texttt{statsmodels}, \texttt{json}, and base libraries.
+
+\subsubsection{Creating an Account in Portfolio Playground}
+After succesfully installing required packages, go into the root directed of the downloaded project, and run the command \texttt{python manage.py runserver}. Then you should be able to access the website at \texttt{localhost:8000}. You should be directed to a Log In page.  Click on the ``Register'' banner at the top of the page, and fill out the required fields to create an account. An example screenshot is given in Figure~\ref{fig:register}.
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[width=0.7\textwidth]{db_diagram}
+\caption{\label{fig:register} Register Page}
+\end{center}
+\end{figure}
+
+\subsubsection{Creating and Analyzing a Portfolio}
+Upon creating an account, you will be taken to the home page where you may create your first portfolio. There are two ways of creating a portfolio: manually, and automatically. To manually create a portfolio, simply provide the portfolio name in the top field, and add stocks with the provided portfolio manager at the bottom of your screen. The portfolio manager allows you to search stocks and specify the number of shares to purchase. To create an automatically recommended portfolio, choose one of three recommender algorithms: Random, High Return, Diverse Options. Next, input the desired parameter values for total budget, maximum investment, and time horizon. For example, try using the High Return algorithm with a total budget of \$10,000, a maximum investment of \$4,000, and a time horizon of 5 days. Mix and match parameters for an endless variety of portfolios! To save the portfolio, press the ``Create Portfolio'' button. See Figure~\ref{fig:creation} for a screenshot of the portfolio creation page.
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[width=0.7\textwidth]{db_diagram}
+\caption{\label{fig:creation} Creation Page}
+\end{center}
+\end{figure}
+
+To analyze one of your portfolios, return to the home page by clicking on the `Portfolios' page on the top menu bar. On your home page, you will find a table of your current portfolios with `See Portfolio' buttons. Clicking on these buttons will take you to page to view a detailed analysis of your portfolio. See Figure~\ref{fig:analysis} for a screenshot of one of these portfolio analysis pages. This page lists the initial investment, current price, and current diversity score of the portfolio in the left side of the screen. On the right side of the screen, there is the price of the portfolio over time. The stocks in the portfolio, as well as the number of shares, current price, and initial price, are listed below. 
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[width=0.7\textwidth]{db_diagram}
+\caption{\label{fig:analysis} Portfolio Analysis Page}
+\end{center}
+\end{figure}
+
+\subsubsection{Comparing Portfolios}
+Once at least two portfolios are created, you can compare between them. To do this, navigate back to the home page, select two portfolios that you want to compare, and click the `Compare' button. You will then be taken to the comparison page where three plots are shown: the total price of the portfolios, the total stock return, and the diversity over time. Note that the total stock return is only defined after the purchase of the stock so you will need to wait a few days before seeing more data points in this plot. Below the plots, the stocks in both portfolios are listed for further comparison. See Figure~\ref{comparison} for a screenshot of the comparison page.
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[width=0.7\textwidth]{db_diagram}
+\caption{\label{fig:comparison} Portfolio Comparison Page}
+\end{center}
+\end{figure}
 
 \section{Recommender Algorithms} \label{sec:alg}
 Perhaps the most interesting and novel feature of Portfolio Playground is the portfolio recommendation algorithms. In this section, we describe these algorithms in detail. At the end of the section, we point out potential flaws in these algorithms and why they do not arise in our applications. Our recommendation algorithms make use of vector autoregressive models. We assume that our audience is familiar with these models (indeed, Ennan expressed that he was familiar with VAR models during our presentation). If this is not true, we encourage the interested reader to peruse Chapter 11 of "Time Series Analysis" by James D. Hamilton.
@@ -149,9 +191,7 @@ Finally, we wanted to allow users to create accounts and save their portfolios o
 
 
 \section{Front-End Design} \label{sec:fe}
-Discuss design discussions in front-end design.
-
-Describe which tools were used.
+We designed the front-end to be simple and user-friendly. Because our users will be focusing on numbers and plots, we decided to have a clean user interface. The main colors, black, off-white, and blue, are calm and neutral. The fonts that are used are inviting and friendly. The user-interface front end is built using (1) \texttt{react.js}, a javascript framework for rendering the DOM and listening for events and handling API calls to the database, (2) \texttt{D3.js}, a graphing library, (3) \texttt{gulp.js}, a javascript task runner, and (4) \texttt{bootstrap} a UI framework.
 
 \section{Main Issues} \label{sec:main_issues}
 Data fidelity was the main issue that we faced - both missing data and multiple inconsistent data points. For instance, sometimes the Tiingo API would be not have stock prices for certain days. There were also instances where Tiingo API returned several prices for a stock on a given day. This is likely a result of the aggregation of the sources that they pull from, such as Quotemedia and Quandl. The issues of missing and multiple data points pose a serious threat to the success of our recommendation algorithms.
@@ -161,6 +201,6 @@ To overcome these issues, we implemented data cleaning methods at several levels
 Our system has several limitations. First, we only supported \emph{static} portfolios. That is, our current framework assumes that stocks are added into a portfolio and kept there indefinitely. We do not support the ability to buy and sell stocks within a portfolio. Fortunately, our framework can be generalized to support dynamic portfolios. without too much trouble. The second system limitation is the sacalability of our forecasting models. We currently use Vector Autoregression Models (VAR), whose parameters grow quadratically in the number of stocks used. For this reason, we only recommend portfolios from the most popular stocks. A more scalable algorithm would allow us to recommend portfolios from a larger range of stocks. A third limitation is the time it takes to pull stocks from the API. Pulling a few stocks is quite fast but the first instantiation of the database takes quite a long time.
 
 \section{Division of Labor} \label{sec:division}
-Chris Harshaw did the initial domain research to understand relevant models, metrics, and methods. Chris proposed the high level view of the app, developed and implemented the recommender algorithms, developed back-end interfaces, wrote data-cleaning methods, and helped to debug back-end issues.  Daniel Keller carried out the initial research to determine which API to use to gather stock prices. Daniel designed the database, wrote the database code, debugged back-end issues, and wrote initial front-end code. Felipe Pires implemented the finalized front-end user interface. Chris wrote the presentation, and Chris and Danny wrote the final report.
+Chris Harshaw did the initial domain research to understand relevant models, metrics, and methods. Chris proposed the high level view of the app, developed and implemented the recommender algorithms, developed back-end interfaces, wrote data-cleaning methods, and helped to debug back-end issues.  Daniel Keller carried out the initial research to determine which API to use to gather stock prices. Daniel designed the database, wrote the database code, debugged back-end issues, and wrote initial front-end code. Felipe Pires designed and implemented the finalized front-end user interface. Chris wrote the presentation, and Chris and Danny wrote the final report.
 
 \end{document}

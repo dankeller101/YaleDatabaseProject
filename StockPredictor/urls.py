@@ -15,8 +15,10 @@ Including another URLconf
 """
 from django.conf.urls import url, include
 from django.contrib import admin
+from predict_my_money import views
 
 urlpatterns = [
     url(r'^predictor/', include('predict_my_money.urls', namespace='predictor')),
     url(r'^admin/', admin.site.urls),
+    url(r'^$', views.index)
 ]

@@ -7,6 +7,7 @@
 #
 
 #computation imports
+import time
 import numpy as np
 from predict_my_money.computations.recommender_algorithms import recommend_random_portfolio, recommend_high_return_portfolio, recommend_diverse_portfolio
 
@@ -22,7 +23,7 @@ class SandP():
             "MMM", "ABT", "ABBV", "ACN", "ATVI", "AYI", "ADBE", "AAP", "AES", "AET", "AMG", "AFL", "A", "APD", "AKAM",
             "ALK", "ALB", "AA", "ALXN", "ALLE", "AGN", "ADS", "LNT", "ALL", "GOOGL", "GOOG", "MO", "AMZN", "AEE", "AAL"
             "AEP", "AXP", "AIG", "AMT", "AWK", "AMP", "ABC", "AME", "AMGN", "APH", "APC", "ADI", "ANTM", "AON", "APA",
-            "AIV", "AAPL", "AMAT", "ADM", "AJG", "AIZ", "T", "ADSK", "ADP", "AN", "AZO", "AVGO", "AVB", "AVY", "BHI"],
+            "AIV", "AAPL", "AMAT", "ADM", "AJG", "AIZ", "T", "ADSK", "ADP", "AN", "AZO", "AVGO", "AVB", "AVY", "BHI"]
             # "BLL", "BAC", "BCR", "BAX", "BBT", "BDX", "BBBY", "BRK-B", "BBY", "BIIB", "BLK", "HRB", "BA", "BWA", "BXP",
             # "BSX", "BMY", "BF-B", "CHRW", "CA", "COG", "CPB", "COF", "CAH", "KMX", "CCL", "CAT", "CBG", "CBS", "CELG",
             # "CNC", "CNP", "CTL", "CERN", "CF", "SCHW", "CHK", "CVX", "CMG", "CB", "CHD", "CI", "XEC", "CINF", "CTAS",
@@ -84,6 +85,9 @@ def recommend_interfacer(recommend_type='random', potential_stocks=None, num_obs
     :return: a JSON Response of a dictionary with stockname -> amount to buy
     """
 
+    # set this to FALSE if not debugging
+    verbose = True
+
     # raise error if recommend_type is not supported
     if recommend_type not in ['random', 'diverse', 'high_return']:
         raise ValueError('recommend_type not recognized')
@@ -93,11 +97,26 @@ def recommend_interfacer(recommend_type='random', potential_stocks=None, num_obs
         SandPObject = SandP()
         potential_stocks = SandPObject.stocks
 
+    if verbose:
+        print('You called recommender on the following %d stocks' % len(potential_stocks) + ', '.join(potential_stocks))
+    start_time = time.time()
+
     # put stock objects
     stock_objects = []
     stockGetter = stockAPI()
-    for stock in potential_stocks:
-        stock_objects.append(stockGetter.getStock(stock))
+    for i, stock in enumerate(potential_stocks):
+        s = stockGetter.getStock(stock)
+        if s:
+            stock_objects.append(s)
+
+        if verbose:
+            print('\tGot %d of %d, %s' %(i+1, len(potential_stocks),stock))
+            if not s:
+                print('\t\t%s was NoneType!' % stock)
+
+    if verbose:
+        print('Got them all -- took %.3f seconds' %(time.time() - start_time) )
+
     potential_stocks = stock_objects
 
     # number of potential stocks
@@ -106,50 +125,57 @@ def recommend_interfacer(recommend_type='random', potential_stocks=None, num_obs
     # get stock price data
     interfaceObject = stockDayDatabaseInterface()
     today = datetime.date.today()
-    if recommend_type == 'random':
+    first_date = today - datetime.timedelta(days=num_observed_days)
+    stock_prices, stock_list, date_list = get_stock_price_array(stock_list=potential_stocks,
+                                                                first_date=first_date, last_date=today)
 
-        # initialize stock prices
-        stock_prices = np.empty(num_stocks)
-        try_date = today
-        clean_data = False
-
-        # add data until it is clean - should only take a couple tries
-        days_back_to_try = 100
-        for i in range(days_back_to_try):
-
-            clean_data = True
-            for j, stock in enumerate(potential_stocks):
-                day = interfaceObject.getSpecificDay(stock, try_date)
-                if (day is not None):
-                    price = day.adjustedClose
-                    if np.isreal(price):
-                        stock_prices[j] = price
-                    else:
-                        clean_data = False
-                        break
-                else:
-                    clean_data = False
-                    break
-
-            # if we got clean data, break
-            if clean_data:
-                break
-            else:
-                try_date -= datetime.timedelta(days=1)
-
-        if not clean_data:
-            raise RuntimeError('There is not enough clean data for the days and stocks requested')
-
-    else:
-
-        # get an entire 2D array of stock prices
-
-        first_date = today - datetime.timedelta(days=num_observed_days)
-        stock_prices, stock_list, date_list = get_stock_price_array(stock_list=potential_stocks,
-                                                                    first_date=first_date, last_date=today)
+    #
+    #
+    # if recommend_type == 'random':
+    #
+    #     # initialize stock prices
+    #     stock_prices = np.empty(num_stocks)
+    #     try_date = today
+    #     clean_data = False
+    #
+    #     # add data until it is clean - should only take a couple tries
+    #     days_back_to_try = 100
+    #     for i in range(days_back_to_try):
+    #
+    #         clean_data = True
+    #         for j, stock in enumerate(potential_stocks):
+    #             day = interfaceObject.getSpecificDay(stock, try_date)
+    #             if (day is not None):
+    #                 price = day.adjustedClose
+    #                 if np.isreal(price):
+    #                     stock_prices[j] = price
+    #                 else:
+    #                     clean_data = False
+    #                     break
+    #             else:
+    #                 clean_data = False
+    #                 break
+    #
+    #         # if we got clean data, break
+    #         if clean_data:
+    #             break
+    #         else:
+    #             try_date -= datetime.timedelta(days=1)
+    #
+    #     if not clean_data:
+    #         raise RuntimeError('There is not enough clean data for the days and stocks requested')
+    #
+    # else:
+    #
+    #     # get an entire 2D array of stock prices
+    #
+    #     first_date = today - datetime.timedelta(days=num_observed_days)
+    #     stock_prices, stock_list, date_list = get_stock_price_array(stock_list=potential_stocks,
+    #                                                                 first_date=first_date, last_date=today)
 
     # run desired recommender algorithm
     if recommend_type == 'random':
+        stock_prices = stock_prices[:, -1] # just look at one day for random
         portfolio = recommend_random_portfolio(stock_ids=potential_stocks, stock_prices=stock_prices, **kwargs)
 
     elif recommend_type == 'high_return':
